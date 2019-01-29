@@ -1,0 +1,6 @@
+sbt run
+run
+reload
+run
+exit
+run
