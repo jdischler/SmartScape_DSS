@@ -3,6 +3,8 @@
 
 GET     /                           controllers.HomeController.index
 GET     /nav                        controllers.HomeController.nav
+GET     /nav-hydro					controllers.HomeController.nav_hydro
+GET     /nav2                       controllers.HomeController.nav2
 GET     /alt                        controllers.HomeController.alt
 
 # Map static resources from the /public folder to the /assets URL path

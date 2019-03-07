@@ -331,7 +331,26 @@ Ext.application({
 		};
 		
 		var landAttrs = [{
-			title: 'Landcover Type'
+			title: 'Landcover Type',
+			layout: 'fit',
+			items: [{
+				xtype: 'container',
+				padding: '2 8 0 48',
+				layout: 'fit',
+				items: [{
+					xtype: 'checkboxgroup',
+					vertical: true,
+					columns: 3,
+					items: [
+						{boxLabel: 'Corn', name: "lt", checked: true, inputValue: 1},
+						{boxLabel: 'Soy', name: "lt", inputValue: 2},
+						{boxLabel: 'Grass', name: "lt", inputValue: 3},
+						{boxLabel: 'Alfalfa', name: "lt", inputValue: 4},
+						{boxLabel: 'Wetlands', name: "lt", inputValue: 5},
+						{boxLabel: 'Developed', name: "lt", inputValue: 6}
+					]
+				}]
+			}]
 		},{
 			title: 'Slope'
 		},{
@@ -343,6 +362,9 @@ Ext.application({
 		},{
 			title: 'Subset of Land'
 		}];
+		
+		var logoBG = "background: -webkit-linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed; " + 
+		"background: linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed;";
 		
 		// animate defs
 		var closed = {to:{height:0}};		
@@ -360,7 +382,7 @@ Ext.application({
 				id: 'DSS_logo',
 				xtype: 'container',
 				region: 'north',
-				style: 'background-color: #C7CDBA',
+				style: logoBG,//'background-color: #cfdfcf',//C7CDBA',
 				height: normalLogoHeight,
 				layout: {
 					type: 'hbox',
@@ -378,7 +400,7 @@ Ext.application({
 					xtype: 'container',
 					margin: '0 0 0 36',
 					width: 310,
-					html: '<a href="/nav"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
+					html: '<a href="/assets/wip/landing_bs.html"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
 					listeners: {
 						afterrender: function(self) {
 							Ext.defer(function() {
@@ -543,7 +565,8 @@ Ext.application({
 				layout: 'fit',
 				items: [{
 					xtype: 'gx_map',
-					map: olMap
+					map: olMap,
+					animate: false
 				}],
 				dockedItems: [{
 					id: 'DSS_selectedStatistics',

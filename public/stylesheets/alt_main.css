@@ -1,4 +1,17 @@
 
+.x-tool-img {
+	background-size: 16px 384px;
+}
+
+.x-form-radio-default {
+	background-size: 30px 30px;
+}
+.x-form-checkbox-default {
+	background-size: 30px 30px;
+}
+.x-column-header-checkbox .x-column-header-checkbox:after, .x-grid-checkcolumn:after {
+	background-size: 30px 30px;
+	}
 .x-panel-header-title-default {
 	font-size: 16px;
 	font-weight: bold;

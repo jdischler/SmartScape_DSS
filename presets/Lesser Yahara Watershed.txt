@@ -1,0 +1,14 @@
+{
+  "name" : "Lesser Yahara Watershed",
+  "description" : "Sauk City to Stoughton",
+  "atX" : -9991929.51,
+  "atY" : 5356675.84,
+  "area" : {
+    "x" : 2358,
+    "y" : 1943,
+    "w" : 2072,
+    "h" : 1904
+  },
+  "isCustom" : false,
+  "expiresHours" : 25
+}

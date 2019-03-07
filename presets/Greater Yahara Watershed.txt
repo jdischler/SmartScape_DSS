@@ -1,0 +1,14 @@
+{
+  "name" : "Greater Yahara Watershed",
+  "description" : "A large portion of area in Southern Wisconsin",
+  "atX" : -1.006265265061E7,
+  "atY" : 5278060.469521415,
+  "area" : {
+    "x" : 0,
+    "y" : 0,
+    "w" : 6150,
+    "h" : 4557
+  },
+  "isCustom" : false,
+  "expiresHours" : 25
+}
