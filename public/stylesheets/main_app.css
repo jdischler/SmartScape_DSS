@@ -64,17 +64,87 @@
     white-space: normal;
 }
 
+.transparency-icon {
+	background-image: url(images/transparency-icon.png);
+	background-size: cover;	
+}
+
+.swap-icon {
+	background-image: url(images/swap-icon.png);
+	background-size: cover;	
+}
+
+.dss-delete-icon {
+	background-image: url(images/delete-icon.png);
+	background-size: cover;
+	opacity: 0.5	
+}
+.dss-delete-icon:hover {
+	opacity: 1	
+}
+
+.dss-inspect-icon {
+	background-image: url(images/inspect-icon.png);
+	background-size: cover;
+	opacity: 0.5	
+}
+.dss-inspect-icon:hover {
+	opacity: 1	
+}
+
+.dss-no-header-border {
+	border-bottom-color: #fff !important;
+-webkit-transition : border 500ms;
+  -moz-transition : border 500ms;
+  -o-transition : border 500ms;
+  transition : border 500ms;
+}
+
+.x-selection-working-mask {
+    background-color: rgba(207, 207, 207, 0.7);
+    border-color: transparent
+}
+
+.x-btn-pressed .x-btn-wrap .x-btn-button .x-btn-inner {
+    color: #2887c7;
+    font-weight: bold;
+}
+.x-grid-header-ct {
+    border: 1px solid #cfcfcf !important;
+}
+.x-btn.x-btn-menu-active.x-btn-default-medium, .x-btn.x-btn-pressed.x-btn-default-medium {
+    border-color: #809fb9;
+    background-color: #fff
+}
+
+.x-btn-wrap-default-small.x-btn-arrow-right:after {
+    background-size: 16px;
+}
+
 .x-accordion-hd .x-panel-header-title {
 	font-weight: bold;
 	color: #157fcc;
 }
 
 .x-accordion-item .x-accordion-hd {
-	padding: 8px 10px 8px 28px;
+	padding: 8px 10px 8px 24px;
 	border-top-color: #aaa;
 }
 
 .x-panel-header-collapsed .x-panel-header-title {
 	font-weight: 300;
-	color: #346;
+	color: #789;
+}
+
+.ol-control button {
+    background-color: rgba(0, 60, 136, .7);
+}
+
+.ol-custom-button {
+	bottom: 0.5em;
+	left: 0.5em;
+}
+
+.ol-scale-line {
+	background: rgba(0,60,136,.65)
 }

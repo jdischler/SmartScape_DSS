@@ -71,8 +71,8 @@ public class Png {
 		mPngWriter = new PngWriter(outputStream, mImageInfo);
 
 		// set default compression and dpi?		
-		//		pngW.setCompLevel(9); // compression level not working?
-		mPngWriter.getMetadata().setDpi(306.98);
+		//mPngWriter.setCompLevel(9); // compression level not working?
+		//mPngWriter.getMetadata().setDpi(306.98);
 	}
 
 	// Not sure if we generally need to set a DPI for the DSS?	

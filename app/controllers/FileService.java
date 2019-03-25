@@ -8,7 +8,7 @@ public class FileService extends Controller {
 
        static String path = "./public/dynamicFiles/";
        
-       public static Result getFile(String file){
+       public Result getFile(String file){
 //              File myfile = new File (System.getenv("PWD")+path+file);
               File myfile = new File (path+file);
               return ok(myfile);

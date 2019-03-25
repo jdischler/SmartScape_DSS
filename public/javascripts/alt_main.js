@@ -11,192 +11,6 @@ Ext.require([
     'Ext.Viewport'
 ]);
 
-var DSS_EmptySelectionName = 'Descriptive Name', 
-	DSS_EmptyTransformText = 'Click to Set Crop';
-
-var DSS_tempColumns = {
-	items:[{
-		dataIndex: 'SelectionName',
-		text: 'Transform Name',
-		width: 150,
-		resizable: false,
-		editor: {
-			xtype: 'textfield',
-			allowBlank: false
-		},
-		renderer : function(value, meta, record) {
-			if (value) {
-				meta.style = "color: #000";
-				return value;
-			} else {
-				meta.style = "color: RGBA(0,0,0,0.3)";
-				return DSS_EmptySelectionName;
-			}
-		},
-		tdCls: 'dss-grey-scenario-grid'
-	},
-	{
-		dataIndex: 'TransformText',
-		text: 'Transforms',
-		width: 150,
-		resizable: false,
-		renderer: function(value, meta, record) {
-			if (!value) {
-				meta.style = 'color: red';
-				return DSS_EmptyTransformText;
-			}
-			meta.tdAttr = 'data-qtip="' + record.get("ManagementText") + '"';
-			return value;
-		}
-	},
-	{
-		xtype: 'checkcolumn',
-		dataIndex: 'Active',
-		text: 'Active',
-		width: 64,
-		resizable: false,
-	},
-	{
-		xtype: 'actioncolumn',
-		width: 23,
-		resizable: false,
-		tooltip: 'Remove this transform',
-		handler: function(grid, rowIndex, colIndex) {
-			Ext.Msg.show({
-				 title: 'Confirm Transform Delete',
-				 msg: 'Are you sure you want to delete this transform?',
-				 buttons: Ext.Msg.YESNO,
-				 icon: Ext.Msg.QUESTION,
-				 fn: function(btn) {
-					 if (btn == 'yes') {
-						var record = grid.getStore().getAt(rowIndex);
-						grid.getStore().remove(record);
-						record.commit();
-						var selModel = grid.getSelectionModel();
-						if (selModel.selected.getCount() < 1) {
-							selModel.select(0);
-						}
-					 }
-				 }
-			});
-		}
-	}]
-};
-
-//------------------------------------------------------------------------------
-Ext.create('Ext.data.Store', {
-	
-	storeId: 'DSS_ScenarioStore',
-    fields: ['Active', 'SelectionName', 'TransformText', 'ManagementText', 'Transform', 'Query'],
-    data: {
-        items: [{
-			Active: true, 
-			SelectionName: 'Row Crops',//'Double Click to Set Custom Name', 
-			TransformText: 'Corn & Soy',//'Double Click to Set Crop',
-			ManagementText: '',
-			Transform: { LandUse: 1, Options: undefined },
-			Query: {}
-		},{
-			Active: false, 
-			SelectionName: null,//'Double Click to Set Custom Name', 
-			TransformText: null,//'Double Click to Set Crop',
-			ManagementText: '',
-			Transform: { LandUse: 1, Options: undefined },
-			Query: {}
-		}]
-    },
-    proxy: {
-        type: 'memory',
-        reader: {
-            type: 'json',
-            root: 'items'
-        }
-    },
-    listeners: {
-    	// blah, just force the commit to happen, no reason not to save it right away IMHO
-    	update: function(store, record, operation, eOps) {
-    		if (operation == Ext.data.Model.EDIT) {
-    			store.commitChanges();
-    		}
-    	}
-    }
-});
-
-Ext.define('Ext.layout.container.Accordion2', {
-    extend: 'Ext.layout.container.Accordion',
-    alias: 'layout.accordion2',
-    type: 'accordion2',
- 
-    alternateClassName: 'Ext.layout.AccordionLayout2',
- 
- 	allowCollapseAll: true,
-
-    updatePanelClasses: function(ownerContext) {
-        var children = ownerContext.visibleItems,
-            ln = children.length,
-            siblingCollapsed = true,
-            i, child, header;
- 
-        for (i = 0; i < ln; i++) {
-            child = children[i];
-            header = child.header;
-            header.addCls(Ext.baseCSSPrefix + 'accordion-hd');
- 
-            if (siblingCollapsed) {
-                header.removeCls(Ext.baseCSSPrefix + 'accordion-hd-sibling-expanded');
-            } else {
-                header.addCls(Ext.baseCSSPrefix + 'accordion-hd-sibling-expanded');
-            }
- 
-            if (i + 1 === ln && child.collapsed) {
-                header.addCls(Ext.baseCSSPrefix + 'accordion-hd-last-collapsed');
-            } else {
-                header.removeCls(Ext.baseCSSPrefix + 'accordion-hd-last-collapsed');
-            }
- 
-            siblingCollapsed = child.collapsed;
-        }
-    },
-    
-    onBeforeComponentCollapse: function(comp) {
-        var me = this,
-            owner = me.owner,
-            toExpand,
-            expanded,
-            previousValue;
- 
-        if (me.owner.items.getCount() === 1) {
-            // do not allow collapse if there is only one item 
-            return false;
-        }
- 
-        if (!me.processing) {
-            me.processing = true;
-            previousValue = owner.deferLayouts;
-            owner.deferLayouts = true;
-            toExpand = comp.next() || comp.prev();
- 
-            // If we are allowing multi, and the "toCollapse" component is NOT the only expanded Component, 
-            // then ask the box layout to collapse it to its header. 
-            if (me.multi) {
-                expanded = me.getExpanded();
- 
-                // If the collapsing Panel is the only expanded one, expand the following Component. 
-                // All this is handling fill: true, so there must be at least one expanded, 
-                if (expanded.length === 1 && !me.allowCollapseAll) {
-                    toExpand.expand();
-                }
- 
-            } else if (toExpand) {
-                toExpand.expand();
-            }
-            owner.deferLayouts = previousValue;
-            me.processing = false;
-        }
-    }
- 
-});
-
 Ext.define('Ext.chart.theme.Custom', {
     extend: 'Ext.chart.theme.Base',
     singleton: true,
@@ -330,39 +144,6 @@ Ext.application({
 			}]
 		};
 		
-		var landAttrs = [{
-			title: 'Landcover Type',
-			layout: 'fit',
-			items: [{
-				xtype: 'container',
-				padding: '2 8 0 48',
-				layout: 'fit',
-				items: [{
-					xtype: 'checkboxgroup',
-					vertical: true,
-					columns: 3,
-					items: [
-						{boxLabel: 'Corn', name: "lt", checked: true, inputValue: 1},
-						{boxLabel: 'Soy', name: "lt", inputValue: 2},
-						{boxLabel: 'Grass', name: "lt", inputValue: 3},
-						{boxLabel: 'Alfalfa', name: "lt", inputValue: 4},
-						{boxLabel: 'Wetlands', name: "lt", inputValue: 5},
-						{boxLabel: 'Developed', name: "lt", inputValue: 6}
-					]
-				}]
-			}]
-		},{
-			title: 'Slope'
-		},{
-			title: 'Distance to Water'
-		},{
-			title: 'Land Capability Class'
-		},{
-			title: 'Watershed'
-		},{
-			title: 'Subset of Land'
-		}];
-		
 		var logoBG = "background: -webkit-linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed; " + 
 		"background: linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed;";
 		
@@ -415,7 +196,6 @@ Ext.application({
 					pressed: true,
 					handler: function(self) {
 						Ext.suspendLayouts();
-							Ext.getCmp('DSS_ScenarioCreator').setHidden(true);
 							Ext.getCmp('DSS_findLandByAttr').setCollapsed(false);
 							Ext.getCmp('DSS_resultsPanel').setCollapsed(true);
 						Ext.resumeLayouts(true);
@@ -425,7 +205,6 @@ Ext.application({
 					width: 140,
 					handler: function(self) {
 						Ext.suspendLayouts();
-							Ext.getCmp('DSS_ScenarioCreator').setHidden(false);
 							Ext.getCmp('DSS_findLandByAttr').setCollapsed(false);
 							Ext.getCmp('DSS_resultsPanel').setCollapsed(true);
 						Ext.resumeLayouts(true);
@@ -437,10 +216,8 @@ Ext.application({
 					toggleHandler: function(self, state) {
 						if (state) {
 							Ext.suspendLayouts();
-								Ext.getCmp('DSS_ScenarioCreator').setHidden(true);
 								Ext.getCmp('DSS_findLandByAttr').setCollapsed(true);
 								Ext.getCmp('DSS_resultsPanel').setCollapsed(false);
-								Ext.getCmp('DSS_selectedStatistics').setHidden(true);
 							Ext.resumeLayouts(true);
 						}
 					}
@@ -464,71 +241,9 @@ Ext.application({
 				scrollable: 'vertical',
 				stateful: true,
 				stateId: 'DSS_findLandByAttr',
-				layout: {
-					type: 'accordion2',
-					fill: false,
-					multi: true
-				},
 				region: 'west',
 				bodyStyle: 'background-color: #bbb',
 				width: 380,
-				defaults: {
-					xtype: 'panel',
-					collapsed: true,
-					height: 90,
-					expandToolText: 'Find land by this attribute',
-					collapseToolText: 'Remove this attribute',
-					listeners: {
-						collapse: function() {
-							Ext.getCmp('DSS_selectedStatistics').setHidden(true);
-						},
-						expand: function() {
-							Ext.getCmp('DSS_selectedStatistics').setHidden(false);
-						}
-					}
-				},
-				items: landAttrs,
-				dockedItems: [{
-					id: 'DSS_ScenarioCreator',
-					hidden: true,
-					xtype: 'panel',
-					title: 'Scenario Creator',
-					stateful: true,
-					stateID: 'DSS_ScenarioCreator',
-					minHeight: 140,
-					maxHeight: 320,
-					resizeHandles: 'n',
-					resizable: true,
-					dock: 'bottom',
-					bodyPadding: 2,
-					layout: {
-						type: 'vbox',
-						align: 'stretch', 
-						pack: 'start'
-					},
-					items: [{
-						xtype: 'grid',
-						store: 'DSS_ScenarioStore',
-						enableColumnHide: false,
-						enableColumnMove: false,
-						sortableColumns: false,
-						//hideHeaders: true,
-						columnLines: true,
-						padding: 2,
-						columns: DSS_tempColumns
-					}],
-					bbar: [{
-						xtype: 'tbfill' 
-					},{
-						xtype: 'button', text: 'Run', width: 80,
-						handler: function() {
-							Ext.defer(function() {
-								Ext.getCmp('DSS_analyzeButton').toggle(true);
-							}, 1000);
-							
-						}
-					}]
-				}]
 			},{
 				id: 'DSS_resultsPanel',
 				xtype: 'panel',
@@ -568,46 +283,6 @@ Ext.application({
 					map: olMap,
 					animate: false
 				}],
-				dockedItems: [{
-					id: 'DSS_selectedStatistics',
-					xtype: 'panel',
-					title: 'Selected Land',
-					hidden: true,
-					height: 70,
-					dock: 'bottom',
-					bodyPadding: 4,
-					layout: {
-						type: 'hbox',
-						align: 'stretch', 
-						pack: 'start'
-					},
-					items: [{
-						xtype: 'container',
-						layout: 'vbox',
-						items: [{
-							xtype: 'textfield',
-							labelWidth: 60,
-							width: 160,
-							labelAlign: 'right',
-							fieldLabel: 'Selected',
-							value: '368.1 ha'
-						}],
-						flex: 1,
-						maxWidth: 200
-					},{
-						xtype: 'container',
-						layout: 'vbox',
-						items: [{
-							xtype: 'textfield',
-							labelAlign: 'right',
-							width: 160,
-							fieldLabel: '% of Study Area',
-							value: '13.2%'
-						}],
-						flex: 1,
-						maxWidth: 200
-					}]
-				}]
 			}]
 		});
 		

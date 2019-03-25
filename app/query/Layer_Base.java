@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.node.*;
 public abstract class Layer_Base
 {
 	//--------------------------------------------------------------------------
-	private static boolean DETAILED_DEBUG_LOGGING = false;
+	private static boolean DETAILED_DEBUG_LOGGING = true;
 	protected static void detailedLog(String detailedMessage) {
 		
 		if (DETAILED_DEBUG_LOGGING) {
@@ -259,7 +259,7 @@ public abstract class Layer_Base
 					Logger.error("BAD READ - more lines than expected!");
 					break;
 				}
-				String line = br.readLine();
+				String line = br.readLine().trim();
 				String split[] = line.split("\\s+");
 				processASC_Line(y, split);
 				y++;
@@ -353,6 +353,9 @@ public abstract class Layer_Base
 					queryParms.add(layer.getIndexForString("grass"));
 					queryParms.add(layer.getIndexForString("soy"));
 					queryParms.add(layer.getIndexForString("alfalfa"));
+					queryParms.add(layer.getIndexForString("alfalfa"));
+					queryParms.add(layer.getIndexForString("woodland"));
+					queryParms.add(layer.getIndexForString("grains"));
 					fakeQueryObj.set("matchValues", queryParms);
 			
 					layer.query(fakeQueryObj, selection);

@@ -18,13 +18,13 @@ public class ServerStartup {
 	@Inject
 	public ServerStartup(ApplicationLifecycle lifecycle) {
 		
+		QueuedWriter.launchQueuedWriter();
+		
 		Layer_Manager.computeLayers();
 		Layer_Manager.cacheLayers();
 
 		prepareSubsets();
-		
-		QueuedWriter.launchQueuedWriter();
-		
+				
         lifecycle.addStopHook(() -> {
         	Layer_Base.removeAllLayers();
         	QueuedWriter.shutdownQueuedWriter();

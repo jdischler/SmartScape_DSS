@@ -6,10 +6,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import play.Logger;
 import play.mvc.*;
+import play.mvc.Http.Context;
 import utils.RandomString;
 import utils.ServerStartup;
+import query.Layer_Base;
+import query.Query;
 
 //------------------------------------------------------------------
 public class HomeController extends Controller {
@@ -27,30 +32,33 @@ public class HomeController extends Controller {
 		Logger.info("Server Startup Finished");
 	}
 	
-	//------------------------------------------------------------------
-	public Result index() {
-		return ok(views.html.index.render());
-	}
-	
-	//------------------------------------------------------------------
-	public Result nav() {
-		return ok(views.html.nav.render());
-	}
-	
-	//------------------------------------------------------------------
-	public Result nav_hydro() {
-		return ok(views.html.nav_hydro.render());
-	}
-	
-	//------------------------------------------------------------------
-	public Result nav2() {
-		return ok(views.html.nav2.render()); 
-	}
-
-	//------------------------------------------------------------------
-	public Result alt() {
+	//--------------------------------------------------------------------------
+	public Result layerParmRequest() {
 		
-		String user = session("user");
+		JsonNode request = request().body().asJson();
+		try {
+			JsonNode ret = Layer_Base.getParameter(request);
+			if (ret != null) 
+			{
+				return ok(ret);
+			}
+		}
+		catch(Exception e) {
+			Logger.error(e.toString());
+		}
+		
+		return badRequest(); // TODO: add return errors if needed...
+	}
+	
+	//------------------------------------------------------------------
+	public Result landing() {
+		return ok(views.html.landing.render());
+	}
+	
+	//------------------------------------------------------------------
+	public Result app() {
+		
+	/*	String user = session("user");
 		if (user == null) {
 			user = createNewUser();
 		}	
@@ -63,8 +71,8 @@ public class HomeController extends Controller {
     		userCache.put(user, new SessionCacheStore());
 	  		return badRequest("User isn't null but it isn't in the cache. Adding to cache. Refresh page...");
     	}
-		Logger.info(user);
-		return ok(views.html.alt.render());
+		Logger.info(user);*/
+		return ok(views.html.app.render());
 	}
 	
 	//------------------------------------------------------------------
@@ -87,4 +95,33 @@ public class HomeController extends Controller {
 	    }
 		return user;
 	}
+	
+	//--------------------------------------------------------------------------
+	public Result createSelection() throws Exception {
+
+		Query query = new Query();
+		JsonNode result = query.selection(request().body().asJson());
+		return ok(result);
+	}
+
+	//--------------------------------------------------------------------------
+	public Result showOcclusion() throws Exception {
+
+		Query query = new Query();
+		JsonNode request = request().body().asJson();
+		JsonNode first = request.get("first"),
+				second = request.get("second");
+		
+		Logger.info("Called into query");
+		Logger.info(request.toString());
+		if (first.isNull()) {
+			JsonNode result = query.selection(second);
+			return ok(result);
+		}
+		else {
+			JsonNode result = query.occludedSelection(first, second);
+			return ok(result);
+		}
+	}
+	
 }

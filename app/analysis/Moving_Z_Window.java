@@ -5,7 +5,7 @@ import query.Layer_Integer;
 
 // This class calculate proportion of Ag, forest and grass with the user specified rectangle buffer 
 // Inputs are location of cell, window size
-// Output proportion of Ag, Forest, Grass
+// Output proportion of Ag, Forest, Grass, Developed, Water (inc. wetlands)
 
 // It uses a cool idea by Amin to zigzag across the cells, subtracting only the old cells
 //	that fall out of the moving window...and adding in the new cells at the leading edge
@@ -58,6 +58,8 @@ public final class Moving_Z_Window
 	private int mCountAg, mAgMask;
 	private int mCountForest, mForestMask;
 	private int mCountGrass, mGrassMask;
+	private int mCountDeveloped, mDevelopedMask;
+	private int mCountWater, mWaterMask; // NOTE: includes wetlands
 	
 	private int mAt_X, mAt_Y;
 	private boolean mbMovingLeft; // set when the window should be moving LEFT
@@ -83,6 +85,8 @@ public final class Moving_Z_Window
 		mGrassMask = cdl.convertStringsToMask("grass") | cdl.convertStringsToMask("alfalfa");	
 		mForestMask = cdl.convertStringsToMask("woodland");
 		mAgMask = cdl.convertStringsToMask("corn") | cdl.convertStringsToMask("soy");
+		mDevelopedMask = cdl.convertStringsToMask("urban") | cdl.convertStringsToMask("suburban");
+		mWaterMask = cdl.convertStringsToMask("water") | cdl.convertStringsToMask("wetlands");
 		
 		mPoint = new Z_WindowPoint(mAt_X, mAt_Y);
 		
@@ -147,6 +151,12 @@ public final class Moving_Z_Window
 					else if ((cellValue & mForestMask) > 0) {
 						mCountForest++;
 					}
+					else if ((cellValue & mDevelopedMask) > 0) {
+						mCountDeveloped++;
+					}
+					else if ((cellValue & mWaterMask) > 0) {
+						mCountWater++;
+					}
 				}
 			}
 		}
@@ -160,6 +170,11 @@ public final class Moving_Z_Window
 		return mPoint;
 	}
 	
+	//--------------------------------------------------------------------------
+	public final int getWindowCenterValue() {
+		return mRasterData[mAt_Y][mAt_X];
+		
+	}
 	// Each call to run advances one cell in the direction the Z-win is moving in...
 	//	since it uses a somewhat irregular pattern to move, this function will
 	// 	return a class with the X, Y coordinates for where the Z_Window is at...
@@ -198,6 +213,12 @@ public final class Moving_Z_Window
 						else if ((cellValue & mForestMask) > 0) {
 							mCountForest--;
 						}
+						else if ((cellValue & mDevelopedMask) > 0) {
+							mCountDeveloped--;
+						}
+						else if ((cellValue & mWaterMask) > 0) {
+							mCountWater--;
+						}
 					}
 				}
 			}			
@@ -221,6 +242,12 @@ public final class Moving_Z_Window
 						}
 						else if ((cellValue & mForestMask) > 0) {
 							mCountForest--;
+						}
+						else if ((cellValue & mDevelopedMask) > 0) {
+							mCountDeveloped--;
+						}
+						else if ((cellValue & mWaterMask) > 0) {
+							mCountWater--;
 						}
 					}
 				}
@@ -271,6 +298,12 @@ public final class Moving_Z_Window
 						else if ((cellValue & mForestMask) > 0) {
 							mCountForest++;
 						}
+						else if ((cellValue & mDevelopedMask) > 0) {
+							mCountDeveloped++;
+						}
+						else if ((cellValue & mWaterMask) > 0) {
+							mCountWater++;
+						}
 					}
 				}
 			}
@@ -305,6 +338,12 @@ public final class Moving_Z_Window
 						else if ((cellValue & mForestMask) > 0) {
 							mCountForest++;
 						}
+						else if ((cellValue & mDevelopedMask) > 0) {
+							mCountDeveloped++;
+						}
+						else if ((cellValue & mWaterMask) > 0) {
+							mCountWater++;
+						}
 					}
 				}
 			}
@@ -335,6 +374,17 @@ public final class Moving_Z_Window
 	//--------------------------------------------------------------------------
 	public final float getProportionGrass() {
 		return (float)mCountGrass / mTotal;
+	}
+	
+	//--------------------------------------------------------------------------
+	public final float getProportionDeveloped() {
+		return (float)mCountDeveloped / mTotal;
+	}
+	
+	// NOTE: includes wetland
+	//--------------------------------------------------------------------------
+	public final float getProportionWater() {
+		return (float)mCountWater / mTotal;
 	}
 }
 

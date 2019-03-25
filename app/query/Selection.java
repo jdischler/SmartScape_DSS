@@ -27,6 +27,18 @@ public class Selection
 		}
 		isValid = true;
 	}
+	
+	//--------------------------------------------------------------------------
+	public Selection(int width, int height, byte fillValue) {
+		
+		mHeight = height;
+		mWidth = width;
+		mRasterData = new byte[mHeight][mWidth];
+		for (byte[] row: mRasterData) {
+			Arrays.fill(row, fillValue);
+		}
+		isValid = true;
+	}
 
 	//--------------------------------------------------------------------------
 	public Selection(File createFromFile) {
@@ -182,6 +194,22 @@ public class Selection
 		}
 		
 		return true;
+	}
+
+	// THIS is considering the top layer, UNDER is the selection underneath
+	public int countOccludedPixels(Selection under) {
+		int x, y, count = 0;
+		
+		for (y = 0; y < mHeight; y++) {
+			for (x = 0; x < mWidth; x++) {
+				// occluded pixels can only occur under active THIS cells
+				if (mRasterData[y][x] > 0) {
+					// and UNDER can only be occluded if it is itself active
+					count += (under.mRasterData[y][x] > 0 ? 1 : 0);
+				}
+			}
+		}
+		return count;
 	}
 }
 

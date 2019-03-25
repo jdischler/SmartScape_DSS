@@ -170,10 +170,8 @@ public class Layer_Float extends Layer_Base
 		detailedLog("Max value:" + Float.toString(maxVal));
 		int x,y;
 		
-		// Blugh, I count 8 permutations that we care about. These are split out this way
-		//	to remove the logic to determine the type of conditional testing to do
-		//	from the inside of the loop. Though maybe that java compiler can detect that the
-		//	condition could never change inside of the loop? Seems unlikely though..
+		// Split out to remove the conditional tests from the inner loops. Because not taking the
+		//	chance that the JVM is smart enough to realize how to properly optimize this.
 		if (isGreaterThan) {
 			if (isLessThan) {
 				// >  <

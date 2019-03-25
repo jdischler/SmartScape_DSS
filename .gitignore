@@ -28,7 +28,9 @@ hs_err_pid*
 .DS_Store
 .DS_Store
 target/
+public/dynamicFiles/
 project/target/
 project/project/
 target/streams/compile/ 
 *.dss
+*.asc

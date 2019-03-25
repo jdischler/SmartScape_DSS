@@ -1,11 +1,13 @@
 # Routes
 # ~~~~
 
-GET     /                           controllers.HomeController.index
-GET     /nav                        controllers.HomeController.nav
-GET     /nav-hydro					controllers.HomeController.nav_hydro
-GET     /nav2                       controllers.HomeController.nav2
-GET     /alt                        controllers.HomeController.alt
+GET     /                        	controllers.HomeController.landing
+GET     /app                        controllers.HomeController.app
+POST	/app/createSelection		controllers.HomeController.createSelection()
+POST	/app/showOcclusion			controllers.HomeController.showOcclusion()
+POST	/app/layerParmRequest		controllers.HomeController.layerParmRequest()
 
 # Map static resources from the /public folder to the /assets URL path
+GET		/files/:file				controllers.FileService.getFile(file: String)
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET		/app/*file					controllers.Assets.at(path="/public/javascripts", file)

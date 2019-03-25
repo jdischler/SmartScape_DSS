@@ -149,12 +149,84 @@ public class Downsampler
 				float res = 0;
 				if (totalCells > 0) {
 					// round...
-					res = ((float)selectedCells / totalCells) * numOutputValues + 0.5f;
+					//res = ((float)selectedCells / totalCells) * numOutputValues + 0.5f;
+					res = (float) Math.ceil(((float)selectedCells / totalCells) * numOutputValues);
 					// clamp...
 					if (res < 0) res = 0;
 					else if (res > numOutputValues - 1) res = numOutputValues - 1;
 				}
 				resampledData[y][x] = (byte)res;
+				upLeftX = lowRightX;
+			}
+			upLeftY = lowRightY;
+		}
+		
+		return resampledData;
+	}
+
+	// FLOAT: Returns a transformed data array of the requested size. Sampler tracks percentage
+	//	of cells with a non-zero value...then converts that to the specified output range.
+	//	e.g., numOutputValues = 3, generates results values that are 0-2
+	//--------------------------------------------------------------------------
+	public static byte[][] generateOccludedSelection(byte[][] data, byte[][] data2, 
+			int width, int height,
+			int numOutputColors, int newWidth, int newHeight) {
+		byte [][] resampledData = new byte[newHeight][newWidth];
+		
+		float widthFactor = width / newWidth;
+		float heightFactor = height / newHeight;
+		
+		int upLeftX = 0, upLeftY = 0;
+		
+		for (int y = 0; y < newHeight - 1; y++) {
+			int lowRightY = Math.round((y + 1) * heightFactor);
+			
+			for (int x = 0; x < newWidth - 1; x++) {
+				int lowRightX = Math.round((x + 1) * widthFactor);
+				
+				// Calculate a percent of selected cells and stuff it into resampledData[y][x]
+				int selectedCells = 0, totalCells = 0;
+				int occludedCells = 0, otherCells = 0;
+				
+				for (int yy = upLeftY; yy <= lowRightY; yy++) {
+					for (int xx = upLeftX; xx <= lowRightX; xx++) {
+						if (data2[yy][xx] > 0) {
+							selectedCells++;
+							if (data[yy][xx] > 0) {
+								occludedCells++;
+							}
+						}
+						else if (data[yy][xx] > 0) {
+							otherCells++;
+						}
+						totalCells++;
+					}
+				}
+				
+				long res1 = 0, res2 = 0;
+				if (totalCells > 0) {
+					// rounding up to nearest INT and avoiding integer decision issues in one step...
+					//	Example: (91 + 8 - 1) / 8  =>  100 / 8  =>  12
+					// A little weird but works out better than Math.ceil because we don't want a double back
+					// 	Math.ceil(91 / 8)  =>  Math.ceil(11.375)  => 12.0
+					res1 = (int)Math.ceil((double)occludedCells / totalCells * numOutputColors);
+					// clamps for safety...
+					if (res1 < 0) res1 = 0;
+					else if (res1 >= numOutputColors) res1 = numOutputColors - 1;
+					
+					res2 = (int)Math.ceil((double)(selectedCells-occludedCells) / totalCells * numOutputColors);
+					// clamps for safety...
+					if (res2 < 0) res2 = 0;
+					else if (res2 >= numOutputColors) res2 = numOutputColors - 1;
+				}
+				byte color = (byte)(res2 + res1 * numOutputColors);
+				if (color == 0 && otherCells > 0) {
+					res1 = (int)Math.ceil((double)otherCells / totalCells * numOutputColors);
+					if (res1 < 0) res1 = 0;
+					else if (res1 >= numOutputColors) res1 = numOutputColors - 1;
+					color = (byte)(res1 + 9);
+				}
+				resampledData[y][x] = color;
 				upLeftX = lowRightX;
 			}
 			upLeftY = lowRightY;
