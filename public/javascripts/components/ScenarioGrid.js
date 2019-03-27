@@ -12,11 +12,11 @@ var DSS_DefaultScenarioSetup = {
 };
 
 var occlusionExample = [{
-	Active: true, SelectionName: 'Row crops near open water', TransformText: 'C3 Grass',
+	Active: true, SelectionName: 'Row crops near public lands', TransformText: 'High Diversity Native Prairie',
 	Query: [{
 		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
 	},{
-		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
+		"name":"public_land","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":1000
 	}]
 },{
 	Active: true, SelectionName: 'Row crops on marginal soils', TransformText: 'C4 Grass',
@@ -26,6 +26,20 @@ var occlusionExample = [{
 		"name":"lcc","type":"indexed","matchValues":[4,5,6,7,8]
 	}]
 },{
+	Active: true, SelectionName: 'Row crops on low slopes', TransformText: 'Keep (increase nutrient spreading',
+	Query: [{
+		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
+	},{
+		"name":"slope","type":"continuous","lessThanTest":"<","greaterThanTest":">=","lessThanValue":4
+	}]
+},{
+	Active: true, SelectionName: 'Row crops near open water', TransformText: 'C3 Grass',
+	Query: [{
+		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
+	},{
+		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
+	}]
+},{
 	Active: true, SelectionName: 'Row crops on steeper slopes', TransformText: 'C3 Grass',
 	Query: [{
 		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
@@ -33,25 +47,15 @@ var occlusionExample = [{
 		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","greaterThanValue":5
 	}]
 },{
-	Active: true, SelectionName: 'Row crops near public lands', TransformText: 'High Diversity Native Prairie',
-	Query: [{
-		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
-	},{
-		"name":"public_land","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":1000
-	}]
-},{
-	Active: true, SelectionName: 'Row crops on low slopes', TransformText: 'Keep (increase nutrient spreading',
-	Query: [{
-		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
-	},{
-		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":3
-	}]
-},{
 	Active: true, SelectionName: 'All remaining row crops', TransformText: 'Alfalfa',
 	Query: [{
 		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
 	}]
-}];
+},{
+	Active: true, SelectionName: 'C4 Grasses', TransformText: 'Mixed Row Crops',
+	Query: [{
+		"name":"cdl_2012","type":"indexed","matchValues":[6]
+	}]}];
 
 var DSS_EmptySelectionName = 'Double Click to Name Selection', 
 	DSS_EmptyTransformText = 'Click to Choose a New Landcover Type';
@@ -208,7 +212,6 @@ Ext.define('DSS.components.ScenarioGrid', {
 	            listeners: {
 	                // Change content dynamically depending on which element triggered the show.
 	                beforeshow: function updateTipBody(tip) {
-	                	console.log(tip.triggerElement);
 	                	if (!Ext.fly(tip.triggerElement).hasCls('dss-trx-col'))
 	                		return false;
 	                	var tt = tip.down('#msg');
@@ -216,9 +219,6 @@ Ext.define('DSS.components.ScenarioGrid', {
 	                }
 	            }
 	        });  
-	        console.log(view.itemSelector)
-	        console.log(t);
-			
 		}
 	},
 	//--------------------------------------------------------------------------

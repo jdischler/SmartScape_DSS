@@ -32,7 +32,7 @@ Ext.define('DSS.components.LogoBar', {
 		margin: '0 0 0 36',
 		width: 310, 
 		height: 71, // a fixed height improves page layout responsiveness unfortunately
-		html: '<a href="/assets/wip/landing_bs.html"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
+		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
 	},{
 		text: 'Explore Landscape',
 		margin: '-1 2 0 48',

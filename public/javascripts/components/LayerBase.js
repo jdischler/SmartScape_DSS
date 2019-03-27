@@ -10,7 +10,7 @@ Ext.define('DSS.components.LayerBase', {
     ],
     
 	collapsed: true,
-	expandToolText: 'Find land by this attribute',
+	expandToolText: 'Find land by this attribute',//DSS.utils.tooltip('Find land by this attribute'),
 	collapseToolText: 'Remove this attribute',
 	allowCollapseAll: true,
 	layout: 'fit',
@@ -63,7 +63,6 @@ Ext.define('DSS.components.LayerBase', {
 				
 				success: function(response, opts) {
 					var obj = JSON.parse(response.responseText);
-					console.log(obj);
 					// TODO: server should pass this all back...
 					obj['bounds']= [
 						-10062652.65061, 5278060.469521415,
@@ -79,6 +78,7 @@ Ext.define('DSS.components.LayerBase', {
 						perc = Ext.util.Format.number(totalAreaPerc, '0.###');
 						
 					Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+					Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
 					Ext.getCmp('yes-dss-selection-container').setLoading(false);
 					me.validateImageOL(obj);			
 				},
@@ -105,22 +105,38 @@ Ext.define('DSS.components.LayerBase', {
 				
 				success: function(response, opts) {
 					var obj = JSON.parse(response.responseText);
-					console.log(obj);
 					// TODO: server should pass this all back...
 					obj['bounds']= [
 						-10062652.65061, 5278060.469521415,
 						-9878152.65061, 5415259.640662575
 					]
-					var area = (obj.selectedPixels * 30.0 * 30.0) / 1000000.0;
-					// then convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
-					area *= 247.105;
-			    
-					var totalAreaPerc = (obj.selectedPixels / obj.totalPixels) * 100.0;
-					
-					var area = Ext.util.Format.number(area, '0,000.#'), 
-						perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+					if (obj.selectedPixelsFirst) {
+						var diff = obj.selectedPixelsSecond - obj.occludedSecondPixels;
+						// convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
+						var area = ((diff * 30.0 * 30.0) / 1000000.0) * 247.105;
+						var totalAreaPerc = (diff / obj.totalPixels) * 100.0;
 						
-					Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+						var occArea = ((obj.occludedSecondPixels * 30.0 * 30.0) / 1000000.0) * 247.105;
+						var totalOccPerc = obj.occludedSecondPixels / obj.selectedPixelsSecond * 100.0;
+						
+						var area = Ext.util.Format.number(area, '0,000.#'), 
+							perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+						Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+						
+						area = Ext.util.Format.number(occArea, '0,000.#'), 
+						perc = Ext.util.Format.number(totalOccPerc, '0.###');
+						Ext.getCmp('yes-dss-selected-stats2').setHtml(area + ' acres<br/>' + perc + '%');
+					}
+					else {
+						// convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
+						var area = ((obj.selectedPixels * 30.0 * 30.0) / 1000000.0) * 247.105;
+						var totalAreaPerc = (obj.selectedPixels / obj.totalPixels) * 100.0;
+						var area = Ext.util.Format.number(area, '0,000.#'), 
+							perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+						Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+						Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
+					}
+					
 					Ext.getCmp('yes-dss-selection-container').setLoading(false);
 					me.validateImageOL(obj);			
 				},
@@ -235,6 +251,4 @@ Ext.define('DSS.components.LayerBase', {
 		me.callParent(arguments);
 	},
 
-	
-	
 });

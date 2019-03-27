@@ -119,7 +119,7 @@ Ext.define('DSS.components.MainMap', {
 				xtype: 'gx_map',
 				map: globalMap,
 				animate: false,
-				style: 'background-color: #d9ddb7' // rgb(217,221,183)
+				style: 'background-color: rgb(198,208,168)' // rgb(217,221,183)
 			}]
 		});
 		

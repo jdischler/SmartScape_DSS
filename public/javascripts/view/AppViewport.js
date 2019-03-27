@@ -1,6 +1,6 @@
 
 //------------------------------------------------------------------------------
-Ext.define('DSS.view.MainViewport', {
+Ext.define('DSS.view.AppViewport', {
 //------------------------------------------------------------------------------
 	extend: 'Ext.container.Viewport',
 	
@@ -11,15 +11,14 @@ Ext.define('DSS.view.MainViewport', {
 	    'DSS.components.ScenarioGrid',
 	],
 
-	layout: 'border',
-	// minimum widest dimension I could find for tablets/desktop (nexus 7 - 2013)
-	//	though most tablets/desktops are at least 1024
+	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
 	minWidth: 960,
-	// min shortest dimension for tablets/desktop (again, nexus 7)
-	//	most support at least 768...
 	minHeight: 600,
-	autoScroll: true,
 	
+	autoScroll: true,
+    renderTo: Ext.getBody(),
+	layout: 'border',
+    
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
@@ -35,7 +34,7 @@ Ext.define('DSS.view.MainViewport', {
 				    id: 'dss-scenario-grid',
 					xtype: 'scenario_grid',
 					dock: 'bottom',
-					hidden: false,
+					hidden: true,
 				}],
 			}]
 		});

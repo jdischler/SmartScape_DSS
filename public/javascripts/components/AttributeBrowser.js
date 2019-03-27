@@ -120,7 +120,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 	dockedItems: [{
 		xtype: 'container',
 		dock: 'bottom',
-		margin: '4 16',
+		margin: '4 12',
 		items: [{
 			xtype: 'checkbox',
 			boxLabel: 'Enable Advanced Finders',
@@ -151,11 +151,12 @@ Ext.define('DSS.components.AttributeBrowser', {
 				padding: '4 8',
 				items: [{
 					xtype: 'button',
-					width: 128,
+					width: 100,
 					scale: 'small',
-					text: 'Subset Mask',
+					textAlign: 'left',
+					text: 'Subset',
 					iconCls: 'transparency-icon',
-					tooltip: 'Adjust layer transparency',
+					tooltip: DSS.utils.tooltip('Adjust layer transparency'),
 					arrowAlign: 'right',
 					menuAlign: 'l-r?',
 					menu: Ext.create('DSS.components.OpacitySlider', {
@@ -164,39 +165,51 @@ Ext.define('DSS.components.AttributeBrowser', {
 				}]
 			},{
 				xtype: 'button',
-				width: 128,
+				width: 100,
 				scale: 'small',
+				textAlign: 'left',
 				text: 'Selection',
 				iconCls: 'transparency-icon',
-				tooltip: 'Adjust layer transparency',
+				tooltip: DSS.utils.tooltip('Adjust layer transparency'),
 				arrowAlign: 'right',
 				menuAlign: 'l-r?',
 				menu: Ext.create('DSS.components.OpacitySlider', {
 					OL_Layer: selectionLayer
 				})
-			},{
+			},
+			getLegendChip('#5a79ee','Matching selection'),
+			getLegendChip('#d73171','Matched but conflicting selection'),
+			getLegendChip('#40495a','Not selected but already trxformed'), {
 				xtype: 'container',
 				id: 'yes-dss-selection-container',
 				layout: 'hbox',
 				padding: 8,
+				margin: '0 -10',
 				flex: 1,
 				items: [{
 					xtype: 'container',
-					html: '<b>Selected Area:<br/>% Subset Area:</b>',
-					width: 128,
+					html: '<b>Selected:<br/>% Area:</b>',
+					width: 60,
 					style: 'text-align: right'
 				},{
 					xtype: 'container',
 					id: 'yes-dss-selected-stats',
-					width: 128,
-					padding: '0 0 0 8',
+					width: 115,
+					padding: '0 0 0 4',
+					html: '--<br/>--'
+				},{
+					xtype: 'container',
+					html: '<b>Occluded:<br/>% Occ.:</b>',
+					width: 64,
+					style: 'text-align: right'
+				},{
+					xtype: 'container',
+					id: 'yes-dss-selected-stats2',
+					width: 115,
+					padding: '0 0 0 4',
 					html: '--<br/>--'
 				}]
-			},
-			getLegendChip('#5a79ee','Matching selection'),
-			getLegendChip('#d73171','Matched but conflicting selection'),
-			getLegendChip('#40495a','Not selected but already trxformed')
-			]
+			}]
 		}]
 	}],
 	

@@ -10,9 +10,9 @@ Ext.Loader.setConfig({
 Ext.application({
     name: 'DSS',
     views: [
-        'MainViewport'
+        'AppViewport'
     ],
-    autoCreateViewport: true,
+    mainView: 'DSS.view.AppViewport',
     
 	init: function() {
 		Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
