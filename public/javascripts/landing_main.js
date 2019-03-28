@@ -7,6 +7,134 @@ Ext.Loader.setConfig({
 	}
 });
 
+var centralSandsCoords = [[
+	[-9974444.68, 5525984.17],
+	[-10005576.9, 5501770.16],
+	[-10012495.2, 5449882.98],
+	[-9988281.26, 5408373.24],
+	[-9943312.37, 5397995.81],
+	[-9908720.92, 5397995.81],
+	[-9887966.05, 5432587.26],
+	[-9887966.05, 5477556.14],
+	[-9905261.78, 5515606.74],
+	[-9943312.37, 5529443.32]
+]];
+var centralSandsFeature = new ol.Feature(new ol.geom.Polygon(centralSandsCoords));
+
+var urbanCorridorCoords = [[ 
+	[-9967999.98, 5370159.85],
+	[-9988790.85, 5357929.93],
+	[-9996128.81, 5333470.08],
+	[-9993682.82, 5309010.23],
+	[-9971668.96, 5295557.31],
+	[-9933756.19, 5288219.36],
+	[-9914188.31, 5284550.38],
+	[-9889728.46, 5291888.34],
+	[-9873829.56, 5301672.28],
+	[-9835916.79, 5300449.28],
+	[-9807787.97, 5296780.31],
+	[-9785774.10, 5305341.25],
+	[-9779659.14, 5337139.06],
+	[-9798004.03, 5353037.96],
+	[-9837139.79, 5367713.87],
+	[-9873829.56, 5370159.85],
+	[-9917857.29, 5375051.82]
+]];
+var urbanCorridorFeature = new ol.Feature(new ol.geom.Polygon(urbanCorridorCoords));
+
+var foxValleyCoords = [[ 
+	[-9805341.98842241, 5555443.215766609],
+	[-9828578.845021103, 5540767.306335855],
+	[-9861599.641240299, 5523645.411999975],
+	[-9876275.550671054, 5493070.600685905],
+	[-9883613.50538643, 5464941.77427696],
+	[-9883613.50538643, 5434366.96296289],
+	[-9861599.641240299, 5412353.098816759],
+	[-9832247.822378792, 5408684.121459071],
+	[-9806564.980874972, 5413576.091269322],
+	[-9773544.184655776, 5427029.008247512],
+	[-9764983.237487836, 5480840.676160277],
+	[-9749084.33560452, 5499185.562948719],
+	[-9751530.320509646, 5533429.351620478],
+	[-9738077.403531455, 5561558.178029423],
+	[-9727070.471458388, 5589687.004438368],
+	[-9736854.411078893, 5597024.959153744],
+	[-9753976.305414772, 5593355.981796056],
+	[-9771098.19975065, 5557889.200671734],
+]];
+var foxValleyFeature = new ol.Feature(new ol.geom.Polygon(foxValleyCoords));
+
+var DriftlessCoords = [[ 
+	[-10155117.829855375, 5433143.970510328],
+	[-10158786.807213064, 5405015.144101383],
+	[-10157563.8147605, 5378109.310145001],
+	[-10144110.89778231, 5363433.4007142475],
+	[-10141664.912877185, 5356095.445998871],
+	[-10149002.867592562, 5330412.604495051],
+	[-10145333.890234873, 5314513.702611734],
+	[-10129434.988351557, 5303506.770538669],
+	[-10084184.267606732, 5304729.762991232],
+	[-10032818.584599094, 5305952.755443795],
+	[-10004689.75819015, 5314513.702611734],
+	[-9985121.878949143, 5332858.589400177],
+	[-9966776.992160702, 5363433.4007142475],
+	[-9966776.992160702, 5387893.249765504],
+	[-9992459.833664522, 5401346.166743695],
+	[-10015696.690263214, 5416022.076174448],
+	[-10053609.45629266, 5427029.008247514],
+	[-10078069.305343919, 5441704.917678268],
+	[-10115982.071373366, 5444150.902583393],
+]];
+
+var driftlessFeature = new ol.Feature(new ol.geom.Polygon(DriftlessCoords));
+
+var spotStyle = new ol.style.Style({
+    stroke: new ol.style.Stroke({
+        color: 'rgba(0, 0, 0, 0.9)',
+        width: 2
+    }),
+    fill: new ol.style.Fill({
+	    color: 'rgba(128, 32, 255, 0.8)'
+	})
+});
+
+var maskLayer = new ol.layer.Vector({
+	source: new ol.source.Vector(),
+	style: spotStyle,
+	opacity: 0.6,
+	// these potentially reduce performance but looks better
+	updateWhileAnimating: true, 
+	updateWhileInteracting: true
+});
+
+var globalMap = new ol.Map({
+	controls: ol.control.defaults({
+		attributionOptions: {
+			collapsible: true
+		}
+	}),
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.Stamen({
+				layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
+			})
+		}),
+		maskLayer
+	],
+	view: new ol.View({
+		center: ol.proj.fromLonLat([-89.565, 44.2]),
+		zoom: 6,
+        minZoom: 3,
+        maxZoom: 9
+	})
+});
+
+globalMap.on('click', function(evt){
+    console.info(globalMap.getCoordinateFromPixel(evt.pixel));
+});
+
+
+
 Ext.require([
     'GeoExt.component.Map',
     'Ext.panel.Panel',
@@ -29,45 +157,50 @@ Ext.define('Ext.chart.theme.Custom', {
     }
 });		
 
+var niText = 'Net\n    Income';
+var scText = 'Soil\nCarbon  ';
+var bhText = 'Bird  \nHabitat  ';
+var srText = 'Soil  \nRetention  ';
+var gbText = '  Gross\n  Biofuel';
 Ext.create('Ext.data.Store', {
 	storeId: 'dss-values',
 	fields: ['name', 'data1', 'location'],
 	data: [
-	{name: 'Net Income',data1: 90.1, location: 'uc'},
-	{name: 'Gross Biofuel',data1: 80.5, location: 'uc'},
+	{name: niText, data1: 90.1, location: 'uc'},
+	{name: gbText, data1: 80.5, location: 'uc'},
 	{name: 'Emissions',data1: 90.7, location: 'uc'},
-	{name: 'Soil Retention',data1: 30.1, location: 'uc'},
-	{name: 'Soil Carbon',data1: 20.1, location: 'uc'},
-	{name: 'Bird Habitat',data1: 10.9, location: 'uc'},
+	{name: srText ,data1: 30.1, location: 'uc'},
+	{name: scText, data1: 20.1, location: 'uc'},
+	{name: bhText, data1: 10.9, location: 'uc'},
 	{name: 'Pest Supression',data1: 15.6, location: 'uc'},
-	{name: 'Pollinators',data1: 30.4, location: 'uc'},
+	{name: '     Pollinators',data1: 30.4, location: 'uc'},
 	
-	{name: 'Net Income',data1: 25.1, location: 'cs'},
-	{name: 'Gross Biofuel',data1: 70.5, location: 'cs'},
+	{name: niText, data1: 25.1, location: 'cs'},
+	{name:  gbText, data1: 70.5, location: 'cs'},
 	{name: 'Emissions',data1: 60.7, location: 'cs'},
-	{name: 'Soil Retention',data1: 28.1, location: 'cs'},
-	{name: 'Soil Carbon',data1: 17.1, location: 'cs'},
-	{name: 'Bird Habitat',data1: 28.9, location: 'cs'},
+	{name: srText, data1: 28.1, location: 'cs'},
+	{name: scText,data1: 17.1, location: 'cs'},
+	{name: bhText, data1: 28.9, location: 'cs'},
 	{name: 'Pest Supression',data1: 19.6, location: 'cs'},
-	{name: 'Pollinators',data1: 40.4, location: 'cs'},
+	{name: '     Pollinators',data1: 40.4, location: 'cs'},
 	
-	{name: 'Net Income',data1: 35.1, location: 'd'},
-	{name: 'Gross Biofuel',data1: 20.5, location: 'd'},
+	{name: niText,data1: 35.1, location: 'd'},
+	{name:  gbText, data1: 20.5, location: 'd'},
 	{name: 'Emissions',data1: 30.7, location: 'd'},
-	{name: 'Soil Retention',data1: 20.1, location: 'd'},
-	{name: 'Soil Carbon',data1: 80.0, location: 'd'},
-	{name: 'Bird Habitat',data1: 100.0, location: 'd'},
+	{name: srText, data1: 20.1, location: 'd'},
+	{name: scText,data1: 80.0, location: 'd'},
+	{name: bhText, data1: 100.0, location: 'd'},
 	{name: 'Pest Supression',data1: 100.0, location: 'd'},
-	{name: 'Pollinators',data1: 100.0, location: 'd'},
+	{name: '     Pollinators',data1: 100.0, location: 'd'},
 	
-	{name: 'Net Income',data1: 100.0, location: 'frv'},
-	{name: 'Gross Biofuel',data1: 100.0, location: 'frv'},
+	{name: niText,data1: 100.0, location: 'frv'},
+	{name:  gbText, data1: 100.0, location: 'frv'},
 	{name: 'Emissions',data1: 100.0, location: 'frv'},
-	{name: 'Soil Retention',data1: 40.1, location: 'frv'},
-	{name: 'Soil Carbon',data1: 32.1, location: 'frv'},
-	{name: 'Bird Habitat',data1: 34.9, location: 'frv'},
+	{name: srText, data1: 40.1, location: 'frv'},
+	{name: scText,data1: 32.1, location: 'frv'},
+	{name: bhText, data1: 34.9, location: 'frv'},
 	{name: 'Pest Supression',data1: 30.6, location: 'frv'},
-	{name: 'Pollinators',data1: 45.4, location: 'frv'},
+	{name: '     Pollinators',data1: 45.4, location: 'frv'},
 	],
 
 	filters: [{
@@ -121,22 +254,36 @@ Ext.create('Ext.data.Store', {
 //-------------------------------------------------------------
 var treeStore = Ext.create('Ext.data.Store', {
 	storeId: 'dss-areas',
-	fields: ['name', 'data1'],
+	fields: ['name', 'value', 'img', 'desc', 'feature'],
 	data: [{ 
 		name: 'Central Sands', value: 'cs', img: 'assets/images/other_5.gif',
-		desc: "The remnants of an ancient lake, the area is characterised by sand and p'taters"
+		desc: "The remnants of an ancient lake, the area is characterised by sand and p'taters",
+		feature: centralSandsFeature
 	},{ 
 		name: 'Driftless', value: 'd', img: 'assets/images/other_6.gif',
-		desc: "The driftless area escaped glaciation during the last ice age and is characterized by steep, forested ridges, deeply-carved river valleys, and cold-water trout streams."
+		desc: "The driftless area escaped glaciation during the last ice age and is characterized by steep, forested ridges, deeply-carved river valleys, and cold-water trout streams.",
+		feature: driftlessFeature
 	},{ 
 		name: 'Fox River Valley', value: 'frv', img: 'assets/images/other_4.gif',
-		desc: "Some special risks and opportunities here..."
+		desc: "Some special risks and opportunities here...",
+		feature: foxValleyFeature
 	},{ 
 		name: 'Urban Corridor', value: 'uc', img: 'assets/images/other_2.gif',
-		desc: "A mix of comparatively densely populated areas and glaciated bits. It'd be nice to have a train to get us to and fro."
+		desc: "A mix of comparatively densely populated areas and glaciated bits. It'd be nice to have a train to get us to and fro.",
+		feature: urbanCorridorFeature
 	}]
 });
 
+Ext.draw.sprite.Text.prototype.originalUpdatePlainBBox = Ext.draw.sprite.Text.prototype.updatePlainBBox;
+
+Ext.draw.sprite.Text.prototype.updatePlainBBox = function(plain, useOldSize) {
+	var me = this;
+	me.originalUpdatePlainBBox(plain, useOldSize);
+	//if (me.config && me.config.padding) {
+		plain.x += 0;//me.config.padding.width;
+		plain.height += -0;//me.config.padding.height;
+//	}
+}
 //-------------------------------------------------------------
 // Sample Radar
 var radarDef = {
@@ -144,16 +291,16 @@ var radarDef = {
 	itemId: 'DSS-gurf',
 	theme: 'custom',
 	flex: 3,
-	title: 'Current State of Selected Area',
+	title: 'Current Conditions in Selected Area',
 //	bodyStyle: 'border-bottom: 0',
-	innerPadding: 20,
+	innerPadding: 4,
 	header: {
 		style: 'border-left: 1px solid #aaa; border-top: 1px solid #aaa; border-right: 1px solid #aaa'
 	},
 	insetPadding: {
 		top: 25,
-		left: 50,
-		right: 50,
+		left: 40,
+		right: 40,
 		bottom: 25
 	},
 	animation: {
@@ -180,6 +327,7 @@ var radarDef = {
 		position: 'radial',
 		fields: 'data1',
 		style: {
+			minStepSize: 10,
 			estStepSize: 10
 		},
 		minimum: 0,
@@ -200,7 +348,8 @@ var radarDef = {
 		grid: true,
 		label: {
 			 font: '12px Helvetica',
-			 color: '#333'
+			 color: '#333',
+			 padding: '0px 28px'
 		}
 	}]
 };
@@ -276,7 +425,7 @@ Ext.application({
 				flex: 20,
 				margin: 8,
 				maxHeight: 520,
-				maxWidth: 860,
+				maxWidth: 800,
 				width: '100%',
 				layout: {
 					type: 'hbox',
@@ -286,7 +435,7 @@ Ext.application({
 				items: [{
 					xtype: 'container',
 					margin: '0 8 0 0',
-					width: 320,
+					width: 340,
 					layout: {
 						type: 'vbox',
 						pack: 'start',
@@ -332,22 +481,17 @@ Ext.application({
 						},*/{
 							xtype: 'container',
 							id: 'dss-map-logo',
+							hidden: true,
 							flex: 2,
 							padding: '0 0 0 24',
 							width: '75%',
 							html: '<img style="background-size: cover; width: 100%" src="assets/images/other_4.gif">'
 						},{
-							xtype: 'container',
-							id: 'dss-description',
-							padding: '8 16',
-							width: '100%',
-							style: 'color: #777'
-						},{
 							xtype: 'grid',
-							height: 150, width: '100%',
+							height: 140, width: '100%',
 							store: 'dss-areas',
 							header: {
-								style: 'border-top: 1px #ccc solid'
+							//	style: 'border-top: 1px #ccc solid'
 							},
 							title: 'Available Areas',
 							hideHeaders: true,
@@ -373,8 +517,24 @@ Ext.application({
 										value: recs[0].get('value')
 									}))
 									Ext.getCmp('dss-description').update('<b>About the ' + recs[0].get('name') + '</b><br/>' + recs[0].get('desc'))
+								    maskLayer.getSource().clear();
+								    maskLayer.getSource().addFeature(recs[0].get('feature'));
 								}
 							}
+						},{
+							xtype: 'gx_map',
+							width: '100%',
+							flex: 2,
+							map: globalMap,
+							animate: false,
+							style: 'background-color: rgb(198,208,168)' // rgb(217,221,183)
+						},{
+							xtype: 'container',
+							id: 'dss-description',
+							padding: '8 16',
+							width: '100%',
+							height: 100,
+							style: 'color: #777'
 						}]
 					},{
 						xtype: 'container',
@@ -392,7 +552,7 @@ Ext.application({
 						},{
 							xtype: 'button',
 							scale: 'medium',
-							text: 'Ok',
+							text: 'Next',
 							margin: '4 8 0 6',
 							width: 100,
 							handler: function() {
@@ -432,6 +592,9 @@ Ext.application({
 			}]
 		});
 		
+	 //   maskLayer.getSource().clear();
+	//    maskLayer.getSource().addFeature(urbanCorridorFeature);
 	}
 	
 });
+
