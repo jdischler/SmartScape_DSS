@@ -11,7 +11,7 @@ Ext.define('DSS.components.LogoBar', {
 	],
     
 	region: 'north',
-	height: 71,
+	height: 60,
 	style: "background: -webkit-linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed; " + 
 		"background: linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed;",
 	
@@ -29,30 +29,30 @@ Ext.define('DSS.components.LogoBar', {
 
 	items: [{
 		xtype: 'container',
-		margin: '0 0 0 36',
-		width: 310, 
-		height: 71, // a fixed height improves page layout responsiveness unfortunately
-		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
+		padding: '2 0 0 10',
+		width: 340, 
+		height: 60, // a fixed height improßves page layout responsiveness unfortunately
+		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:75%"></a>',
 	},{
 		text: 'Explore Landscape',
 		margin: '-1 2 0 48',
-		width: 140,
+		width: 130,
 		pressed: true
 	},{
 		text: 'Transform Landscape',
 		margin: '-1 2 0 2',
-		width: 140,
+		width: 130,
 		toggleHandler: function(self, pressed) {
 			Ext.getCmp('dss-scenario-grid').setVisible(pressed);
 		}
 	},{
 		text: 'Analyze Results',
 		margin: '-1 2 0 2',
-		width: 140, height: 62
+		width: 130
 	},{
 		text: 'Step 4 Mockup',
 		margin: '-1 2 0 2',
-		width: 140, height: 62,
+		width: 130,
 		handler: function() {
 			Ext.create('DSS.components.Step4').show().center();
 		}

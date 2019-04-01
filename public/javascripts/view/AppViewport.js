@@ -31,10 +31,28 @@ Ext.define('DSS.view.AppViewport', {
 			},{
 				xtype: 'mainmap',
 				dockedItems: [{
+					xtype: 'container',
 				    id: 'dss-scenario-grid',
-					xtype: 'scenario_grid',
-					dock: 'bottom',
-					hidden: true,
+					style: 'background-color: rgb(245,245,245)',
+				    dock: 'bottom',
+				    hidden: true,
+				  	resizable: {minHeight:172, maxHeight: 246 + 28},
+					resizeHandles: 'n',
+				    layout: {
+				    	type: 'hbox',
+				    	align: 'stretch',
+				    	pack: 'start'
+				    },
+				    items: [{
+				    	xtype: 'container',
+				    	flex: 1
+				    },{
+				    	xtype: 'scenario_grid',
+				    	flex: 20
+				    },{
+				    	xtype: 'container',
+				    	flex: 1
+				    }],
 				}],
 			}]
 		});

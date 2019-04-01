@@ -13,9 +13,9 @@
 	background-size: 30px 30px;
 	}
 .x-panel-header-title-default {
-	font-size: 16px;
+//	font-size: 16px;
 	font-weight: bold;
-	line-height: 17px;
+//	line-height: 17px;
 	color: #346;
 }
 
@@ -31,6 +31,13 @@
 	-moz-box-shadow: #d7e9f6 0 1px 0px 0 inset, #d7e9f6 0 -1px 0px 0 inset, #d7e9f6 -1px 0 0px 0 inset, #d7e9f6 1px 0 0px 0 inset;
 	box-shadow: #d7e9f6 0 1px 0px 0 inset, #d7e9f6 0 -1px 0px 0 inset, #d7e9f6 -1px 0 0px 0 inset, #d7e9f6 1px 0 0px 0 inset
 }
+
+.x-btn-focus.x-btn-menu-active.x-btn-default-large, .x-btn-focus.x-btn-pressed.x-btn-default-large {
+    -webkit-box-shadow:#fff 0 1px 0px 0 inset;
+    -moz-box-shadow:#fff 0 1px 0px 0 inset;
+    box-shadow:#fff 0 1px 0px 0 inset; 
+}
+
 
 .x-btn-over.x-btn-default-large {
 	border-color: rgba(0,0,0,0.4);
@@ -50,7 +57,7 @@
 }
 
 .x-btn-inner-default-large {
-	font-weight: bold;
+	font: bold 14px helvetica, arial, verdana, sans-serif;
 	color: #234;
 	word-wrap: break-word;
 	overflow-wrap: break-word; 
@@ -100,7 +107,12 @@
   transition : border 500ms;
 }
 
-.x-selection-working-mask {
+.
+.x-column-header-inner {
+    padding: 7px !important;
+}
+
+}x-selection-working-mask {
     background-color: rgba(207, 207, 207, 0.7);
     border-color: transparent
 }
@@ -147,4 +159,43 @@
 
 .ol-scale-line {
 	background: rgba(0,60,136,.65)
+}
+
+
+.dss-tool {
+    cursor: pointer
+}
+
+.dss-tool-tool-el {
+    overflow: hidden;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    color: #fff;
+    text-align: center;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
+    opacity: 0.75
+}
+
+.dss-tool-over .dss-tool-tool-el {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    opacity: 1
+}
+
+.dss-tool-pressed .dss-tool-tool-el {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    opacity: 1
+}
+
+.dss-tool-gear {
+    background-image: url(images/process-icon.png);
+    background-size: cover
+}
+.dss-tool-plus {
+    background-image: url(images/new-trx-icon.png);
+    background-size: cover
+}
+.dss-tool-refresh {
+    background-image: url(images/new-scenario-icon.png);
+    background-size: cover
 }

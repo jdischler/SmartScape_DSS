@@ -26,7 +26,7 @@ var occlusionExample = [{
 		"name":"lcc","type":"indexed","matchValues":[4,5,6,7,8]
 	}]
 },{
-	Active: true, SelectionName: 'Row crops on low slopes', TransformText: 'Keep (increase nutrient spreading',
+	Active: true, SelectionName: 'Row crops on low slopes', TransformText: 'Keep (increase nutrient spreading)',
 	Query: [{
 		"name":"cdl_2012","type":"indexed","matchValues":[1,16,2]
 	},{
@@ -98,10 +98,61 @@ Ext.define('DSS.components.ScenarioGrid', {
   
 	autoScroll: true,
     height: 220,
-  	resizable: {minHeight:120, maxHeight: 362},
-	resizeHandles: 'n',
-    
+    maxWidth: 960,
+    minWidth: 640,
+    header: {
+    	iconAlign: 'right'
+    },
+    collapsible: true,
 	title: 'Transform the Landscape',
+	dockedItems: [{
+		xtype: 'toolbar',
+		dock: 'right',
+		items:[{
+			xtype: 'tool',
+			type: 'refresh',
+		    baseCls: 'dss-tool',
+		    disabledCls: 'dss-tool-disabled',
+		    toolPressedCls: 'dss-tool-pressed',
+		    toolOverCls: 'dss-tool-over',		
+			width: 28, height: 28,
+			tooltip: 'Start over with a new scenario',
+			callback: function(toolOwner, tool) {
+				Ext.Msg.show({
+				    title: 'Would you like to start over?',
+				    message: 'Clicking "YES" will remove any steps you\'ve already configured. Proceed?',
+				    buttons: Ext.Msg.YES | Ext.Msg.CANCEL,
+				    icon: Ext.Msg.QUESTION,
+				    fn: function(btn) {
+				        if (btn === 'yes') {
+							Ext.data.StoreManager.lookup('dss-scenario-store').loadRawData([{Active:true}], false);
+				        }
+				    }
+				});
+			}
+		},'->',{
+			xtype: 'tool',
+			type: 'plus' ,
+		    baseCls: 'dss-tool',
+		    disabledCls: 'dss-tool-disabled',
+		    toolPressedCls: 'dss-tool-pressed',
+		    toolOverCls: 'dss-tool-over',		
+			width: 28, height: 28,
+			tooltip: 'Add another step to my landscape transformation',
+			callback: function(toolOwner, tool) {
+				Ext.data.StoreManager.lookup('dss-scenario-store').loadRawData([{Active:true}], true);
+			}
+		},' ',' ',{
+			xtype: 'tool',
+			type: 'gear',
+		    baseCls: 'dss-tool',
+		    disabledCls: 'dss-tool-disabled',
+		    toolPressedCls: 'dss-tool-pressed',
+		    toolOverCls: 'dss-tool-over',		
+			width: 28, height: 28,
+			tooltip: 'Calculate the outcomes for my landscape transformations'
+		}]
+	}],
 	viewConfig: {
 		stripeRows: true
 	},
@@ -225,8 +276,10 @@ Ext.define('DSS.components.ScenarioGrid', {
 	columns: {
 		items:[{
 			xtype: 'actioncolumn',
-			width: 28,
+			width: 32,
 			resizable: false,
+			align: 'center',
+			dirtyText: null, // prevents addition of an unneeded DOM el
 			iconCls: 'dss-inspect-icon',
 			tooltip: 'View the effective selection for this tranform',
 			handler: function(grid, rowIndex, colIndex) {
@@ -259,10 +312,16 @@ Ext.define('DSS.components.ScenarioGrid', {
 				}*/
 			}
 		},{
+			xtype: 'rownumberer',
+			text: 'Priority',
+			align: 'center',
+			dirtyText: null, // prevents addition of an unneeded DOM el
+			width: 66,
+		},{
 			dataIndex: 'SelectionName',
 			text: 'User-Named Selection',
 			flex: 1, 
-			maxWidth: 280,
+		//	maxWidth: 280,
 			resizable: false,
 			editor: {
 				xtype: 'textfield',
@@ -282,7 +341,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 			dataIndex: 'TransformText',
 			text: 'Transforms & Managment',
 			flex: 1, 
-			maxWidth: 280,
+		//	maxWidth: 280,
 			resizable: false,
 			tdCls: 'dss-grey-scenario-grid dss-trx-col',
 			renderer: function(value, meta, record) {
@@ -297,13 +356,17 @@ Ext.define('DSS.components.ScenarioGrid', {
 			xtype: 'checkcolumn',
 			dataIndex: 'Active',
 			text: 'Active',
+			dirtyText: null, // prevents addition of an unneeded DOM el
+			align: 'center',
 			width: 60,
 			resizable: false,
 			tdCls: 'dss-grey-scenario-grid'
 		},{
 			xtype: 'actioncolumn',
-			width: 28,
+			width: 32,
 			resizable: false,
+			align: 'center',
+			dirtyText: null, // prevents addition of an unneeded DOM el
 			iconCls: 'dss-delete-icon',
 			tooltip: 'Remove this transformation step',
 			handler: function(grid, rowIndex, colIndex) {

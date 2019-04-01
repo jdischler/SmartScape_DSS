@@ -399,7 +399,7 @@ Ext.application({
 	},	
 	launch: function() {
 				
-		var logoBG = "background: #F0F2F0;background: -webkit-linear-gradient(to top, #cfdfcf, #ffe, #f2f2f0) fixed; background: linear-gradient(to top, #cfdfcf, #ffe,  #f2f2f0) fixed;";
+		var logoBG = "background: #F0F2F0;background: -webkit-linear-gradient(to top, #afbfaf, #ddc, #eee) fixed; background: linear-gradient(to top, #afbfaf, #ddc,  #eee) fixed;";
 		
 		Ext.create('Ext.Viewport', {
 			minHeight: 640,
@@ -576,17 +576,21 @@ Ext.application({
 			},{
 				padding: 8,
 				width: '100%',
-				style: 'background-color: #a0b0a0; background: -webkit-linear-gradient(to top, #a0b0a0, 809080);background: linear-gradient(to top, #a0b0a0, #809080); color: #fff; text-shadow: 0 0 1px #00000050; font-size: 18px; border-top: 1px solid #00000050;',
+				style: 'background-color: #404740; background: -webkit-linear-gradient(to bottom, #404740, #282728);background: linear-gradient(to bottom, #404740, #282728); color: #ddd; text-shadow: 0 0 1px #00000050; font-size: 14px; border-top: 1px solid #00000050;',
 				layout: {
 					type: 'vbox',
 					align: 'middle'
 				},
 				defaults: {
-					xtype: 'container', margin: 8
+					xtype: 'container'
 				},
 				items: [{
-					html: 'Footer text and more. And more and more and more',
+					width: 480, height: 90,
+					margin: -12,
+					html: '<a href="https://energy.wisc.edu"><img src="assets/images/wei-logo.png" style="width: 60%"></a>' + 
+					'<a href="http://gratton.entomology.wisc.edu"><img src="assets/images/gratton-logo.png" style="width: 40%"></a>',
 				},{
+					margin: 8,
 					html: '&copy;2019 wei.wisc.edu'
 				}]
 			}]
