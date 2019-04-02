@@ -53,6 +53,8 @@ public class Layer_Manager
 			newFloatLayer("dist_to_water").init();
 			newFloatLayer("rivers").init();
 			newIntegerLayer("watersheds", Layer_Integer.EType.ERaw).init();
+			newIntegerLayer("huc-8", Layer_Integer.EType.ERaw).init();
+			newIntegerLayer("counties", Layer_Integer.EType.ERaw).init();
 			
 		//	newFloatLayer("cow_index").init();
 			

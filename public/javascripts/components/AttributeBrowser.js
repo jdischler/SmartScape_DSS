@@ -96,6 +96,7 @@ Ext.define('DSS.components.AttributeBrowser', {
         'DSS.components.LayerBase',
         'DSS.components.LayerIndexed',
         'DSS.components.LayerFloat',
+        'DSS.components.LayerClickSelect',
         'DSS.components.LayerDrawShape',
     ],
     
@@ -299,6 +300,18 @@ Ext.define('DSS.components.AttributeBrowser', {
 				DSS_lessThanValue: 180,
 				DSS_maxValue: 5250,
 				DSS_stepSize: 30
+			}));
+			
+			DSS.Layers.add(Ext.create('DSS.components.LayerClickSelect', {
+				title: 'HUC-8 Watershed',
+				DSS_serverLayer: 'huc-8',
+				DSS_vectorLayer: watershed
+			}));
+			
+			DSS.Layers.add(Ext.create('DSS.components.LayerClickSelect', {
+				title: 'County',
+				DSS_serverLayer: 'counties',
+				DSS_vectorLayer: county
 			}));
 			
 			DSS.Layers.add(Ext.create('DSS.components.LayerDrawShape'));

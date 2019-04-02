@@ -28,9 +28,10 @@ Ext.define('DSS.components.LayerDrawShape', {
 	//--------------------------------------------------------------------------
 	configureSelection: function() {
 
-		// TODO: 
-		
-        return false;
-	}
-
+		var me = this;
+		if (me.getCollapsed() || me.isHidden() || true) {
+			return false;
+		}
+	},
+	
 });

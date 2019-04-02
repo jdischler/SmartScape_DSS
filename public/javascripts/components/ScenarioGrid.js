@@ -602,9 +602,9 @@ Ext.define('DSS.components.ScenarioGrid', {
 								+ "', request timed out?");
 					}
 				}
-			});
+			})
 		}
-	}
-	
+    },
+		
 });
 

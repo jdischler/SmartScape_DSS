@@ -64,6 +64,7 @@ Ext.define('DSS.components.LayerBase', {
 				success: function(response, opts) {
 					var obj = JSON.parse(response.responseText);
 					// TODO: server should pass this all back...
+					//-10062652.65061, -9878152.65061, 5278060.469521415, 5415259.640662575
 					obj['bounds']= [
 						-10062652.65061, 5278060.469521415,
 						-9878152.65061, 5415259.640662575
@@ -221,6 +222,18 @@ Ext.define('DSS.components.LayerBase', {
 				});
 				src.M.load(); // EVIL internal diggings...M is the secret internal ol.Image
 			}, 50 + tryCount * 50, me); //  
+		},
+		//---------------------------------------------------------------------------------
+		cancelClickActionsForAllBut: function(layer) {
+			var me = this;
+			Ext.each(me.layers, function(test) {
+				if (layer.getId() != test.getId()) {
+					if (test.cancelClickSelection) {
+						test.cancelClickSelection();
+					}
+				} else {
+				}
+			})
 		}
 	},
 	
@@ -228,6 +241,7 @@ Ext.define('DSS.components.LayerBase', {
 		beforeexpand: function() {
 			var me = this;
 			me.getHeader().addCls('dss-no-header-border');
+			if (me.expandInternal) me.expandInternal();
 		},
 		expand: function() {
 			DSS.Layers.valueChanged();
@@ -235,6 +249,7 @@ Ext.define('DSS.components.LayerBase', {
 		beforecollapse: function() {
 			var me = this;
 			me.getHeader().removeCls('dss-no-header-border');
+			if (me.collapseInternal) me.collapseInternal();
 		},
 		collapse: function() {
 			DSS.Layers.valueChanged();

@@ -23,8 +23,6 @@ Ext.define('DSS.components.LogoBar', {
 	defaults: {
 		xtype: 'button',
 		scale: 'large',
-		toggleGroup: 'DSS-mode',
-		allowDepress: false
 	},
 
 	items: [{
@@ -36,23 +34,29 @@ Ext.define('DSS.components.LogoBar', {
 	},{
 		text: 'Explore Landscape',
 		margin: '-1 2 0 48',
-		width: 130,
+		width: 120,
+		toggleGroup: 'DSS-mode',
+		allowDepress: false,
 		pressed: true
 	},{
 		text: 'Transform Landscape',
 		margin: '-1 2 0 2',
-		width: 130,
+		width: 120,
+		toggleGroup: 'DSS-mode',
+		allowDepress: false,
 		toggleHandler: function(self, pressed) {
 			Ext.getCmp('dss-scenario-grid').setVisible(pressed);
 		}
 	},{
 		text: 'Analyze Results',
 		margin: '-1 2 0 2',
-		width: 130
+		toggleGroup: 'DSS-mode',
+		allowDepress: false,
+		width: 120
 	},{
 		text: 'Step 4 Mockup',
 		margin: '-1 2 0 2',
-		width: 130,
+		width: 120,
 		handler: function() {
 			Ext.create('DSS.components.Step4').show().center();
 		}
