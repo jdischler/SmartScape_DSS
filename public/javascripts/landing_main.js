@@ -1,4 +1,3 @@
-// TODO: set up a proper main and sub-asset folder doodad
 
 Ext.Loader.setConfig({
 	enabled: true,
@@ -291,7 +290,7 @@ var radarDef = {
 	itemId: 'DSS-gurf',
 	theme: 'custom',
 	flex: 3,
-	title: 'Current Conditions in Selected Area',
+	title: 'Current Conditions',
 //	bodyStyle: 'border-bottom: 0',
 	innerPadding: 4,
 	header: {
@@ -358,7 +357,7 @@ var pieDef = {
 	xtype: 'polar',
 	innerPadding: 20,
 //	bodyStyle: 'border-top: 0',
-	title: 'Landcover Proportions for Selected Area',
+	title: 'Landcover Proportions',
 	header: {
 		style: 'border-left: 1px solid #aaa; border-right: 1px solid #aaa'
 	},
@@ -402,7 +401,7 @@ Ext.application({
 		var logoBG = "background: #F0F2F0;background: -webkit-linear-gradient(to top, #afbfaf, #ddc, #eee) fixed; background: linear-gradient(to top, #afbfaf, #ddc,  #eee) fixed;";
 		
 		Ext.create('Ext.Viewport', {
-			minHeight: 640,
+			minHeight: 640,minWidth: 660,
 			renderTo: Ext.getBody(),
 			style: logoBG,
 			autoScroll: true,
@@ -415,17 +414,18 @@ Ext.application({
 			},
 			items: [{
 				width: 310, height: 70,
-				margin: '16 0 0 0',
+				margin: '16 0',
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
-			},{
+			/*},{
 				html: 'Choose an Area of Interest to Explore',
 				margin: '24 8 0 8',
 				style: 'color: #333; font-size: 18px; font-weight: bold'
+			*/
 			},{
 				flex: 20,
 				margin: 8,
 				maxHeight: 520,
-				maxWidth: 800,
+				maxWidth: 960,
 				width: '100%',
 				layout: {
 					type: 'hbox',
@@ -435,7 +435,7 @@ Ext.application({
 				items: [{
 					xtype: 'container',
 					margin: '0 8 0 0',
-					width: 340,
+					width: 440,
 					layout: {
 						type: 'vbox',
 						pack: 'start',
@@ -449,36 +449,7 @@ Ext.application({
 							type: 'vbox',
 							align: 'middle'
 						},
-						items: [/*{
-							xtype: 'combo',
-							width: '100%',
-							margin: 8,
-							queryMode: 'local',
-							store: 'dss-areas',
-							fieldLabel: 'Area',
-							labelAlign: 'right',
-							labelWidth: 40,
-							multiSelect: false,
-							forceSelection: true,
-							displayField: 'name', 
-							valueField: 'value',
-							//value: 'uc',
-							listeners: {
-								afterrender: function(self) {
-									self.setSelection(self.getStore().findRecord('value','uc'));
-								},
-								select: function(self, rec) {
-									Ext.getCmp('dss-map-logo').update(
-										'<img style="background-size: cover; width: 100%" src="' + rec.get('img') + '">'
-									);
-									var chartData = Ext.data.StoreManager.lookup('dss-values');
-									chartData.setFilters(new Ext.util.Filter({
-										property: 'location',
-										value: rec.get('value')
-									}))
-								}
-							}
-						},*/{
+						items: [{
 							xtype: 'container',
 							id: 'dss-map-logo',
 							hidden: true,
@@ -488,12 +459,13 @@ Ext.application({
 							html: '<img style="background-size: cover; width: 100%" src="assets/images/other_4.gif">'
 						},{
 							xtype: 'grid',
+							id: 'dss-area-grid',
 							height: 140, width: '100%',
 							store: 'dss-areas',
 							header: {
 							//	style: 'border-top: 1px #ccc solid'
 							},
-							title: 'Available Areas',
+							title: 'Choose an Area of Interest to Explore',//'Available Areas',
 							hideHeaders: true,
 							columns:[{
 								dataIndex: 'name', flex: 1
@@ -531,10 +503,70 @@ Ext.application({
 						},{
 							xtype: 'container',
 							id: 'dss-description',
+							hidden: true,
 							padding: '8 16',
 							width: '100%',
 							height: 100,
 							style: 'color: #777'
+						},{
+							xtype: 'panel',
+							id: 'dss-refine-area',
+							title: 'Refine Area of Interest (optional)',
+							collapsible: true,
+							collapsed: true,
+							width: '100%',
+							layout: {
+								type: 'vbox',
+								pack: 'center',
+								align: 'stretch'
+							},
+							items: [{
+								xtype: 'container',
+								layout: 'hbox',
+								padding: 4,
+								items: [{
+									xtype: 'container',
+									html: 'Counties',
+									width: 80,
+									padding: '4 2',
+									style: 'text-align: right'
+								},{
+									xtype: 'button',
+									scale: 'small',
+									text: 'Choose',
+									width: 80,
+									margin: '2 4'
+								},{
+									xtype: 'button',
+									scale: 'small',
+									text: 'Clear',
+									width: 80,
+									margin: '2 4'
+								}]
+							},{
+								xtype: 'container',
+								layout: 'hbox',
+								padding: 4,
+								items: [{
+									xtype: 'container',
+									html: 'Watersheds',
+									width: 80,
+									padding: '4 2',
+									style: 'text-align: right'
+								},{
+									xtype: 'button',
+									scale: 'small',
+									text: 'Choose',
+									width: 80,
+									margin: '2 4'
+								},{
+									xtype: 'button',
+									scale: 'small',
+									text: 'Clear',
+									width: 80,
+									margin: '2 4'
+								}]
+							}]
 						}]
 					},{
 						xtype: 'container',
@@ -596,8 +628,42 @@ Ext.application({
 			}]
 		});
 		
-	 //   maskLayer.getSource().clear();
-	//    maskLayer.getSource().addFeature(urbanCorridorFeature);
+		var img = Ext.create('Ext.Img', {
+			src: 'assets/images/focus-arrow-icon.png',
+			floating: true,
+			style:'opacity:0',
+			shadow: false,
+			width: 64,
+			height: 64,
+			x: 50,
+			y: 50
+		}).showBy(Ext.getCmp('dss-area-grid'), 'r-tl', [0,18]);
+		Ext.defer(function() {
+			img.animate({
+				from: {
+					x: img.getX() - 32,
+					opacity: 0
+				},
+				to: {
+					x: img.getX(),
+					opacity: 1
+				}
+			})
+		}, 2000);
+		Ext.defer(function() {
+			img.setStyle({opacity: 0});
+			img.showBy(Ext.getCmp('dss-refine-area'), 'r-tl', [0,18]);
+			img.animate({
+				from: {
+					x: img.getX() - 32,
+					opacity: 0
+				},
+				to: {
+					x: img.getX(),
+					opacity: 1
+				}
+			})
+		}, 6000);
 	}
 	
 });
