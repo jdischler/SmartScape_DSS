@@ -6,26 +6,15 @@ Ext.Loader.setConfig({
 	}
 });
 
-var spotStyle = new ol.style.Style({
-    stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 0.9)',
-        width: 2
-    }),
-    fill: new ol.style.Fill({
-	    color: 'rgba(128, 32, 255, 0.8)'
-	})
-});
-
-var maskLayer = new ol.layer.Vector({
-	source: new ol.source.Vector(),
-	style: spotStyle,
-	opacity: 0.6,
-	// these potentially reduce performance but looks better
-	updateWhileAnimating: true, 
-	updateWhileInteracting: true
+var globalView = new ol.View({
+	center: ol.proj.fromLonLat([-89.565, 44.2]),
+	zoom: 6,
+    minZoom: 3,
+    maxZoom: 9
 });
 
 var globalMap = new ol.Map({
+	loadTilesWhileAnimating: true,
 	controls: ol.control.defaults({
 		attributionOptions: {
 			collapsible: true
@@ -36,15 +25,9 @@ var globalMap = new ol.Map({
 			source: new ol.source.Stamen({
 				layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
 			})
-		}),
-		maskLayer
+		})
 	],
-	view: new ol.View({
-		center: ol.proj.fromLonLat([-89.565, 44.2]),
-		zoom: 6,
-        minZoom: 3,
-        maxZoom: 9
-	})
+	view: globalView
 });
 
 globalMap.on('click', function(evt){
@@ -257,9 +240,6 @@ var pieDef = {
 	innerPadding: 20,
 //	bodyStyle: 'border-top: 0',
 	title: 'Landcover Proportions',
-	header: {
-		style: 'border-left: 1px solid #aaa; border-right: 1px solid #aaa'
-	},
 	flex: 2,
 	//theme: 'category1',
 	insetPadding: {

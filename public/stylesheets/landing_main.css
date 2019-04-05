@@ -92,3 +92,119 @@
 	font-weight: 300;
 	color: #346;
 }
+
+.dss-step-1-icon {
+	margin: 2px 4px;
+	background-image: url(images/step-1-icon.png);
+	background-size: cover;
+	opacity: 0.7	
+}
+
+.dss-step-2-icon {
+	margin: 2px 4px;
+	background-image: url(images/step-2-icon.png);
+	background-size: cover;
+	opacity: 0.7	
+}
+
+.dss-step-3-icon {
+	margin: 2px 4px;
+	background-image: url(images/step-3-icon.png);
+	background-size: cover;
+	opacity: 0.7	
+}
+
+.dss-step-4-icon {
+	margin: 2px 4px;
+	background-image: url(images/step-4-icon.png);
+	background-size: cover;
+	opacity: 0.7	
+}
+
+.dss-step-5-icon {
+	margin: 2px 4px;
+	background-image: url(images/step-5-icon.png);
+	background-size: cover;
+	opacity: 0.7	
+}
+
+.dss-breadcrumb-active {
+	background: #2a6e9f !important;
+	font-weight: bold;
+}
+
+.dss-breadcrumb-active:after {
+    border-left-color: #2a6e9f !important;
+}
+
+.dss-breadcrumb-active:before {
+    border-top-color: #2a6e9f !important;
+    border-bottom-color: #2a6e9f !important;
+}
+
+.dss-breadcrumb-point {
+	background: #3892d4;
+	color: #fff;
+	white-space: nowrap;
+	font-size: 16px;
+	text-align: left;
+	cursor: pointer;
+}
+
+.dss-breadcrumb-tail {
+	background: #3892d4;
+	color: #fff;
+	white-space: nowrap;
+	font-size: 16px;
+	text-align: left;
+	cursor: pointer;
+}
+
+.dss-breadcrumb-point:hover {
+	background: #2a6e9f;
+}
+.dss-breadcrumb-tail:hover {
+	background: #2a6e9f;
+}
+
+.dss-breadcrumb-point:after {
+    content: "";
+    top: 0;
+    overflow: visible !important;
+    right: -20px;
+    border-top: 20px solid transparent;
+    position: absolute;
+    border-left: 20px solid #3892d4;
+    border-bottom: 20px solid transparent;
+}
+
+.dss-breadcrumb-tail:before {
+    content: "";
+    top: 0;
+    left: -20px;
+    overflow: visible !important;
+    border-top: 20px solid #3892d4;
+    position: absolute;
+    border-left: 20px solid transparent;
+    border-bottom: 20px solid #3892d4;
+}
+
+.dss-breadcrumb-point:hover:after {
+    border-left: 20px solid #2a6e9f !important;
+}
+
+.dss-breadcrumb-tail:hover:before {
+    border-top: 20px solid #2a6e9f !important;
+    border-bottom: 20px solid #2a6e9f !important;
+}
+
+#dss-portal-map {
+ 	border-radius: 8px;	
+ 	background-color: rgb(198,208,168);
+ 	border: 1px solid rgba(0,0,0,0.25)
+}
+
+#dss-portal-map > .ol-viewport {
+ 	border-radius: 8px;	
+}
+
