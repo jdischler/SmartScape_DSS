@@ -9,7 +9,8 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.Footer',
 		'DSS.app_portal.AOI_Map',
 		'DSS.app_portal.AOI',
-		'DSS.app_portal.AOI_Refinement'
+		'DSS.app_portal.AOI_Refinement',
+		'DSS.app_portal.Assumptions'
 	],
 
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
@@ -36,9 +37,10 @@ Ext.define('DSS.view.PortalViewport', {
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
 			},{
 				xtype: 'container',
+				id: 'dss-navigator',
 				layout: 'hbox',
-				style: 'background: #fff; border-radius: 12px;',
-				padding: 2,
+				style: 'background: #fff; border-radius: 16px; border: 1px solid rgba(0,0,0,0.2)',
+				padding: 4,
 				defaults: {
 					xtype: 'container',
 					height: 40,
@@ -48,43 +50,56 @@ Ext.define('DSS.view.PortalViewport', {
 					width: 74,
 					margin: '0 15',
 			        listeners: {
-			            element: 'el',
-			            click: function(el) {
-			            	var me = this;
-			            	var up = me.up().component.items;
-			            	Ext.suspendLayouts();
-			            	Ext.each(up.items, function(els) {
-			            		if (els == me.component) return true; // skip self
-			            		els.removeCls('dss-breadcrumb-active');
-			            		els.animate({
+			            click: {
+			            	element: 'el',
+			            	fn: function(evt) {
+				            	var me = this;
+				            	var up = me.up().component.items;
+				            	Ext.suspendLayouts();
+				            	Ext.each(up.items, function(els) {
+				            		if (els == me.component) return true; // skip self
+				            		els.removeCls('dss-breadcrumb-active');
+				            		els.animate({
+				            			dynamic: true,
+				            			duration: 750,
+				            			to: {
+				            				width: els.DSS_verbWidth
+				            			}
+				            		});
+				            		els.setHtml(els.DSS_verb);
+									els.DSS_selectionChanged(false);
+				            	})
+				                me.component.addCls('dss-breadcrumb-active');
+				            	me.component.stopAnimation().animate({
 			            			dynamic: true,
 			            			duration: 750,
+				            		callback: function() {
+						            	me.component.setHtml(me.component.DSS_fullText);
+				            		},
 			            			to: {
-			            				width: els.DSS_verbWidth
+			            				width: me.component.DSS_fullWidth
 			            			}
 			            		});
-			            		els.setHtml(els.DSS_verb);
-								els.DSS_selectionChanged(false);
-			            	})
-			                me.component.addCls('dss-breadcrumb-active');
-			            	me.component.stopAnimation().animate({
-		            			dynamic: true,
-		            			duration: 750,
-			            		callback: function() {
-					            	me.component.setHtml(me.component.DSS_fullText);
-			            		},
-		            			to: {
-		            				width: me.component.DSS_fullWidth
-		            			}
-		            		});
-			            	
-			            	me.component.setHtml(me.component.DSS_fullText);
-			            	me.component.DSS_selectionChanged(true);
-							
-			            	// awful...ensure the innerCt which holds the text just clips off any overflow...
-			            	var downer = me.component.getEl().down('[data-ref="innerCt"]');
-			            	downer.dom.style['overflow'] = 'hidden';
-			            	Ext.resumeLayouts(true);
+				            	
+				            	me.component.setHtml(me.component.DSS_fullText);
+				            	me.component.DSS_selectionChanged(true);
+								
+				            	// awful...ensure the innerCt which holds the text just clips off any overflow...
+				            	var downer = me.component.getEl().down('[data-ref="innerCt"]');
+				            	downer.dom.style['overflow'] = 'hidden';
+				            	Ext.resumeLayouts(true);
+				            }
+				        },
+			            afterrender: function(self) {
+			            	var me = this;
+			            	if (self.DSS_tooltip) {
+			            		Ext.tip.QuickTipManager.register({
+			            			target: self.el,
+			            			text: self.DSS_tooltip,
+			        	            defaultAlign: 'b50-t50',
+			        	            anchor: true,
+			            		});
+			            	}
 			            }
 			        }
 				},
@@ -101,6 +116,7 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-grid').updateState(selected);
 						if (selected) {
+							Ext.getCmp('dss-action-holder').setHidden(false);
 							DSS_PortalMap.setMode('region');
 							Ext.getCmp('dss-region-grid').animate({
 								duration: 750, to: { left: 0 }
@@ -112,6 +128,7 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				},{
 					html: 'Refine',
+					DSS_tooltip: 'Optionally refine the area of interest',
 					DSS_fullText: 'Refine Area of Interest (Optional)',
 					DSS_verb: 'Refine',
 					DSS_fullWidth: 290,
@@ -119,6 +136,7 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-refinement').updateState(selected);
 						if (selected) {
+							Ext.getCmp('dss-action-holder').setHidden(false);
 							DSS_PortalMap.setMode('refine');
 							Ext.getCmp('dss-region-grid').animate({
 								duration: 750, to: { left: -380 }
@@ -130,14 +148,35 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				},{
 					html: 'Review',
+					DSS_tooltip: 'Review the assumptions used by SmartScape and customise them if desired',
 					DSS_fullText: 'Review Assumptions (Optional)',
 					DSS_verb: 'Review',
 					DSS_fullWidth: 260,
 					cls: 'dss-breadcrumb-point dss-breadcrumb-tail',
 					DSS_selectionChanged: function(selected) {
+						var item = me['DSS_Assumptions'];
+						if (!item) {
+							item = me['DSS_Assumptions'] = Ext.create('DSS.app_portal.Assumptions');
+						}
+						if (selected) {
+							Ext.defer(function() {
+								item.setHeight(1);
+								item.animate({
+									duration: 750,
+									dynamic: true,
+									to: {
+										height: 520
+									}
+								}).show().anchorTo(Ext.getCmp('dss-navigator'), 'tc-bc', [0,8])
+							}, 50);
+						}
+						else {
+							item.setHidden(true);
+						}
 					}
 				},{
 					html: 'Start',
+					id: 'DSS-start-smartscape',
 					DSS_fullText: 'Start SmartScape',
 					DSS_verb: 'Start',
 					margin: '0 0 0 15',
@@ -145,6 +184,39 @@ Ext.define('DSS.view.PortalViewport', {
 					cls: 'dss-breadcrumb-tail',
 					style: 'border-top-right-radius: 12px; border-bottom-right-radius: 12px',
 					DSS_selectionChanged: function(selected) {
+						var item = me['DSS_Start'];
+						if (!item) {
+							item = me['DSS_Start'] = Ext.create('Ext.container.Container', {
+								cls: 'dss-smart-scape-button',
+								floating: true,
+								shadow: false,
+								width: 1,
+								height: 30,
+								listeners: {
+						            element: 'el',
+						            click: function(el) {
+						            	location.href = '/app'
+						            }
+					            }
+							});
+						}
+						if (selected) {
+							Ext.getCmp('dss-action-holder').setHidden(true);
+							Ext.defer(function() {
+								item.setWidth(1);
+								item.show().anchorTo(Ext.getCmp('DSS-start-smartscape'), 'l-l', [4,0])
+								item.animate({
+									duration: 250,
+									dynamic: true,
+									to: {
+										width: 158,
+									}
+								});//.show().anchorTo(Ext.getCmp('DSS-start-smartscape'), 'l-l', [8,0])
+							}, 750);
+						}
+						else {
+							item.setHidden(true);
+						}
 					}
 				}]
 			},{
@@ -178,6 +250,7 @@ Ext.define('DSS.view.PortalViewport', {
 						},
 						items: [{
 							xtype: 'container',
+							margin: '0 0 8 0',
 							id: 'dss-action-holder',
 						//	style: 'overflow: hidden',
 							layout: 'absolute',
@@ -198,6 +271,7 @@ Ext.define('DSS.view.PortalViewport', {
 							}]
 						},{
 							xtype: 'container',
+							hidden: true,
 							layout: {
 								type: 'hbox',
 								pack: 'end',
@@ -234,14 +308,9 @@ Ext.define('DSS.view.PortalViewport', {
 								text: 'Next >'
 							}]
 						},{
-							xtype: 'gx_map',
-							id: 'dss-portal-map',
-							flex: 1,
-							map: globalMap,
-							animate: false,
-						},{
 							xtype: 'aoi_map',
-							flex: 1,
+							id: 'dss-portal-map',
+							flex: 1
 						}]
 					}]
 				},{
@@ -252,7 +321,7 @@ Ext.define('DSS.view.PortalViewport', {
 						align: 'stretch',
 						pack: 'start'
 					},
-					items: [radarDef, pieDef]
+					items: [pieDef, radarDef]
 				}]
 			},{
 				flex: 1,
@@ -269,7 +338,7 @@ Ext.define('DSS.view.PortalViewport', {
 			callback: function() {
 				Ext.defer(me.doFakeArrow, 200);
 			}
-		}).showBy(me, 'tr-tr', [-16,16]);
+		}).show().anchorTo(me, 'tr-tr', [-16,16]);
 	},
 	
 	doFakeArrow: function() {

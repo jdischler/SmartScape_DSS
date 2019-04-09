@@ -200,7 +200,7 @@
 
 #dss-portal-map {
  	border-radius: 8px;	
- 	background-color: rgb(198,208,168);
+ 	background-color: #efefe7;
  	border: 1px solid rgba(0,0,0,0.25)
 }
 
@@ -208,3 +208,12 @@
  	border-radius: 8px;	
 }
 
+.dss-smart-scape-button {
+	border: 1px solid white; 
+	border-radius: 16px;
+	cursor: pointer;	
+}
+
+.dss-smart-scape-button:hover {
+	background: rgba(255,255,255,0.2);
+}

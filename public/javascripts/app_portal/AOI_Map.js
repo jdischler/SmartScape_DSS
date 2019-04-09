@@ -12,14 +12,16 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		view: new ol.View({
 			center: ol.proj.fromLonLat([-89.565, 44.2]),
 			zoom: 6,
-		    minZoom: 3,
-		    maxZoom: 9
+		    minZoom: 5,
+		    maxZoom: 11
 		}),
 		layers: [
 			new ol.layer.Tile({
-				source: new ol.source.Stamen({
-					layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
-				})
+				//source: new ol.source.BingMaps({})
+				source: new ol.source.OSM({})
+				//source: new ol.source.Stamen({
+				//	layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
+				//})
 			})
 		],
 		loadTilesWhileAnimating: true,
@@ -30,14 +32,48 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		}),
 	},
 	
-	// Clumsy OL object references
 	DSS_mode: 'region',
+	
+	// Default MAP Interaction Styles...styles in DSS_OL below override these
+	DSS_layerStyle: new ol.style.Style({
+	    stroke: new ol.style.Stroke({
+	        color: 'rgba(0, 0, 0, 0.3)',
+	        width: 1
+	    }),
+	    fill: new ol.style.Fill({
+		    color: 'rgba(128, 32, 255, 0.3)'
+		})
+	}),
+	DSS_hoverStyle: new ol.style.Style({
+	    stroke: new ol.style.Stroke({
+	        color: 'rgba(0, 0, 0, 0.5)',
+	        width: 1
+	    }),
+	    fill: new ol.style.Fill({
+		    color: 'rgba(200, 32, 200, 0.5)'
+		})
+	}),
+	DSS_clickStyle: new ol.style.Style({
+	    stroke: new ol.style.Stroke({
+	        color: 'rgba(128, 100, 16, 0.9)',
+	        width: 2
+	    }),
+	    fill: new ol.style.Fill({
+		    color: 'rgba(255, 200, 16, 0.5)'
+		})
+	}),
+	
+	// Clumsy OL object references
 	DSS_OL: {
 		region: {
 			source: false,
 			layer: false,
 			hoverTool: false,
 			clickTool: false,
+			clickStyle: new ol.style.Style({
+			    stroke: new ol.style.Stroke({	color: 'rgba(0, 0, 0, 0.5)', width: 2}),
+			    fill: new ol.style.Fill({		color: 'rgba(128, 32, 255, 0.5)'})
+			}) 
 		},
 		county: {
 			source: false,
@@ -52,35 +88,6 @@ Ext.define('DSS.app_portal.AOI_Map', {
 			clickTool: false,
 		}
 	},
-
-	// MAP Interaction Styles...styles might want to be part of DSS_OL above so they could be custom per layer
-	DSS_layerStyle: new ol.style.Style({
-	    stroke: new ol.style.Stroke({
-	        color: 'rgba(0, 0, 0, 0.3)',
-	        width: 1
-	    }),
-	    fill: new ol.style.Fill({
-		    color: 'rgba(128, 32, 255, 0.3)'
-		})
-	}),
-	DSS_hoverStyle: new ol.style.Style({
-	    stroke: new ol.style.Stroke({
-	        color: 'rgba(0, 0, 0, 0.5)',
-	        width: 2
-	    }),
-	    fill: new ol.style.Fill({
-		    color: 'rgba(128, 32, 255, 0.5)'
-		})
-	}),
-	DSS_clickStyle: new ol.style.Style({
-	    stroke: new ol.style.Stroke({
-	        color: 'rgba(128, 100, 16, 0.9)',
-	        width: 2
-	    }),
-	    fill: new ol.style.Fill({
-		    color: 'rgba(255, 200, 16, 0.6)'
-		})
-	}),
 
 	//--------------------------------------------------------------------------
     constructor: function(config) {
@@ -101,10 +108,15 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		Ext.applyIf(me, {
 		});
 		
+		// FOR DEV
+		me.getMap().on('click', function(evt){
+		    console.info(me.getMap().getCoordinateFromPixel(evt.pixel));
+		});
+
 		me.callParent(arguments);
 		me.initLayer(me.DSS_OL.region, './assets/regions.geojson', me.regionClicked.bind(me), true, true, true, );
-		me.initLayer(me.DSS_OL.county, './assets/portal-counties.geojson', me.countyClicked.bind(me), true);
-		me.initLayer(me.DSS_OL.watershed, './assets/huc-8.geojson', me.watershedClicked.bind(me));
+		me.initLayer(me.DSS_OL.county, './assets/portal-counties2.geojson', me.countyClicked.bind(me), true);
+		me.initLayer(me.DSS_OL.watershed, './assets/portal-watersheds.geojson', me.watershedClicked.bind(me), true);
 	},
 	
 	// region, refine (county, or watershed)
@@ -119,7 +131,18 @@ Ext.define('DSS.app_portal.AOI_Map', {
 			me.DSS_OL.region.layer.setOpacity(0.1);
 			me.DSS_OL.region.clickTool.setActive(false);
 			me.DSS_OL.region.hoverTool.setActive(false);
-			
+			me.DSS_OL.region.hoverTool.getFeatures().clear();
+
+			me.DSS_OL.county.layer.setOpacity(0.1);
+			me.DSS_OL.county.clickTool.setActive(false);
+			me.DSS_OL.county.hoverTool.setActive(false);
+			me.DSS_OL.county.hoverTool.getFeatures().clear();
+
+			me.DSS_OL.watershed.layer.setOpacity(0.1);
+			me.DSS_OL.watershed.clickTool.setActive(false);
+			me.DSS_OL.watershed.hoverTool.setActive(false);
+			me.DSS_OL.watershed.hoverTool.getFeatures().clear();
+
 			if (autoZoom) {
 				var fs = me.DSS_OL.region.clickTool.getFeatures();
 				if (fs.getLength() > 0) {
@@ -160,6 +183,16 @@ Ext.define('DSS.app_portal.AOI_Map', {
 				}
 			}			
 		}
+		else if (modeString === 'county') {
+			me.DSS_OL.county.layer.setOpacity(1.0);
+			me.DSS_OL.county.clickTool.setActive(true);
+			me.DSS_OL.county.hoverTool.setActive(true);
+		}
+		else if (modeString === 'watershed') {
+			me.DSS_OL.watershed.layer.setOpacity(1.0);
+			me.DSS_OL.watershed.clickTool.setActive(true);
+			me.DSS_OL.watershed.hoverTool.setActive(true);
+		}
 		me.DSS_mode = modeString;
 	},
 	
@@ -181,8 +214,17 @@ Ext.define('DSS.app_portal.AOI_Map', {
 				}
 			});		
 			me.DSS_OL.county.layer.setSource(tmp);
+			me.DSS_OL.county.clickTool.getFeatures().clear();
 			
-			// TODO: Watershed
+			tmp = new ol.source.Vector();
+			me.DSS_OL.watershed.source.forEachFeature(function(f) {
+				if (f.get('REGION') == sel) {
+					tmp.addFeature(f);
+				}
+			});		
+			me.DSS_OL.watershed.layer.setSource(tmp);
+			me.DSS_OL.watershed.clickTool.getFeatures().clear();
+
 			if (!skipGrid) {
 				Ext.getCmp('dss-region-grid').getSelectionModel().select(sel);
 			}
@@ -193,7 +235,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 	countyClicked: function(feature) {
 		if (feature.selected.length > 0) {
 			var sel = feature.selected[0].get("OBJECTID");
-			console.log('clicked county: ' + sel)
+//			console.log('clicked county: ' + sel)
 		//	me.getSelectionModel().select(sel);
 		}
 	},
@@ -202,7 +244,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 	watershedClicked: function(feature) {
 		if (feature.selected.length > 0) {
 			var sel = feature.selected[0].get("OBJECTID");
-			console.log('clicked watershed: ' + sel)
+//			console.log('clicked watershed: ' + sel)
 		//	me.getSelectionModel().select(sel);
 		}
 	},
@@ -221,7 +263,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		var layer = objRef['layer'] = new ol.layer.Vector({
 			style: me.DSS_layerStyle,
 			source: bindSource ? source : undefined,
-			opacity: enableInteractions ? 1 : 0.5,
+			opacity: enableInteractions ? 1 : 0.1,
 			// these potentially reduce performance but looks better
 			updateWhileAnimating: true, updateWhileInteracting: true
 		})		
@@ -239,7 +281,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 			condition: ol.events.condition.click,
 			toggleCondition: singleSelection ? ol.events.condition.never : undefined,
 			layers: [layer],
-			style: me.DSS_clickStyle,
+			style: objRef['clickStyle'] || me.DSS_clickStyle,
 		});
 		clickInteraction.setActive(enableInteractions || false);
 		me.getMap().addInteraction(clickInteraction);

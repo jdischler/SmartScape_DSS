@@ -6,36 +6,6 @@ Ext.Loader.setConfig({
 	}
 });
 
-var globalView = new ol.View({
-	center: ol.proj.fromLonLat([-89.565, 44.2]),
-	zoom: 6,
-    minZoom: 3,
-    maxZoom: 9
-});
-
-var globalMap = new ol.Map({
-	loadTilesWhileAnimating: true,
-	controls: ol.control.defaults({
-		attributionOptions: {
-			collapsible: true
-		}
-	}),
-	layers: [
-		new ol.layer.Tile({
-			source: new ol.source.Stamen({
-				layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
-			})
-		})
-	],
-	view: globalView
-});
-
-globalMap.on('click', function(evt){
-    console.info(globalMap.getCoordinateFromPixel(evt.pixel));
-});
-
-
-
 Ext.require([
     'GeoExt.component.Map',
     'Ext.panel.Panel',
