@@ -19,14 +19,14 @@ Ext.define('DSS.app_portal.Footer', {
 		
 		Ext.applyIf(me, {
 			items: [{
-				xtype: 'container',
+				xtype: 'component',
 				width: 480, 
 				height: 90,
 				margin: -12,
 				html: '<a href="https://energy.wisc.edu"><img src="assets/images/wei-logo.png" style="width: 60%"></a>' + 
 				'<a href="http://gratton.entomology.wisc.edu"><img src="assets/images/gratton-logo.png" style="width: 40%"></a>',
 			},{
-				xtype: 'container',
+				xtype: 'component',
 				margin: 8,
 				html: '&copy;2019 wei.wisc.edu'
 			}]

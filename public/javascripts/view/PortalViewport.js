@@ -10,7 +10,8 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.AOI_Map',
 		'DSS.app_portal.AOI',
 		'DSS.app_portal.AOI_Refinement',
-		'DSS.app_portal.Assumptions'
+		'DSS.app_portal.LaunchSummary',
+		'DSS.app_portal.Assumptions',
 	],
 
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
@@ -32,6 +33,7 @@ Ext.define('DSS.view.PortalViewport', {
 		
 		Ext.applyIf(me, {
 			items: [{
+				xtype: 'component',
 				width: 310, height: 70,
 				margin: '16 0',
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
@@ -116,13 +118,11 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-grid').updateState(selected);
 						if (selected) {
-							Ext.getCmp('dss-action-holder').setHidden(false);
 							DSS_PortalMap.setMode('region');
+							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 760 }});
+							Ext.getCmp('dss-region-refinement').animate({duration: 750, to: { left: 380 }});
 							Ext.getCmp('dss-region-grid').animate({
 								duration: 750, to: { left: 0 }
-							});
-							Ext.getCmp('dss-region-refinement').animate({
-								duration: 750, to: { left: 380 }
 							});
 						}
 					}
@@ -136,11 +136,9 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-refinement').updateState(selected);
 						if (selected) {
-							Ext.getCmp('dss-action-holder').setHidden(false);
 							DSS_PortalMap.setMode('refine');
-							Ext.getCmp('dss-region-grid').animate({
-								duration: 750, to: { left: -380 }
-							});
+							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 380 }});
+							Ext.getCmp('dss-region-grid').animate({duration: 750, to: { left: -380 }});
 							Ext.getCmp('dss-region-refinement').animate({
 								duration: 750, to: { left: 0 }
 							});
@@ -184,38 +182,19 @@ Ext.define('DSS.view.PortalViewport', {
 					cls: 'dss-breadcrumb-tail',
 					style: 'border-top-right-radius: 12px; border-bottom-right-radius: 12px',
 					DSS_selectionChanged: function(selected) {
-						var item = me['DSS_Start'];
-						if (!item) {
-							item = me['DSS_Start'] = Ext.create('Ext.container.Container', {
-								cls: 'dss-smart-scape-button',
-								floating: true,
-								shadow: false,
-								width: 1,
-								height: 30,
-								listeners: {
-						            element: 'el',
-						            click: function(el) {
-						            	location.href = '/app'
-						            }
-					            }
-							});
-						}
 						if (selected) {
-							Ext.getCmp('dss-action-holder').setHidden(true);
-							Ext.defer(function() {
-								item.setWidth(1);
-								item.show().anchorTo(Ext.getCmp('DSS-start-smartscape'), 'l-l', [4,0])
-								item.animate({
-									duration: 250,
-									dynamic: true,
-									to: {
-										width: 158,
-									}
-								});//.show().anchorTo(Ext.getCmp('DSS-start-smartscape'), 'l-l', [8,0])
-							}, 750);
-						}
-						else {
-							item.setHidden(true);
+							DSS_PortalMap.setMode('refine');
+							var cmp = Ext.getCmp('dss-region-grid');
+							if (cmp.getX() != -380) {
+								cmp.animate({duration: 750, to: { left: -760 }});
+							}
+							cmp = Ext.getCmp('dss-region-refinement');
+							if (cmp.getX() != -380) {
+								cmp.animate({duration: 750, to: { left: -380 }});
+							}
+							Ext.getCmp('dss-launch-summary').animate({
+								duration: 750, to: { left: 0 }
+							});
 						}
 					}
 				}]
@@ -254,7 +233,7 @@ Ext.define('DSS.view.PortalViewport', {
 							id: 'dss-action-holder',
 						//	style: 'overflow: hidden',
 							layout: 'absolute',
-							height: 140,
+							minHeight: 148, maxHeight: 148,
 							maxWidth: 380,
 							items: [{
 								id: 'dss-region-grid',
@@ -267,6 +246,12 @@ Ext.define('DSS.view.PortalViewport', {
 								xtype: 'aoi_refinement',
 								maxWidth: 380,
 								x: 380,
+								y: 0
+							},{
+								id: 'dss-launch-summary',
+								xtype: 'launch_summary',
+								maxWidth: 380,
+								x: 760,
 								y: 0
 							}]
 						},{

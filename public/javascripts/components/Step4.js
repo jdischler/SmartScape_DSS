@@ -1,5 +1,5 @@
 
-var	data= {
+var	inputData= {
 	corn: {
 		yield: 34063530 / 250.0,
 		cost: (82803.4/2.471) * 1135,
@@ -56,6 +56,7 @@ Ext.define('DSS.components.Step4', {
     	'DSS.components.Pollination',
     	'DSS.components.Pest',
     	'DSS.components.YieldChart',
+    	'DSS.components.d3_sankey',
     ],
     modal: true,
     width: 900, minWidth: 800,
@@ -262,17 +263,17 @@ Ext.define('DSS.components.Step4', {
 		});
 		me.down('#holder').add(item);
 		
-		item = Ext.create('DSS.components.YieldChart', {
-			itemId: 'chart', hidden: true
-		});
-		me.down('#holder').add(item);
+		me.down('#holder').add(
+			Ext.create('DSS.components.d3_sankey', {
+				itemId: 'chart', hidden: true
+		}));
 	},
 	
 	//--------------------------------------------------------
 	calculateResults: function() {
 		var me = this;
 		
-		var cloned = Ext.clone(data);
+		var cloned = Ext.clone(inputData);
 		Ext.suspendLayouts();
 		var result = me.down('#pest').process(cloned);
 		result = me.down('#pollination').process(cloned);
@@ -305,6 +306,7 @@ Ext.define('DSS.components.Step4', {
 		
 		me.down('#incomeStatistics').setHtml(results);
 		Ext.resumeLayouts(true);
+		me.down('#chart').doResized();
 	}
 	
 });

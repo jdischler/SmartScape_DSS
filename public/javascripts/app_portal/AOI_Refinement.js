@@ -6,7 +6,7 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 	extend: 'Ext.panel.Panel',
 	alias: 'widget.aoi_refinement',
 	
-	height: 140,
+//	height: 140,
 	title: 'Region Refinement Tools',
 	
 	layout: {
@@ -28,7 +28,7 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 			},{				
 				xtype: 'container',
 				flex: 1,
-				padding: 8,
+				padding: '16 8 9 8',
 				layout: {
 					type: 'hbox',
 					pack: 'center',

@@ -25,7 +25,7 @@ Ext.define('DSS.app_portal.AOI', {
 	extend: 'Ext.grid.Panel',
 	alias: 'widget.aoi',
 	
-	height: 140,
+//	height: 140,
 //	width: 380,
 	store: 'dss-areas',
 	title: 'Available Regions',

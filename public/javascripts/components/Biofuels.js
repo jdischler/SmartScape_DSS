@@ -210,6 +210,15 @@ Ext.define('DSS.components.Biofuels', {
 		data.biofuelProduced += 360.0 * grass;
 		data.biofuelProduced += 350.0 * alfalfa;
 		
+		sankeyData.links[0].value = /*sankeyDataClone.links[0].value +*/ soy * 0.001;
+		sankeyData.links[1].value = /*sankeyDataClone.links[1].value +*/ data['soy'].yield * 0.001;
+		sankeyData.links[36].value = /*sankeyDataClone.links[1].value +*/ data.biofuelProduced * 0.000003;
+		sankeyData.links[37].value = /*sankeyDataClone.links[0].value +*/ corn * 0.0005;
+		sankeyData.links[7].value = /*sankeyDataClone.links[7].value*/ + data['corn'].yield * 0.001;
+
+
+		console.log(sankeyData.links[1].value);
+		
 		details += "<br>Litres produced: " + Ext.util.Format.number(data.biofuelProduced, '0,000');
 
 		var costs = 8.2 * corn;
