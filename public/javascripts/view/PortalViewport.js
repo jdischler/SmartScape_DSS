@@ -12,6 +12,7 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.AOI_Refinement',
 		'DSS.app_portal.LaunchSummary',
 		'DSS.app_portal.Assumptions',
+		'DSS.app_portal.d3_nav'
 	],
 
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
@@ -37,6 +38,9 @@ Ext.define('DSS.view.PortalViewport', {
 				width: 310, height: 70,
 				margin: '16 0',
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
+			},{
+				xtype: 'd3_nav',
+				width: 720, height: 49
 			},{
 				xtype: 'container',
 				id: 'dss-navigator',

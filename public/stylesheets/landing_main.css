@@ -217,3 +217,25 @@
 .dss-smart-scape-button:hover {
 	background: rgba(255,255,255,0.2);
 }
+
+.d3-nav {
+	cursor: pointer;
+	stroke-width: 1;
+	fill: #3892d4;
+}
+
+.d3-nav:hover {
+	stroke-width: 1;
+	fill: #2a6e9f;
+}
+
+.d3-nav-text {
+	font-family: sans-serif;
+	font-size: 16px;
+	fill: #fff
+}
+
+.d3-nav-active {
+	font-weight: bold;
+	fill: #2a6e9f;
+}
