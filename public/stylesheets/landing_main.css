@@ -218,6 +218,12 @@
 	background: rgba(255,255,255,0.2);
 }
 
+.d3-nav-bg {
+	stroke: #ccc;
+	stroke-width: 1;
+	fill: #fff;
+}
+
 .d3-nav {
 	cursor: pointer;
 	stroke-width: 1;

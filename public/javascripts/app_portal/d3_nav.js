@@ -26,16 +26,35 @@ Ext.define('DSS.app_portal.d3_nav', {
    
 	listeners: {
 		afterrender: function(self) {
-			self.doD3();
+			self.createD3_Elements();
 		},
 		resize: function(self) {
 			if (self.DSS_svg) {
-				self.doResized();
+			//	self.doResized();
 			}
 		}
 	},
-	
+	DSS_time: false,
 	DSS_timer: false,
+	DSS_duration: 250.0,
+	DSS_containerPad: 5,
+	DSS_nodePad: 20, // inner padding around each element
+	DSS_nodeSpacing: 6,	//space between nodes
+	
+	DSS_elements: [{
+		text: 'Select',
+		active: true,
+		activeText: 'Select Area of Interest',
+	},{
+		text: 'Refine',
+		activeText: 'Refine Area of Interest (optional)',
+	},{
+		text: 'Review',
+		activeText: 'Review Assumptions (optional)',
+	},{
+		text: 'Start',
+		activeText: 'Start SmartScape',
+	}],
 	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -45,94 +64,6 @@ Ext.define('DSS.app_portal.d3_nav', {
 		});
 		
 		me.callParent(arguments);
-	},
-	
-	//--------------------------------------------------------------------------
-	doD3: function() {
-		var me = this;
-		me['DSS_svg'] = d3.select("#d3-nav")
-			.append("svg")
-				.attr("width", me.getWidth())
-				.attr("height",me.getHeight());
-//				.attr("class", "sankey-chart");
-		
-		var width = me.calculateTextWidths();
-		var w = me.getWidth(), 
-		h = me.getHeight(); 
-		var cx = (w - width) / 2;
-		const container_pad = 5;
-		const pad = 20;
-		
-		me.DSS_svg//.selectAll('.d3-bg')
-			//.data([{}])
-			//.enter()
-			.append("g")
-		//	.append("path")
-			.append("rect")//, me.roundedPointRect(width,h-1,18, true, true))
-			.attr("transform", "translate("+cx+",1)")
-			.attr("class", "d3-bg")
-			.attr("width", width)
-			.attr("height", h-1)
-			.attr("rx", 18)
-			.attr("stroke", "#ccc")
-			.attr("stroke-width", 1)
-			.attr("fill", "#fff")
-		
-		var navs = me.DSS_svg.selectAll('.d3-nav')
-			.data(data_d)
-			.enter()
-			.append("g")
-			.on("click", function(d, i, nodes) {
-				data_d.forEach(function(dd) {
-					dd.active = false;
-					dd.ox = dd.tx;
-				})
-				d.active = true;
-				me.DSS_svg.selectAll('text').text(function(dee) {
-					return dee.active ? dee.activeText : dee.text;
-				});
-				me.doResized();
-			})
-			.attr("class", function(d) {
-				return "d3-nav" + (d.active ? " d3-nav-active" : "")
-			})
-			.attr("transform", function(d) {
-				const res = "translate("+ (d.tx + cx) +","+container_pad+")";
-	//			x += d.width + pad*2 + itemSpace;// + (d.rl ? 0 : 20) + (d.rr ? 0 : 20);
-				return res;
-			})
-		
-		navs.append("rect")
-			.data(data_d)
-			.attr("x", 0)
-			.attr("class", "d3-nav-rect")
-			.attr("y", 0)
-			.attr("rx", 12)
-			.attr("width", function(d) {
-				return d.w + pad * 2;
-			})
-			.attr("height", "40")
-/*		navs.append("path")
-			.attr("d", function(d) {
-				return me.roundedPointRect(d.width + 70,40,16, d.rl, d.rr)
-			})
-		*/
-		navs.append("text")
-			.data(data_d)
-		  .attr("x", pad)
-		  .attr("y", 20)
-	      .attr("dy", ".35em")
-	      .attr("transform", null)
-	      .attr("class", "d3-nav-text")
-	      .text(function(d) {
-	    	  return d.active ? d.activeText : d.text
-	      })
-			
-		data_d.forEach(function(d) {
-			d['curX'] = d['ox'] = d.tx;
-		})
-	      
-		me.doResized(true);
 	},
 	
 	//--------------------------------------------------------------------------
@@ -165,90 +96,182 @@ Ext.define('DSS.app_portal.d3_nav', {
 	},
 
 	//--------------------------------------------------------------------------
-	calculateTextWidths: function() {
+	createD3_Elements: function() {
+		var me = this;
+		
+		me['DSS_svg'] = d3.select("#d3-nav")
+			.append("svg")
+				.attr("width", me.getWidth())
+				.attr("height",me.getHeight());
+		
+		me.measureNodes();
+
+		const width = me.layoutNav();
+		const cx = (me.getWidth() - width) / 2;
+		
+		me.DSS_svg
+			.append("g")
+			.append("rect")
+			.attr("transform", "translate(" + cx + ",1)")
+			.attr("class", "d3-nav-bg")
+			.attr("width", width)
+			.attr("height", me.getHeight()-1) // ? why -1?
+			.attr("rx", 18);
+		
+		var navs = me.DSS_svg.selectAll('.d3-nav')
+			.data(me.DSS_elements)
+			.enter()
+			.append("g")
+			.on("click", function(d, i, nodes) {
+				me.DSS_elements.forEach(function(dd) {
+					dd.active = false;
+				})
+				d.active = true;
+				me.DSS_svg.selectAll('text').text(function(dee) {
+					return dee.active ? dee.activeText : dee.text;
+				});
+				me.updateNav();
+			})
+			.attr("class", function(d) {
+				return "d3-nav" + (d.active ? " d3-nav-active" : "")
+			})
+			.attr("transform", function(d) {
+				const res = "translate("+ (d.t_x + cx) +","+me.DSS_containerPad+")";
+				return res;
+			})
+		
+		navs.append("rect")
+			.data(me.DSS_elements)
+			.attr("class", "d3-nav-rect")
+			.attr("x", 0)
+			.attr("y", 0)
+			.attr("rx", 12)
+			.attr("width", function(d) {
+				return d.w + me.DSS_nodePad * 2;
+			})
+			.attr("height", "40");
+			
+		navs.append("text")
+			.data(me.DSS_elements)
+			.attr("x", me.DSS_nodePad)
+			.attr("y", 20)
+			.attr("dy", ".35em")
+			.attr("class", "d3-nav-text")
+			.text(function(d) {
+				return d.active ? d.activeText : d.text
+			});
+			
+		data_d.forEach(function(d) {
+		//	d['curX'] = d['ox'] = d.tx;
+		})
+	      
+		//me.doResized(true);
+	},
+	
+	//--------------------------------------------------------------------------
+	layoutNav: function() {
+		
+		const me = this;
+		
+		var atX = me.DSS_containerPad;
+		me.DSS_elements.forEach(function(d) {
+			d['t_x'] = atX;
+			atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
+		})
+		
+		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
+	},
+
+	//--------------------------------------------------------------------------
+	measureNodes: function() {
+		
 		const me = this;
 		me.DSS_svg
 			.selectAll('.dummyText')
 			.append('g')
-			.data(data_d)
+			.data(me.DSS_elements)
 			.enter()
 			.append("text")
 			.attr("class", function(d) {
 				return "dummyText d3-nav-text" + (d.active ? " d3-nav-active" : "")
 			})
-			.text(function(d) { return d.active ? d.activeText : d.text})
+			.text(function(d) { 
+				return d.active ? d.activeText : d.text
+			})
 			.each(function(d,i) {
-				d['w'] = this.getComputedTextLength()
-				console.log(d.w)
+				d['t_w'] = this.getComputedTextLength()
+				d['w'] = d['w'] || d['t_w']; 
+				d['s_w'] = d.w;
 				this.remove() // remove them just after displaying them...
-			})//.remove(); //..and clean up temp g node
-			
-		const container_pad = 5;
-		const pad = 20;
-		const itemSpace = 6;
-		var wx = container_pad;
+			});
+	},
+	
+	//---------------------------------------------------------------------------------
+	getNavWidth: function() {
+		var me = this;
+		var atX = me.DSS_containerPad;
 		
-		data_d.forEach(function(d) {
-			d['ox'] = d['tx'];
-			d['tx'] = wx;
-			wx += d.w + pad * 2 + itemSpace;;
+		me.DSS_elements.forEach(function(d) {
+			atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
 		})
-		return wx + container_pad - itemSpace;
+		
+		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
+
 	},
 	
 	//--------------------------------------------------------------------------
-	doResized: function(first) {
+	updateNav: function() {
+		
 		var me = this;
-		var t = d3.transition(750)
-		var w = me.getWidth(), 
-			h = me.getHeight();
-		
 		var svg = me.DSS_svg; 
-		
-		const container_pad = 5;
-		var x = container_pad;
-		const pad = 20;
-		const itemSpace = 6;
 		
 		svg
 			.attr("width", me.getWidth())
 			.attr("height", me.getHeight());
 		
-		var width = me.calculateTextWidths();
+		// set targets
+		me.measureNodes();
 
-		var ease = d3.easeLinear;
-		var cx = (w - width) / 2;
-		
-		var navs = svg.selectAll('.d3-nav')
-		.selectAll(".d3-nav-rect")
-		.transition()
-	//	.ease(ease)
-		.attr("width", function(d) {
-			return d.w + pad * 2;
-		})
-		svg.selectAll('.d3-bg')
-			.transition()
-			//.ease(ease)
-			.attr("transform", "translate("+cx+",1)")
-			.attr("width", width)
-
-		function translateFn(d,i,a) {
-			return d3.interpolateTransformSvg(
-					"translate("+ (d.ox + cx) +","+container_pad+")",
-					"translate("+ (d.tx + cx) +","+container_pad+")")
+		if (me.DSS_timer) {
+			me.DSS_timer.stop();
 		}
-		
-		/*var*/ navs = svg.selectAll('.d3-nav')
-			.transition()
-			//.ease(ease)
-			.attr("class", function(d) {
-				return "d3-nav" + (d.active ? " d3-nav-active" : "")
-			})
-			.attrTween("transform", translateFn);
+	
+		me.DSS_timer = d3.timer(function(elapsed) {
+			var t = elapsed / me.DSS_duration;
+			t = Math.pow(t,0.4);
+			if (t >= 1) {
+				t = 1.0;
+				me.DSS_timer.stop();
+			}
 			
-	}
+			// compute & set real width
+			svg.selectAll('.d3-nav')
+				.selectAll(".d3-nav-rect")
+				.attr("width", function(d) {
+					d.w = d.s_w * (1.0 - t) + d.t_w * t;
+					return d.w + me.DSS_nodePad * 2;
+				})
 
+			var realWidth = me.getNavWidth();
+			var cx = (me.getWidth() - realWidth) / 2;
+			var atX = me.DSS_containerPad;
+			svg.selectAll('.d3-nav')
+				.attr("class", function(d) {
+					return "d3-nav" + (d.active ? " d3-nav-active" : "")
+				})
+				.attr("transform", function(d) {
+					d['t_x'] = atX;
+					atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
+					return "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")"
+				});
+				
+			
+			svg.selectAll('.d3-nav-bg')
+				.attr("transform", "translate("+cx+",1)")
+				.attr("width", realWidth)
+				
+		}, 16/*1000.0 / 60.0*/);
+	}
 	
 });
-
 
