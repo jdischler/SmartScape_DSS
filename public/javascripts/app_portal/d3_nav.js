@@ -1,4 +1,16 @@
 
+
+// measure notes:
+// shave 4-8px inner padding from the left side of all nodes
+
+// first node chevron point is 13px further to the right
+
+// second node chevron point is 16px further to the right
+
+// third node chevron point is 27px further to the right
+
+// 4th node rounded edge is 2px to short on the right
+
 //-----------------------------------------------------
 // DSS.components.d3_sankey
 //
@@ -106,6 +118,18 @@ Ext.define('DSS.app_portal.d3_nav', {
 			.attr("height", me.getHeight()-1) // ? why -1?
 			.attr("rx", 18);
 		
+		me.DSS_svg.selectAll("clipPath")
+			.data(me.DSS_elements)
+			.enter()
+			.append("clipPath")
+			.attr("id", function(d,i) {
+				return 'text-clip-' + i;
+			})
+			.append("use")
+			.attr("xlink:href", function(d,i) {
+				return "#path-" + i;
+			})
+		
 		var navs = me.DSS_svg.selectAll('.d3-nav')
 			.data(me.DSS_elements)
 			.enter()
@@ -133,10 +157,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 		            	html(d.tooltip)	
 		                .style("left", (d3.event.pageX) + "px")		
 		                .style("left", (d3.event.target.parentNode.getBoundingClientRect().x - 64) + "px")
-		                //.style("top", (d3.event.pageY - 32) + "px");
 		            	.style("top", (d3.event.target.parentNode.getBoundingClientRect().y - 28) + "px")
-//		            console.log(d3.event.target.parentNode)
-//		            console.log(d3.event.target.parentNode.getBoundingClientRect().y)
 		        }
 	        	else {
 	        		me.DSS_tooltip.transition()		
@@ -159,6 +180,9 @@ Ext.define('DSS.app_portal.d3_nav', {
 
 		navs.append("path")
 			.data(me.DSS_elements)
+			.attr("id", function(d,i) {
+				return "path-" + i;
+			})
 			.attr("class", "d3-nav-rect")
 			.attr("d", function(d) { //width, height, r, roundLeft, roundRight
 				var w = d.w + me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
@@ -167,10 +191,13 @@ Ext.define('DSS.app_portal.d3_nav', {
 			
 		navs.append("text")
 			.data(me.DSS_elements)
+			.attr("clip-path", function(d,i) {
+				return "url(#text-clip-" + i +")"
+			})
 			.attr("x", function(d) {
 				return me.DSS_nodePad + d.l_w;
 			})
-			.attr("y", 20)
+			.attr("y", 18) // TODO: position automatically
 			.attr("dy", ".35em")
 			.attr("class", "d3-nav-text")
 			.text(function(d) {
@@ -235,7 +262,6 @@ Ext.define('DSS.app_portal.d3_nav', {
 		
 		// nodePad compensates for hack in path drawing that adds an extra pad for the last item...
 		return atX + me.DSS_nodePad + me.DSS_containerPad - me.DSS_nodeSpacing;
-//		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
 	},
 	
 	//--------------------------------------------------------------------------
@@ -264,12 +290,11 @@ Ext.define('DSS.app_portal.d3_nav', {
 			else {
 				t = Ext.fx.Easing.ease(t);
 			}
-			//t = Math.pow(t,0.4);
 			
 			// compute & set real width
 			svg.selectAll('.d3-nav')
 				.selectAll(".d3-nav-rect")
-				.attr("d", function(d) { //width, height, r, roundLeft, roundRight
+				.attr("d", function(d) { 
 					var w = d.w = d.s_w * (1.0 - t) + d.t_w * t;
 					w += me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
 					return me.roundedPointRect(w, 40, 16, (d.l_w <= 0), (d.r_w <= 0))
