@@ -12,7 +12,7 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.AOI_Refinement',
 		'DSS.app_portal.LaunchSummary',
 		'DSS.app_portal.Assumptions',
-		'DSS.app_portal.d3_nav'
+		'DSS.components.d3_nav'
 	],
 
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
@@ -40,7 +40,83 @@ Ext.define('DSS.view.PortalViewport', {
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
 			},{
 				xtype: 'd3_nav',
-				width: 720, height: 49
+				width: 720, height: 49,
+				DSS_elements: [{
+					text: 'Select',
+					active: true,
+					activeText: 'Select Area of Interest',
+					tooltip: 'Select an area of interest',
+					DSS_selectionChanged: function(selected) {
+						Ext.getCmp('dss-region-grid').updateState(selected);
+						if (selected) {
+							DSS_PortalMap.setMode('region');
+							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 760 }});
+							Ext.getCmp('dss-region-refinement').animate({duration: 750, to: { left: 380 }});
+							Ext.getCmp('dss-region-grid').animate({
+								duration: 750, to: { left: 0 }
+							});
+						}
+					}
+				},{
+					text: 'Refine',
+					activeText: 'Refine Area of Interest (optional)',
+					tooltip: 'Optionally refine the area of interest by choosing a county or a watershed',
+					DSS_selectionChanged: function(selected) {
+						Ext.getCmp('dss-region-refinement').updateState(selected);
+						if (selected) {
+							DSS_PortalMap.setMode('refine');
+							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 380 }});
+							Ext.getCmp('dss-region-grid').animate({duration: 750, to: { left: -380 }});
+							Ext.getCmp('dss-region-refinement').animate({
+								duration: 750, to: { left: 0 }
+							});
+						}
+					}
+				},{
+					text: 'Review',
+					activeText: 'Review Assumptions (optional)',
+					tooltip: 'Review and adjust an assumptions if desired',
+					DSS_selectionChanged: function(selected) {
+						var item = me['DSS_Assumptions'];
+						if (!item) {
+							item = me['DSS_Assumptions'] = Ext.create('DSS.app_portal.Assumptions');
+						}
+						if (selected) {
+							Ext.defer(function() {
+								item.setHeight(1);
+								item.animate({
+									duration: 750,
+									dynamic: true,
+									to: {
+										height: 520
+									}
+								}).show().anchorTo(Ext.getCmp('dss-navigator'), 'tc-bc', [0,8])
+							}, 50);
+						}
+						else {
+							item.setHidden(true);
+						}
+					}
+				},{
+					text: 'Start',
+					activeText: 'Start SmartScape',
+					DSS_selectionChanged: function(selected) {
+						if (selected) {
+							DSS_PortalMap.setMode('refine');
+							var cmp = Ext.getCmp('dss-region-grid');
+							if (cmp.getX() != -380) {
+								cmp.animate({duration: 750, to: { left: -760 }});
+							}
+							cmp = Ext.getCmp('dss-region-refinement');
+							if (cmp.getX() != -380) {
+								cmp.animate({duration: 750, to: { left: -380 }});
+							}
+							Ext.getCmp('dss-launch-summary').animate({
+								duration: 750, to: { left: 0 }
+							});
+						}
+					}
+				}],
 			},{
 				xtype: 'container',
 				id: 'dss-navigator',

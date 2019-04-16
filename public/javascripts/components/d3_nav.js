@@ -1,9 +1,9 @@
 
 //-----------------------------------------------------
-// DSS.components.d3_sankey
+// DSS.components.d3_nav
 //
 //-----------------------------------------------------
-Ext.define('DSS.app_portal.d3_nav', {
+Ext.define('DSS.components.d3_nav', {
     extend: 'Ext.Component',
     alias: 'widget.d3_nav',
 
@@ -26,24 +26,6 @@ Ext.define('DSS.app_portal.d3_nav', {
 	DSS_containerPad: 5,
 	DSS_nodePad: 20, // inner padding around each element
 	DSS_nodeSpacing: 10,	//space between nodes
-	
-	DSS_elements: [{
-		text: 'Select',
-		active: true,
-		activeText: 'Select Area of Interest',
-		tooltip: 'Select an area of interest'
-	},{
-		text: 'Refine',
-		activeText: 'Refine Area of Interest (optional)',
-		tooltip: 'Optionally refine the area of interest by choosing a county or a watershed'
-	},{
-		text: 'Review',
-		activeText: 'Review Assumptions (optional)',
-		tooltip: 'Review and adjust an assumptions if desired'
-	},{
-		text: 'Start',
-		activeText: 'Start SmartScape',
-	}],
 	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -125,9 +107,12 @@ Ext.define('DSS.app_portal.d3_nav', {
 			.append("g")
 			.on("click", function(d, i, nodes) {
 				me.DSS_elements.forEach(function(dd) {
+					if (d == dd) return;
+					dd.DSS_selectionChanged(false)
 					dd.active = false;
 				})
 				d.active = true;
+				d.DSS_selectionChanged(true);
 				me.DSS_svg.selectAll('text').text(function(dee) {
 					return dee.active ? dee.activeText : dee.text;
 				});
