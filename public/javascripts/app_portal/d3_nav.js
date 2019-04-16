@@ -1,19 +1,4 @@
 
-const data_d = [{
-	text: 'Select',
-	active: true,
-	activeText: 'Select Area of Interest',
-},{
-	text: 'Refine',
-	activeText: 'Refine Area of Interest (optional)',
-},{
-	text: 'Review',
-	activeText: 'Review Assumptions (optional)',
-},{
-	text: 'Start',
-	activeText: 'Start SmartScape',
-}];
-
 //-----------------------------------------------------
 // DSS.components.d3_sankey
 //
@@ -36,7 +21,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 	},
 	DSS_time: false,
 	DSS_timer: false,
-	DSS_duration: 250.0,
+	DSS_duration: 750.0,
 	DSS_containerPad: 5,
 	DSS_nodePad: 20, // inner padding around each element
 	DSS_nodeSpacing: 6,	//space between nodes
@@ -45,12 +30,15 @@ Ext.define('DSS.app_portal.d3_nav', {
 		text: 'Select',
 		active: true,
 		activeText: 'Select Area of Interest',
+		tooltip: 'Select an area of interest'
 	},{
 		text: 'Refine',
 		activeText: 'Refine Area of Interest (optional)',
+		tooltip: 'Optionally refine the area of interest by choosing a county or a watershed'
 	},{
 		text: 'Review',
 		activeText: 'Review Assumptions (optional)',
+		tooltip: 'Review and adjust an assumptions if desired'
 	},{
 		text: 'Start',
 		activeText: 'Start SmartScape',
@@ -132,40 +120,66 @@ Ext.define('DSS.app_portal.d3_nav', {
 				});
 				me.updateNav();
 			})
+	        .on("mouseover", function(d) {
+	        	if (d.tooltip && !d.active) {
+		            me.DSS_tooltip.
+		            	transition()
+		            	.delay(function(d) {
+		            		return me.DSS_tooltip.style("opacity") > 0 ? 0 : 600;
+		            	})
+		                .duration(100)		
+		                .style("opacity", 1);		
+		            me.DSS_tooltip.
+		            	html(d.tooltip)	
+		                .style("left", (d3.event.pageX) + "px")		
+		                .style("left", (d3.event.target.parentNode.getBoundingClientRect().x - 64) + "px")
+		                //.style("top", (d3.event.pageY - 32) + "px");
+		            	.style("top", (d3.event.target.parentNode.getBoundingClientRect().y - 28) + "px")
+//		            console.log(d3.event.target.parentNode)
+//		            console.log(d3.event.target.parentNode.getBoundingClientRect().y)
+		        }
+	        	else {
+	        		me.DSS_tooltip.transition()		
+	                .duration(100)		
+	                .style("opacity", 0);	
+	        	}
+	        })
+	        .on("mouseout", function(d) {		
+        		me.DSS_tooltip.transition()		
+                .duration(100)		
+                .style("opacity", 0);	
+	        })			
 			.attr("class", function(d) {
 				return "d3-nav" + (d.active ? " d3-nav-active" : "")
 			})
 			.attr("transform", function(d) {
-				const res = "translate("+ (d.t_x + cx) +","+me.DSS_containerPad+")";
+				const res = "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")";
 				return res;
 			})
-		
-		navs.append("rect")
+
+		navs.append("path")
 			.data(me.DSS_elements)
 			.attr("class", "d3-nav-rect")
-			.attr("x", 0)
-			.attr("y", 0)
-			.attr("rx", 12)
-			.attr("width", function(d) {
-				return d.w + me.DSS_nodePad * 2;
+			.attr("d", function(d) { //width, height, r, roundLeft, roundRight
+				var w = d.w + me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
+				return me.roundedPointRect(w, 40, 16, (d.l_w <= 0), (d.r_w <= 0))
 			})
-			.attr("height", "40");
 			
 		navs.append("text")
 			.data(me.DSS_elements)
-			.attr("x", me.DSS_nodePad)
+			.attr("x", function(d) {
+				return me.DSS_nodePad + d.l_w;
+			})
 			.attr("y", 20)
 			.attr("dy", ".35em")
 			.attr("class", "d3-nav-text")
 			.text(function(d) {
 				return d.active ? d.activeText : d.text
 			});
-			
-		data_d.forEach(function(d) {
-		//	d['curX'] = d['ox'] = d.tx;
-		})
-	      
-		//me.doResized(true);
+		
+		me['DSS_tooltip'] = d3.select("body").append("div")	
+		    .attr("class", "d3-nav-tooltip")				
+		    .style("opacity", 0);	
 	},
 	
 	//--------------------------------------------------------------------------
@@ -174,12 +188,13 @@ Ext.define('DSS.app_portal.d3_nav', {
 		const me = this;
 		
 		var atX = me.DSS_containerPad;
-		me.DSS_elements.forEach(function(d) {
+		me.DSS_elements.forEach(function(d,i,a) {
 			d['t_x'] = atX;
-			atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
+			atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
 		})
 		
-		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
+		// nodePad compensates for hack in path drawing that adds an extra pad for the last item...
+		return atX + me.DSS_nodePad + me.DSS_containerPad - me.DSS_nodeSpacing;
 	},
 
 	//--------------------------------------------------------------------------
@@ -198,8 +213,11 @@ Ext.define('DSS.app_portal.d3_nav', {
 			.text(function(d) { 
 				return d.active ? d.activeText : d.text
 			})
-			.each(function(d,i) {
-				d['t_w'] = this.getComputedTextLength()
+			.each(function(d,i,a) {
+				var w = this.getComputedTextLength();
+				d['l_w'] = (i > 0) ? 20 : 0;
+				d['r_w'] = (i < a.length-1) ? 20 : 0;
+				d['t_w'] = w + d.l_w + d.r_w;
 				d['w'] = d['w'] || d['t_w']; 
 				d['s_w'] = d.w;
 				this.remove() // remove them just after displaying them...
@@ -212,11 +230,12 @@ Ext.define('DSS.app_portal.d3_nav', {
 		var atX = me.DSS_containerPad;
 		
 		me.DSS_elements.forEach(function(d) {
-			atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
+			atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
 		})
 		
-		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
-
+		// nodePad compensates for hack in path drawing that adds an extra pad for the last item...
+		return atX + me.DSS_nodePad + me.DSS_containerPad - me.DSS_nodeSpacing;
+//		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
 	},
 	
 	//--------------------------------------------------------------------------
@@ -238,18 +257,22 @@ Ext.define('DSS.app_portal.d3_nav', {
 	
 		me.DSS_timer = d3.timer(function(elapsed) {
 			var t = elapsed / me.DSS_duration;
-			t = Math.pow(t,0.4);
 			if (t >= 1) {
 				t = 1.0;
 				me.DSS_timer.stop();
 			}
+			else {
+				t = Ext.fx.Easing.ease(t);
+			}
+			//t = Math.pow(t,0.4);
 			
 			// compute & set real width
 			svg.selectAll('.d3-nav')
 				.selectAll(".d3-nav-rect")
-				.attr("width", function(d) {
-					d.w = d.s_w * (1.0 - t) + d.t_w * t;
-					return d.w + me.DSS_nodePad * 2;
+				.attr("d", function(d) { //width, height, r, roundLeft, roundRight
+					var w = d.w = d.s_w * (1.0 - t) + d.t_w * t;
+					w += me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
+					return me.roundedPointRect(w, 40, 16, (d.l_w <= 0), (d.r_w <= 0))
 				})
 
 			var realWidth = me.getNavWidth();
@@ -261,7 +284,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 				})
 				.attr("transform", function(d) {
 					d['t_x'] = atX;
-					atX += d.w + me.DSS_nodePad * 2 + me.DSS_nodeSpacing;
+					atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
 					return "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")"
 				});
 				

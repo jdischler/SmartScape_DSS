@@ -245,3 +245,16 @@
 	font-weight: bold;
 	fill: #2a6e9f;
 }
+
+.d3-nav-tooltip {	
+    position: absolute;			
+    text-align: center;			
+    padding: 8px;				
+    font: 12px sans-serif;		
+    background: #eef;	
+    border: 1px solid #ccc;		
+    border-radius: 4px;
+    color: #333;			
+    pointer-events: none;
+    box-shadow: 0 4px 4px rgba(0,0,0,0.2)		
+}
