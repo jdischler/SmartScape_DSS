@@ -9,7 +9,7 @@
 
 // third node chevron point is 27px further to the right
 
-// 4th node rounded edge is 2px to short on the right
+// 4th node rounded edge is 2px too short on the right
 
 //-----------------------------------------------------
 // DSS.components.d3_sankey
