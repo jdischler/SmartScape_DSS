@@ -226,13 +226,12 @@
 
 .d3-nav {
 	cursor: pointer;
-	stroke-width: 1;
 	fill: #3892d4;
 }
 
 .d3-nav:hover {
-	stroke-width: 1;
 	fill: #2a6e9f;
+	text-shadow: 0 0 2px #99f;
 }
 
 .d3-nav-text {

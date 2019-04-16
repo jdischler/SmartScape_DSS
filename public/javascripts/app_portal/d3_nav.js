@@ -1,16 +1,4 @@
 
-
-// measure notes:
-// shave 4-8px inner padding from the left side of all nodes
-
-// first node chevron point is 13px further to the right
-
-// second node chevron point is 16px further to the right
-
-// third node chevron point is 27px further to the right
-
-// 4th node rounded edge is 2px too short on the right
-
 //-----------------------------------------------------
 // DSS.components.d3_sankey
 //
@@ -27,6 +15,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 		},
 		resize: function(self) {
 			if (self.DSS_svg) {
+			// TODO: support resize?
 			//	self.doResized();
 			}
 		}
@@ -36,7 +25,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 	DSS_duration: 750.0,
 	DSS_containerPad: 5,
 	DSS_nodePad: 20, // inner padding around each element
-	DSS_nodeSpacing: 6,	//space between nodes
+	DSS_nodeSpacing: 10,	//space between nodes
 	
 	DSS_elements: [{
 		text: 'Select',
@@ -76,25 +65,25 @@ Ext.define('DSS.app_portal.d3_nav', {
 		}
 		else if (roundLeft) {
 			const mh = height / 2,
-				w = width - r - mh;
+				w = width - r - (mh/2); // front beak will overflow by 1/2 mh
 			return "M0,"+r+" q0,-"+r+" "+r+",-"+r+" h"+w+" l"+mh+","+mh+" l-"+mh+","+mh+
 				" h-"+w+" q-"+r+",0 -"+r+",-"+r+" Z";
 		}
 		else if (roundRight) {
 			const mh = height / 2,
-				w = width - r - mh,
+				w = width - r + mh/2;// - (mh/2), // back tail will overflow by 1/2mh
 				h = height - r * 2;
-			return "M"+mh+","+mh+" l-"+mh+",-"+mh+" h"+w+" q"+r+",0 "+r+","+r+" v"+h+
+			return "M"+(mh/2)+","+mh+" l-"+mh+",-"+mh+" h"+w+" q"+r+",0 "+r+","+r+" v"+h+
 				" q0,"+r+" -"+r+","+r+" h-"+w+" Z";   
 		}
 		else {
 			const mh = height / 2,
-				w = width - mh;
-			return "M"+mh+","+mh+" l-"+mh+",-"+mh+" h"+w+" l"+mh+","+mh+" l-"+mh+","+mh+
+				w = width// - mh;
+			return "M"+(mh/2)+","+mh+" l-"+mh+",-"+mh+" h"+w+" l"+mh+","+mh+" l-"+mh+","+mh+
 				" h-"+w+" Z";
 		}
 	},
-
+	
 	//--------------------------------------------------------------------------
 	createD3_Elements: function() {
 		var me = this;
@@ -106,7 +95,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 		
 		me.measureNodes();
 
-		const width = me.layoutNav();
+		const width = me.calcNavWidth(true);
 		const cx = (me.getWidth() - width) / 2;
 		
 		me.DSS_svg
@@ -184,9 +173,8 @@ Ext.define('DSS.app_portal.d3_nav', {
 				return "path-" + i;
 			})
 			.attr("class", "d3-nav-rect")
-			.attr("d", function(d) { //width, height, r, roundLeft, roundRight
-				var w = d.w + me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
-				return me.roundedPointRect(w, 40, 16, (d.l_w <= 0), (d.r_w <= 0))
+			.attr("d", function(d, i, a) {
+				return me.roundedPointRect(d.w, 40, 16, (i == 0), (i == a.length - 1))
 			})
 			
 		navs.append("text")
@@ -195,9 +183,9 @@ Ext.define('DSS.app_portal.d3_nav', {
 				return "url(#text-clip-" + i +")"
 			})
 			.attr("x", function(d) {
-				return me.DSS_nodePad + d.l_w;
+				return me.DSS_nodePad;
 			})
-			.attr("y", 18) // TODO: position automatically
+			.attr("y", 19) // TODO: position automatically
 			.attr("dy", ".35em")
 			.attr("class", "d3-nav-text")
 			.text(function(d) {
@@ -209,21 +197,6 @@ Ext.define('DSS.app_portal.d3_nav', {
 		    .style("opacity", 0);	
 	},
 	
-	//--------------------------------------------------------------------------
-	layoutNav: function() {
-		
-		const me = this;
-		
-		var atX = me.DSS_containerPad;
-		me.DSS_elements.forEach(function(d,i,a) {
-			d['t_x'] = atX;
-			atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
-		})
-		
-		// nodePad compensates for hack in path drawing that adds an extra pad for the last item...
-		return atX + me.DSS_nodePad + me.DSS_containerPad - me.DSS_nodeSpacing;
-	},
-
 	//--------------------------------------------------------------------------
 	measureNodes: function() {
 		
@@ -242,9 +215,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 			})
 			.each(function(d,i,a) {
 				var w = this.getComputedTextLength();
-				d['l_w'] = (i > 0) ? 20 : 0;
-				d['r_w'] = (i < a.length-1) ? 20 : 0;
-				d['t_w'] = w + d.l_w + d.r_w;
+				d['t_w'] = w + me.DSS_nodePad * 2;
 				d['w'] = d['w'] || d['t_w']; 
 				d['s_w'] = d.w;
 				this.remove() // remove them just after displaying them...
@@ -252,16 +223,18 @@ Ext.define('DSS.app_portal.d3_nav', {
 	},
 	
 	//---------------------------------------------------------------------------------
-	getNavWidth: function() {
+	calcNavWidth: function(doNodeLayout) {
 		var me = this;
 		var atX = me.DSS_containerPad;
 		
 		me.DSS_elements.forEach(function(d) {
-			atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
+			if (doNodeLayout) {
+				d['t_x'] = atX;
+			}
+			atX += d.w + me.DSS_nodeSpacing;
 		})
 		
-		// nodePad compensates for hack in path drawing that adds an extra pad for the last item...
-		return atX + me.DSS_nodePad + me.DSS_containerPad - me.DSS_nodeSpacing;
+		return atX + me.DSS_containerPad - me.DSS_nodeSpacing;
 	},
 	
 	//--------------------------------------------------------------------------
@@ -292,15 +265,14 @@ Ext.define('DSS.app_portal.d3_nav', {
 			}
 			
 			// compute & set real width
-			svg.selectAll('.d3-nav')
+			svg
 				.selectAll(".d3-nav-rect")
-				.attr("d", function(d) { 
+				.attr("d", function(d, idx, a) { 
 					var w = d.w = d.s_w * (1.0 - t) + d.t_w * t;
-					w += me.DSS_nodePad * 2 + (d.r_w > 0 ? 0 : me.DSS_nodePad);
-					return me.roundedPointRect(w, 40, 16, (d.l_w <= 0), (d.r_w <= 0))
+					return me.roundedPointRect(w, 40, 16, (idx == 0), (idx == a.length - 1))
 				})
 
-			var realWidth = me.getNavWidth();
+			var realWidth = me.calcNavWidth();
 			var cx = (me.getWidth() - realWidth) / 2;
 			var atX = me.DSS_containerPad;
 			svg.selectAll('.d3-nav')
@@ -309,7 +281,7 @@ Ext.define('DSS.app_portal.d3_nav', {
 				})
 				.attr("transform", function(d) {
 					d['t_x'] = atX;
-					atX += d.w + me.DSS_nodePad + me.DSS_nodeSpacing;
+					atX += d.w + me.DSS_nodeSpacing;
 					return "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")"
 				});
 				
