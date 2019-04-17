@@ -6,6 +6,7 @@ Ext.define('DSS.view.AppViewport', {
 	
 	requires: [
 	    'DSS.components.MainMap', // likes to be first...
+	    'DSS.components.d3_nav', // this also likes to be here even if not used directly in this object
 	    'DSS.components.LogoBar',
 	    'DSS.components.AttributeBrowser',
 	    'DSS.components.ScenarioGrid',

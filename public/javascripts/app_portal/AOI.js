@@ -6,13 +6,13 @@ Ext.create('Ext.data.Store', {
 	fields: ['name', 'value', 'desc', 'feature'],
 	data: [{ 
 		name: 'Central Sands', value: 'cs', objectid: 0,
-		desc: "The remnants of an ancient lake, the area is characterised by sand and p'taters",
+		desc: "The remnants of an ancient lake, this area is characterised by sand and p'taters",
 	},{ 
 		name: 'Driftless', value: 'd', objectid: 1,
 		desc: "The driftless area escaped glaciation during the last ice age and is characterized by steep, forested ridges, deeply-carved river valleys, and cold-water trout streams.",
 	},{ 
 		name: 'Fox River Valley', value: 'frv', objectid: 2,
-		desc: "Some special risks and opportunities here...",
+		desc: "Some special risks and opportunities here...Far too many to list.",
 	},{ 
 		name: 'Urban Corridor', value: 'uc', objectid: 3,
 		desc: "A mix of comparatively densely populated areas and glaciated bits. It'd be nice to have a train to get us to and fro.",
@@ -22,48 +22,103 @@ Ext.create('Ext.data.Store', {
 //------------------------------------------------------------------------------
 Ext.define('DSS.app_portal.AOI', {
 //------------------------------------------------------------------------------
-	extend: 'Ext.grid.Panel',
+	extend: 'Ext.panel.Panel',
 	alias: 'widget.aoi',
 	
-//	height: 140,
-//	width: 380,
+	width: 380,
+	height: 195,
 	store: 'dss-areas',
-	title: 'Available Regions',
-	
-	hideHeaders: true,
-	columns:[{
-		dataIndex: 'name', flex: 1
-	}],
+	title: 'Getting Started...',
+	layout: 'fit',
 	listeners: {
-		viewready: function(self) {
+		afterrender: function(self) {
 			Ext.defer(function() {
-				self.getSelectionModel().select(3);
+				//self.getSelectionModel().select(3);
 			}, 500);
-		},
-		selectionchange: function(sel, recs, e) {
-			var me = this;
-			var chartData = Ext.data.StoreManager.lookup('dss-values');
-			chartData.setFilters(new Ext.util.Filter({
-				property: 'location',
-				value: recs[0].get('value')
-			}))
-			chartData = Ext.data.StoreManager.lookup('dss-proportions');
-			chartData.setFilters(new Ext.util.Filter({
-				property: 'location',
-				value: recs[0].get('value')
-			}));
-			DSS_PortalMap.selectFeature('region', recs[0].get('objectid'), true);
 		}
 	},
-
+	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
 		
 		Ext.applyIf(me, {
+			items: [{
+				xtype: 'container',
+				padding: 8,
+				layout: {
+					type: 'vbox',
+					align: 'center'
+				},
+				items: [{
+					xtype: 'component',
+					width: '100%',
+					html: 'To get started, SmartScape must first be narrowed down to an Area of Interest. ' + 
+						'Select one of the following choices...or choose directly on the map.'
+				},{
+					xtype: 'container',
+					layout: 'column',
+					itemId: 'dss-button-options',
+					padding: '8 16',
+					width: '100%',
+					defaults: {
+						xtype: 'button',
+						scale: 'medium',
+						columnWidth : 0.5,
+						margin: 4,
+						toggleGroup: 'dss-toggle',
+						allowDepress: false,
+						toggleHandler: function(self, pressed) {
+							if (!pressed) return;
+							me.onActivated();
+							var chartData = Ext.data.StoreManager.lookup('dss-values');
+							chartData.setFilters(new Ext.util.Filter({
+								property: 'location',
+								value: self.DSS_areaCode
+							}))
+							chartData = Ext.data.StoreManager.lookup('dss-proportions');
+							chartData.setFilters(new Ext.util.Filter({
+								property: 'location',
+								value: self.DSS_areaCode
+							}));
+							DSS_PortalMap.selectFeature('region', self.DSS_areaId, true);							
+						}
+					},
+					items: [{
+						text: 'Central Sands',
+						DSS_areaCode: 'cs',
+						DSS_areaId: 0
+					},{
+						text: 'Driftless',
+						DSS_areaCode: 'd',
+						DSS_areaId: 1
+					},{
+						text: 'Fox River Valley',
+						DSS_areaCode: 'frv',
+						DSS_areaId: 2
+					},{
+						text: 'Urban Corridor',
+						DSS_areaCode: 'uc',
+						DSS_areaId: 3
+					}]
+					
+				}]
+			}]
 		});
 		
 		me.callParent(arguments);
+	},
+	
+	//----------------------------------------------------------
+	setSelection: function(selection) {
+		var me = this;
+		var i = me.down('#dss-button-options').items.items;
+		i.forEach(function(item) {
+			if (item.DSS_areaId == selection) {
+				item.toggle(true, false);
+				return;
+			}
+		})
 	},
 	
 	//----------------------------------------------------------

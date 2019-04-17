@@ -6,7 +6,6 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 	extend: 'Ext.panel.Panel',
 	alias: 'widget.aoi_refinement',
 	
-//	height: 140,
 	title: 'Region Refinement Tools',
 	
 	layout: {
@@ -15,7 +14,9 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 		align: 'stretch'
 	},
 	bodyPadding: 8,
+	
 	width: 380,
+	height: 195,
 
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -23,12 +24,13 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 		
 		Ext.applyIf(me, {
 			items: [{
-				xtype: 'container',
-				html: 'The Area of Interest can optionally be further restricted by choosing counties or watersheds that overlap this Region.'
+				xtype: 'component',
+				html: 'The Area of Interest can optionally be further restricted by choosing counties or watersheds that overlap this Region.' +
+					'<br/><br/>Note that SmartScape will restrict landscape changes and computed outcomes to the sub-areas you select.'
 			},{				
 				xtype: 'container',
 				flex: 1,
-				padding: '16 8 9 8',
+				padding: '16 8 9 4',
 				layout: {
 					type: 'hbox',
 					pack: 'center',

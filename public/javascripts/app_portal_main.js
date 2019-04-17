@@ -139,17 +139,18 @@ var radarDef = {
 	xtype: 'polar',
 	itemId: 'DSS-gurf',
 	theme: 'custom',
-	background: 'transparent',
 	border: false,
 	flex: 3,
-	title: 'Current Conditions',
+	bodyStyle: 'background: rgba(255,255,255,0.5); border-bottom-left-radius: 8px; border-bottom-right-radius: 8px',// !important',
+	background: 'transparent',
+//	title: 'Current Conditions',
 //	bodyStyle: 'border-bottom: 0',
 	innerPadding: 4,
-	header: {
+	header: false,/*{
 		style: 'border-left: 1px solid #aaa; border-top: 1px solid #aaa; border-right: 1px solid #aaa'
-	},
+	},*/
 	insetPadding: {
-		top: 25,
+		top: 45,
 		left: 40,
 		right: 40,
 		bottom: 25
@@ -158,6 +159,15 @@ var radarDef = {
 		duration: 250
 	},
 	store: 'dss-values',
+	sprites: [{
+		type: 'text',
+		x: 8,
+		y: 18,
+		text: 'Current Conditions',
+		fontSize: 14,
+		fontWeight: 'bold',
+		fillStyle: '#356'
+	}],
 	series: [{
 		type: 'radar',
 		title: 'Default',
@@ -179,7 +189,8 @@ var radarDef = {
 		fields: 'data1',
 		style: {
 			minStepSize: 10,
-			estStepSize: 10
+			estStepSize: 10,
+			strokeStyle: 'red',
 		},
 		minimum: 0,
 		maximum: 100,
@@ -194,7 +205,7 @@ var radarDef = {
 		fields: 'name',
 		style: {
 			estStepSize: 1,
-			strokeStyle: 'rgba(0,0,0,0)'
+			strokeStyle: 'rgba(255,0,0,0)'
 		},
 		grid: true,
 		label: {
@@ -208,14 +219,15 @@ var radarDef = {
 var pieDef = {
 	xtype: 'polar',
 	innerPadding: 20,
-//	bodyStyle: 'border-top: 0',
-	title: 'Landcover Proportions',
+	bodyStyle: 'background: rgba(255,255,255,0.5); border-top-left-radius: 8px; border-top-right-radius: 8px',// !important',
+	background: 'transparent',
 	flex: 2,
-	//theme: 'category1',
+	header: false,
+	border: false,
 	insetPadding: {
-		top: 15,
-		left: 45,
-		right: 35,
+		top: 40,
+		left: 50,
+		right: 40,
 		bottom: 0
 	},
 	animation: {
@@ -223,6 +235,15 @@ var pieDef = {
 	},
 	store: 'dss-proportions',
 	interactions: ['rotate', 'itemhighlight'],
+	sprites: [{
+		type: 'text',
+		x: 8,
+		y: 18,
+		text: 'Landcover Proportions',
+		fontSize: 14,
+		fontWeight: 'bold',
+		fillStyle: '#356'
+	}],
    series: {
 	   colors: ['#f3e45c','#a4b85c','#f3a05a','#6f9fdc','#b7b7b7','#bf8a9a'],
        type: 'pie3d',

@@ -1,4 +1,4 @@
-var sankeyData = {"nodes":[
+var sankeyDataClonable = {"nodes":[
 	{id:0,"name":"Soybeans", color: d3.color("#7d3").hex()},	// 2
 	{id:1,"name":"Corn Grain", color: d3.color("#7d3").brighter(0.2).hex()}, 	// 0
 	{id:2,"name":"Corn Stover", color: d3.color("#7d3").brighter(0.3).hex()},	// 1
@@ -66,10 +66,10 @@ var sankeyData = {"nodes":[
 ]}
 
 var formatNumber = d3.format(",.0f"),
-	format = function(d) { return formatNumber(d) + " TWh"; },
+	format = function(d) { return formatNumber(d) + " Mt"; },
 	color = d3.scaleOrdinal(d3.schemeCategory10);
 	
-var sankeyDataClone = {};
+var sankeyData = {};
 
 //-----------------------------------------------------
 // DSS.components.d3_sankey
@@ -112,7 +112,7 @@ Ext.define('DSS.components.d3_sankey', {
 		});
 		
 		me.callParent(arguments);
-		sankeyDataClone = Ext.clone(sankeyData);
+		sankeyData = Ext.clone(sankeyDataClonable);
 	},
 	
 	//--------------------------------------------------------------------------

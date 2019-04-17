@@ -226,7 +226,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 			me.DSS_OL.watershed.clickTool.getFeatures().clear();
 
 			if (!skipGrid) {
-				Ext.getCmp('dss-region-grid').getSelectionModel().select(sel);
+				Ext.getCmp('dss-region-grid').setSelection(sel);
 			}
 		}
 	},

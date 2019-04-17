@@ -18,7 +18,7 @@ Ext.define('DSS.view.PortalViewport', {
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
 	minWidth: 750,
 	minHeight: 720,
-	style: "background: #F0F2F0;background: -webkit-linear-gradient(to top, #afbfaf, #ddc, #edefea) fixed; background: linear-gradient(to top, #afbfaf, #ddc,  #edefea) fixed;",
+	style: "background: #F0F2F0;background: -webkit-linear-gradient(to top, #a1b3a1, #ddc, #edefea) fixed; background: linear-gradient(to top, #a1b3a1, #ddc,  #edefea) fixed;",
 
 	autoScroll: true,
 	layout: {
@@ -36,11 +36,12 @@ Ext.define('DSS.view.PortalViewport', {
 			items: [{
 				xtype: 'component',
 				width: 310, height: 70,
-				margin: '16 0',
+				margin: '16 0 8 0',
 				html: '<a href="/assets/wip/landing_bs.html"><img src="assets/images/dss_logo.png" style="width:100%"></a>',
 			},{
 				xtype: 'd3_nav',
-				width: 720, height: 49,
+				itemId: 'dss-navigator',
+				width: 720, height: 72,
 				DSS_elements: [{
 					text: 'Select',
 					active: true,
@@ -59,8 +60,10 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				},{
 					text: 'Refine',
+					disabled: true,
 					activeText: 'Refine Area of Interest (optional)',
 					tooltip: 'Optionally refine the area of interest by choosing a county or a watershed',
+					disabledTooltip: 'Select an Area of Interest to proceed',
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-refinement').updateState(selected);
 						if (selected) {
@@ -74,8 +77,10 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				},{
 					text: 'Review',
+					disabled: true,
 					activeText: 'Review Assumptions (optional)',
 					tooltip: 'Review and adjust an assumptions if desired',
+					disabledTooltip: 'Select an Area of Interest to proceed',
 					DSS_selectionChanged: function(selected) {
 						var item = me['DSS_Assumptions'];
 						if (!item) {
@@ -90,7 +95,7 @@ Ext.define('DSS.view.PortalViewport', {
 									to: {
 										height: 520
 									}
-								}).show().anchorTo(Ext.getCmp('dss-navigator'), 'tc-bc', [0,8])
+								}).show().anchorTo(me.down('#dss-navigator'), 'tc-bc', [0,8])
 							}, 50);
 						}
 						else {
@@ -99,7 +104,10 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				},{
 					text: 'Start',
+					disabled: true,
 					activeText: 'Start SmartScape',
+					tooltip: 'Start the SmartScape application with the chosen Area of Interest',
+					disabledTooltip: 'Select an Area of Interest to proceed',
 					DSS_selectionChanged: function(selected) {
 						if (selected) {
 							DSS_PortalMap.setMode('refine');
@@ -118,167 +126,6 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				}],
 			},{
-				xtype: 'container',
-				id: 'dss-navigator',
-				layout: 'hbox',
-				style: 'background: #fff; border-radius: 16px; border: 1px solid rgba(0,0,0,0.2)',
-				padding: 4,
-				defaults: {
-					xtype: 'container',
-					height: 40,
-					margin: 4,
-					padding: '12 16',
-					DSS_verbWidth: 74,
-					width: 74,
-					margin: '0 15',
-			        listeners: {
-			            click: {
-			            	element: 'el',
-			            	fn: function(evt) {
-				            	var me = this;
-				            	var up = me.up().component.items;
-				            	Ext.suspendLayouts();
-				            	Ext.each(up.items, function(els) {
-				            		if (els == me.component) return true; // skip self
-				            		els.removeCls('dss-breadcrumb-active');
-				            		els.animate({
-				            			dynamic: true,
-				            			duration: 750,
-				            			to: {
-				            				width: els.DSS_verbWidth
-				            			}
-				            		});
-				            		els.setHtml(els.DSS_verb);
-									els.DSS_selectionChanged(false);
-				            	})
-				                me.component.addCls('dss-breadcrumb-active');
-				            	me.component.stopAnimation().animate({
-			            			dynamic: true,
-			            			duration: 750,
-				            		callback: function() {
-						            	me.component.setHtml(me.component.DSS_fullText);
-				            		},
-			            			to: {
-			            				width: me.component.DSS_fullWidth
-			            			}
-			            		});
-				            	
-				            	me.component.setHtml(me.component.DSS_fullText);
-				            	me.component.DSS_selectionChanged(true);
-								
-				            	// awful...ensure the innerCt which holds the text just clips off any overflow...
-				            	var downer = me.component.getEl().down('[data-ref="innerCt"]');
-				            	downer.dom.style['overflow'] = 'hidden';
-				            	Ext.resumeLayouts(true);
-				            }
-				        },
-			            afterrender: function(self) {
-			            	var me = this;
-			            	if (self.DSS_tooltip) {
-			            		Ext.tip.QuickTipManager.register({
-			            			target: self.el,
-			            			text: self.DSS_tooltip,
-			        	            defaultAlign: 'b50-t50',
-			        	            anchor: true,
-			            		});
-			            	}
-			            }
-			        }
-				},
-				items: [{
-					html: 'Select Area of Interest',
-					id: 'dss-step-1',
-					DSS_fullText: 'Select Area of Interest',
-					DSS_verb: 'Select',
-					width: 205,
-					DSS_fullWidth: 205,
-					margin: '0 15 0 0',
-					cls: 'dss-breadcrumb-active dss-breadcrumb-point',
-					style: 'border-bottom-left-radius: 12px; border-top-left-radius: 12px',
-					DSS_selectionChanged: function(selected) {
-						Ext.getCmp('dss-region-grid').updateState(selected);
-						if (selected) {
-							DSS_PortalMap.setMode('region');
-							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 760 }});
-							Ext.getCmp('dss-region-refinement').animate({duration: 750, to: { left: 380 }});
-							Ext.getCmp('dss-region-grid').animate({
-								duration: 750, to: { left: 0 }
-							});
-						}
-					}
-				},{
-					html: 'Refine',
-					DSS_tooltip: 'Optionally refine the area of interest',
-					DSS_fullText: 'Refine Area of Interest (Optional)',
-					DSS_verb: 'Refine',
-					DSS_fullWidth: 290,
-					cls: 'dss-breadcrumb-point dss-breadcrumb-tail',
-					DSS_selectionChanged: function(selected) {
-						Ext.getCmp('dss-region-refinement').updateState(selected);
-						if (selected) {
-							DSS_PortalMap.setMode('refine');
-							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 380 }});
-							Ext.getCmp('dss-region-grid').animate({duration: 750, to: { left: -380 }});
-							Ext.getCmp('dss-region-refinement').animate({
-								duration: 750, to: { left: 0 }
-							});
-						}
-					}
-				},{
-					html: 'Review',
-					DSS_tooltip: 'Review the assumptions used by SmartScape and customise them if desired',
-					DSS_fullText: 'Review Assumptions (Optional)',
-					DSS_verb: 'Review',
-					DSS_fullWidth: 260,
-					cls: 'dss-breadcrumb-point dss-breadcrumb-tail',
-					DSS_selectionChanged: function(selected) {
-						var item = me['DSS_Assumptions'];
-						if (!item) {
-							item = me['DSS_Assumptions'] = Ext.create('DSS.app_portal.Assumptions');
-						}
-						if (selected) {
-							Ext.defer(function() {
-								item.setHeight(1);
-								item.animate({
-									duration: 750,
-									dynamic: true,
-									to: {
-										height: 520
-									}
-								}).show().anchorTo(Ext.getCmp('dss-navigator'), 'tc-bc', [0,8])
-							}, 50);
-						}
-						else {
-							item.setHidden(true);
-						}
-					}
-				},{
-					html: 'Start',
-					id: 'DSS-start-smartscape',
-					DSS_fullText: 'Start SmartScape',
-					DSS_verb: 'Start',
-					margin: '0 0 0 15',
-					DSS_fullWidth: 170,
-					cls: 'dss-breadcrumb-tail',
-					style: 'border-top-right-radius: 12px; border-bottom-right-radius: 12px',
-					DSS_selectionChanged: function(selected) {
-						if (selected) {
-							DSS_PortalMap.setMode('refine');
-							var cmp = Ext.getCmp('dss-region-grid');
-							if (cmp.getX() != -380) {
-								cmp.animate({duration: 750, to: { left: -760 }});
-							}
-							cmp = Ext.getCmp('dss-region-refinement');
-							if (cmp.getX() != -380) {
-								cmp.animate({duration: 750, to: { left: -380 }});
-							}
-							Ext.getCmp('dss-launch-summary').animate({
-								duration: 750, to: { left: 0 }
-							});
-						}
-					}
-				}]
-			},{
 				flex: 20,
 				margin: 8,
 				maxHeight: 520,
@@ -286,7 +133,7 @@ Ext.define('DSS.view.PortalViewport', {
 				width: '100%',
 				layout: {
 					type: 'hbox',
-					pack: 'start',
+					pack: 'middle',
 					align: 'stretch',
 				},
 				items: [{
@@ -305,19 +152,28 @@ Ext.define('DSS.view.PortalViewport', {
 						layout: {
 							type: 'vbox',
 							align: 'stretch',
-							pack: 'start',
+							pack: 'middle',
 						},
 						items: [{
 							xtype: 'container',
-							margin: '0 0 8 0',
+							margin: '0 0 4 0',
 							id: 'dss-action-holder',
 						//	style: 'overflow: hidden',
 							layout: 'absolute',
-							minHeight: 148, maxHeight: 148,
+							style: 'background: rgba(255,255,255,0.5); border-bottom-left-radius: 12px;border-bottom-right-radius: 12px',
+							minHeight: 200, maxHeight: 200,
 							maxWidth: 380,
+							defaults: {
+								bodyStyle: 'background: transparent',
+								border: 0
+							},
 							items: [{
 								id: 'dss-region-grid',
 								xtype: 'aoi',
+								onActivated: function() {
+									me.down('#dss-stats').setVisible(true);
+									me.down('#dss-navigator').enableAll();
+								},
 								maxWidth: 380,
 								x: 0,
 								y: 0
@@ -335,43 +191,12 @@ Ext.define('DSS.view.PortalViewport', {
 								y: 0
 							}]
 						},{
-							xtype: 'container',
+							xtype: 'checkbox',
 							hidden: true,
-							layout: {
-								type: 'hbox',
-								pack: 'end',
-								align: 'middle'
-							},
-							items: [{
-								xtype: 'checkbox',
-								id: 'dss-portal-auto-zoom',
-								margin: '4 16',
-								boxLabel: 'Map Auto-Zoom + Auto-Pan' ,
-								checked: true,
-								/*stateful: true,
-								stateId: 'dss-portal-auto-zoom',
-								applyState: function(state) {
-									console.log(this);
-									var me = this;
-									if (state && state['autoZoom']) {
-										me.setValue(state['autoZoom']);
-									}
-								},
-								getState: function() {
-									console.log(this);
-									var res = {};
-									res['autoZoom'] = this.getValue();
-									console.log(res);
-									return res;
-								}*/
-							},{
-								xtype: 'button',
-								scale: 'small',
-								disabled: true,
-								width: 72,
-								margin: '1 16',
-								text: 'Next >'
-							}]
+							id: 'dss-portal-auto-zoom',
+							margin: '4 16',
+							boxLabel: 'Map Auto-Zoom + Auto-Pan' ,
+							checked: true,
 						},{
 							xtype: 'aoi_map',
 							id: 'dss-portal-map',
@@ -380,6 +205,8 @@ Ext.define('DSS.view.PortalViewport', {
 					}]
 				},{
 					xtype: 'container',
+					itemId: 'dss-stats',
+					hidden: true,
 					flex: 1,
 					layout: {
 						type: 'vbox',

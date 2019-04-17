@@ -20,6 +20,8 @@ Ext.define('DSS.components.d3_nav', {
 			}
 		}
 	},
+	DSS_tooltipOffset: [-64,-28],
+	DSS_align: 'c', //c = center, r = right, l = left
 	DSS_time: false,
 	DSS_timer: false,
 	DSS_duration: 750.0,
@@ -67,6 +69,15 @@ Ext.define('DSS.components.d3_nav', {
 	},
 	
 	//--------------------------------------------------------------------------
+	enableAll: function() {
+		var me = this;
+		me.DSS_elements.forEach(function(d) {
+			d.disabled = false;
+		})
+		me.updateNav();
+	},
+	
+	//--------------------------------------------------------------------------
 	createD3_Elements: function() {
 		var me = this;
 		
@@ -78,16 +89,46 @@ Ext.define('DSS.components.d3_nav', {
 		me.measureNodes();
 
 		const width = me.calcNavWidth(true);
-		const cx = (me.getWidth() - width) / 2;
-		
+		const cx = (me.DSS_align === "c") ? (me.getWidth() - width) / 2 : 
+			(me.DSS_align === "l") ? 20 : (me.getWidth() - width) - 20; // account for shadow
+
+	var defs = me.DSS_svg.append("defs");
+	
+	var filter = defs.append("filter")
+		.attr("id", "nav-shadow")
+		.attr("width", "120%")
+		.attr("height", "150%");
+	filter.append("feGaussianBlur")
+		.attr("in", "SourceAlpha")
+		.attr("stdDeviation", "4")
+		.attr("result", "blur");
+	filter.append("feOffset")
+		.attr("in", "blur")
+		.attr("dx","0")
+		.attr("dy","10")
+		.attr("result","offsetBlur");
+	var transfer = filter.append("feComponentTransfer")
+		.attr("in",	"offsetBlur")
+		.attr("result","alphaBlur");
+	transfer.append("feFuncA")
+			.attr("type", "linear")
+			.attr("slope", "0.3");
+
+	var merge = filter.append("feMerge");
+		merge.append("feMergeNode")
+			.attr("in", "alphaBlur");
+		merge.append("feMergeNode")
+			.attr("in", "SourceGraphic");
+
 		me.DSS_svg
 			.append("g")
 			.append("rect")
 			.attr("transform", "translate(" + cx + ",1)")
 			.attr("class", "d3-nav-bg")
 			.attr("width", width)
-			.attr("height", me.getHeight()-1) // ? why -1?
-			.attr("rx", 18);
+			.attr("height", 48)//me.getHeight()-1) // ? why -1?
+			.attr("rx", 18)
+			.attr("filter", "url(#nav-shadow");
 		
 		me.DSS_svg.selectAll("clipPath")
 			.data(me.DSS_elements)
@@ -106,6 +147,7 @@ Ext.define('DSS.components.d3_nav', {
 			.enter()
 			.append("g")
 			.on("click", function(d, i, nodes) {
+				if (d.disabled) return;
 				me.DSS_elements.forEach(function(dd) {
 					if (d == dd) return;
 					dd.DSS_selectionChanged(false)
@@ -128,10 +170,12 @@ Ext.define('DSS.components.d3_nav', {
 		                .duration(100)		
 		                .style("opacity", 1);		
 		            me.DSS_tooltip.
-		            	html(d.tooltip)	
+		            	html(d.disabled ? (d.disabledTooltip || d.tooltip) : d.tooltip)	
 		                .style("left", (d3.event.pageX) + "px")		
-		                .style("left", (d3.event.target.parentNode.getBoundingClientRect().x - 64) + "px")
-		            	.style("top", (d3.event.target.parentNode.getBoundingClientRect().y - 28) + "px")
+		                .style("left", (d3.event.target.parentNode.getBoundingClientRect().x 
+		                		+ me.DSS_tooltipOffset[0]) + "px")
+		            	.style("top", (d3.event.target.parentNode.getBoundingClientRect().y 
+		            			+ me.DSS_tooltipOffset[1]) + "px")
 		        }
 	        	else {
 	        		me.DSS_tooltip.transition()		
@@ -145,7 +189,8 @@ Ext.define('DSS.components.d3_nav', {
                 .style("opacity", 0);	
 	        })			
 			.attr("class", function(d) {
-				return "d3-nav" + (d.active ? " d3-nav-active" : "")
+				return "d3-nav" + (d.active ? " d3-nav-active" : "") 
+					+ (d.disabled ? " d3-nav-disabled" : "")
 			})
 			.attr("transform", function(d) {
 				const res = "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")";
@@ -258,11 +303,13 @@ Ext.define('DSS.components.d3_nav', {
 				})
 
 			var realWidth = me.calcNavWidth();
-			var cx = (me.getWidth() - realWidth) / 2;
+			const cx = (me.DSS_align === "c") ? (me.getWidth() - realWidth) / 2 : 
+				(me.DSS_align === "l") ? 0 : me.getWidth() - realWidth;
 			var atX = me.DSS_containerPad;
 			svg.selectAll('.d3-nav')
 				.attr("class", function(d) {
-					return "d3-nav" + (d.active ? " d3-nav-active" : "")
+					return "d3-nav" + (d.active ? " d3-nav-active" : "") 
+					+ (d.disabled ? " d3-nav-disabled" : "")
 				})
 				.attr("transform", function(d) {
 					d['t_x'] = atX;

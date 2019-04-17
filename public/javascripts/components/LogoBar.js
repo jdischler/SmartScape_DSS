@@ -8,6 +8,7 @@ Ext.define('DSS.components.LogoBar', {
     
     require: [
     	'DSS.components.Step4',
+		'DSS.components.d3_nav'
 	],
     
 	region: 'north',
@@ -18,48 +19,55 @@ Ext.define('DSS.components.LogoBar', {
 	layout: {
 		type: 'hbox',
 		pack: 'start',
-		align: 'bottom'
-	},
-	defaults: {
-		xtype: 'button',
-		scale: 'large',
+//		align: 'center'
 	},
 
 	items: [{
-		xtype: 'container',
-		padding: '2 0 0 10',
-		width: 340, 
-		height: 60, // a fixed height improßves page layout responsiveness unfortunately
-		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:75%"></a>',
+		xtype: 'component',
+		margin: '1 0 0 10',
+		width: 260, 
+		height: 60, // a fixed height improves page layout responsiveness unfortunately
+		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
 	},{
-		text: 'Explore Landscape',
-		margin: '-1 2 0 48',
-		width: 120,
-		toggleGroup: 'DSS-mode',
-		allowDepress: false,
-		pressed: true
-	},{
-		text: 'Transform Landscape',
-		margin: '-1 2 0 2',
-		width: 120,
-		toggleGroup: 'DSS-mode',
-		allowDepress: false,
-		toggleHandler: function(self, pressed) {
-			Ext.getCmp('dss-scenario-grid').setVisible(pressed);
-		}
-	},{
-		text: 'Analyze Results',
-		margin: '-1 2 0 2',
-		toggleGroup: 'DSS-mode',
-		allowDepress: false,
-		width: 120
-	},{
-		text: 'Step 4 Mockup',
-		margin: '-1 2 0 2',
-		width: 120,
-		handler: function() {
-			Ext.create('DSS.components.Step4').show().center();
-		}
+		xtype: 'd3_nav',
+		width: 640, 
+		height: 58,
+		padding: '4 0 0 32',
+		DSS_tooltipOffset: [-64,-18],
+		DSS_align: 'l',
+		DSS_duration: 500.0,
+		DSS_elements: [{
+			text: 'Explore',
+			active: true,
+			activeText: 'Explore Landscape',
+			tooltip: 'Find existing landscape matching selected attributes',
+			DSS_selectionChanged: function(selected) {
+				if (selected) {
+				}
+			}
+		},{
+			text: 'Transform',
+			activeText: 'Transform the Landscape',
+			tooltip: 'Alter the landcover in selected areas to create a user-scenario',
+			DSS_selectionChanged: function(selected) {
+				Ext.getCmp('dss-scenario-grid').setVisible(selected);
+			}
+		},{
+			text: 'Analyze',
+			activeText: 'Analyze Results',
+			tooltip: 'Analyze the modeled outcomes from the user-chosen landscape changes',
+			DSS_selectionChanged: function(selected) {
+			}
+		},{
+			text: 'Next?',
+			activeText: 'Step 4 (what next?) Mockup',
+			tooltip: 'Dig a little deeper and explore meta-model outcomes',
+			DSS_selectionChanged: function(selected) {
+				if (selected) {
+					Ext.create('DSS.components.Step4').show().center();
+				}
+			}
+		}]
 	},{
 		xtype: 'container',
 		flex: 1,

@@ -15,6 +15,7 @@ Ext.define('DSS.app_portal.LaunchSummary', {
 	},
 	bodyPadding: 8,
 	width: 380,
+	height: 195,
 
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -22,8 +23,9 @@ Ext.define('DSS.app_portal.LaunchSummary', {
 		
 		Ext.applyIf(me, {
 			items: [{
-				xtype: 'container',
-				html: 'SmartScape will now launch with your settings. Exploring scenarios in a different region will require coming back to this page.'
+				xtype: 'component',
+				html: 'SmartScape will now launch with your Area of Interest and Value choices. ' + 
+					'<br/></br>Note that exploring scenarios in a different region will require coming back to this page.'
 			},{				
 				xtype: 'container',
 				flex: 1,

@@ -124,10 +124,9 @@ Ext.define('DSS.components.MainMap', {
 	    'GeoExt.component.Map',
     ],
     
-	header: {
+	header: false/*{
 		style: 'border-right: 1px solid #bcd; border-left: 1px solid #bcd;',
-		//height: 8,
-	},
+	*/,
 	region: 'center',
 	layout: 'fit',
 
@@ -186,7 +185,7 @@ Ext.define('DSS.components.MainMap', {
 	        [bounds[2], bounds[1]],
 	        [bounds[0], bounds[1]]
 	    ]]);*/
-	    
+	  //  -10062652.7,-9878152.7, 5278060.5, 5415259.6
 	    // draw rectangle spot
 		var c = [
 			-10062652.7, 5278060.5,
