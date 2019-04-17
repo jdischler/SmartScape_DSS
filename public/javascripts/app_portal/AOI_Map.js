@@ -18,10 +18,10 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		layers: [
 			new ol.layer.Tile({
 				//source: new ol.source.BingMaps({})
-				source: new ol.source.OSM({})
-				//source: new ol.source.Stamen({
-				//	layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
-				//})
+				//source: new ol.source.OSM({})
+				source: new ol.source.Stamen({
+					layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
+				})
 			})
 		],
 		loadTilesWhileAnimating: true,

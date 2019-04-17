@@ -50,7 +50,7 @@ Ext.define('DSS.app_portal.Assumptions', {
 	alias: 'widget.assumptions',
 
 	floating: true,
-	width: 740,
+	width: 380,
 	height: 1,
 	layout: 'fit',
 	bodyPadding: '16 32',

@@ -41,11 +41,11 @@ Ext.define('DSS.view.PortalViewport', {
 			},{
 				xtype: 'd3_nav',
 				itemId: 'dss-navigator',
-				width: 720, height: 72,
+				width: 720, height: 68,
 				DSS_elements: [{
 					text: 'Select',
 					active: true,
-					activeText: 'Select Area of Interest',
+					activeText: 'Select an Area of Interest',
 					tooltip: 'Select an area of interest',
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-grid').updateState(selected);
@@ -76,10 +76,10 @@ Ext.define('DSS.view.PortalViewport', {
 						}
 					}
 				},{
-					text: 'Review',
+					text: 'Values',
 					disabled: true,
-					activeText: 'Review Assumptions (optional)',
-					tooltip: 'Review and adjust an assumptions if desired',
+					activeText: 'Set Personal Values (optional)',
+					tooltip: 'Tell SmartScape about your values if desired',
 					disabledTooltip: 'Select an Area of Interest to proceed',
 					DSS_selectionChanged: function(selected) {
 						var item = me['DSS_Assumptions'];
@@ -127,7 +127,7 @@ Ext.define('DSS.view.PortalViewport', {
 				}],
 			},{
 				flex: 20,
-				margin: 8,
+				margin: '0 8 8 8',
 				maxHeight: 520,
 				maxWidth: 760,
 				width: '100%',
