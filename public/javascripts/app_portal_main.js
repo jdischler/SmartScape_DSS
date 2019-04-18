@@ -133,22 +133,79 @@ Ext.draw.sprite.Text.prototype.updatePlainBBox = function(plain, useOldSize) {
 		plain.height += -0;//me.config.padding.height;
 //	}
 }*/
+var pieDef = {
+	xtype: 'polar',
+	itemId: 'dss-pie',
+	innerPadding: 20,
+	bodyStyle: 'background: transparent',
+	background: 'transparent',
+	height: 180,
+	header: false,
+	border: false,
+	insetPadding: {
+		top: 30,
+		left: 35,
+		right: 35,
+		bottom: 0
+	},
+	animation: {
+		duration: 300
+	},
+	store: 'dss-proportions',
+	interactions: ['rotate', 'itemhighlight'],
+	sprites: [{
+		type: 'text',
+		x: 4,
+		y: 18,
+		text: 'Landcover Proportions',
+		fontSize: 14,
+		fontWeight: 'bold',
+		fillStyle: '#356'
+	},{
+		type: 'line',
+		fromX: 3,
+		fromY: 20,
+		toX: 102,
+		toY: 20,
+		strokeStyle: '#467'
+	},{
+		type: 'line',
+		fromX: 106,
+		fromY: 20,
+		toX: 159,
+		toY: 20,
+		strokeStyle: '#467'
+	}],
+   series: {
+	   colors: ['#f3e45c','#a4b85c','#f3a05a','#6f9fdc','#b7b7b7','#bf8a9a'],
+       type: 'pie3d',
+       highlight: true,
+       angleField: 'data1',
+       label: {
+           field: 'name',
+           display: 'rotate',//'rotate',
+           color: '#333',
+			 font: '12px Helvetica'
+       },
+       donut: 40,
+       thickness: 10,
+       distortion: 0.45
+   }		
+}
+
 //-------------------------------------------------------------
-// Sample Radar
+//Sample Radar
 var radarDef = {
 	xtype: 'polar',
 	itemId: 'DSS-gurf',
 	theme: 'custom',
 	border: false,
-	flex: 3,
-	bodyStyle: 'background: rgba(255,255,255,0.5); border-bottom-left-radius: 8px; border-bottom-right-radius: 8px',// !important',
+//	height: 250,
+	flex: 1,
+	bodyStyle: 'background: transparent',
 	background: 'transparent',
-//	title: 'Current Conditions',
-//	bodyStyle: 'border-bottom: 0',
 	innerPadding: 4,
-	header: false,/*{
-		style: 'border-left: 1px solid #aaa; border-top: 1px solid #aaa; border-right: 1px solid #aaa'
-	},*/
+	header: false,
 	insetPadding: {
 		top: 45,
 		left: 40,
@@ -161,12 +218,19 @@ var radarDef = {
 	store: 'dss-values',
 	sprites: [{
 		type: 'text',
-		x: 8,
+		x: 4,
 		y: 18,
 		text: 'Current Conditions',
 		fontSize: 14,
 		fontWeight: 'bold',
 		fillStyle: '#356'
+	},{
+		type: 'line',
+		fromX: 4,
+		fromY: 20,
+		toX: 133,
+		toY: 20,
+		strokeStyle: '#467'
 	}],
 	series: [{
 		type: 'radar',
@@ -189,12 +253,13 @@ var radarDef = {
 		fields: 'data1',
 		style: {
 			minStepSize: 10,
-			estStepSize: 10,
-			strokeStyle: 'red',
+			estStepSize: 10
 		},
 		minimum: 0,
 		maximum: 100,
-		grid: true,
+		grid: {
+			strokeStyle: '#ccc'
+		},
 		label: {
 			 font: '12px Helvetica',
 			 color: '#333'
@@ -207,7 +272,9 @@ var radarDef = {
 			estStepSize: 1,
 			strokeStyle: 'rgba(255,0,0,0)'
 		},
-		grid: true,
+		grid: {
+			strokeStyle: '#bbb'
+		},
 		label: {
 			 font: '12px Helvetica',
 			 color: '#333',
@@ -216,50 +283,6 @@ var radarDef = {
 	}]
 };
 
-var pieDef = {
-	xtype: 'polar',
-	innerPadding: 20,
-	bodyStyle: 'background: rgba(255,255,255,0.5); border-top-left-radius: 8px; border-top-right-radius: 8px',// !important',
-	background: 'transparent',
-	flex: 2,
-	header: false,
-	border: false,
-	insetPadding: {
-		top: 40,
-		left: 50,
-		right: 40,
-		bottom: 0
-	},
-	animation: {
-		duration: 300
-	},
-	store: 'dss-proportions',
-	interactions: ['rotate', 'itemhighlight'],
-	sprites: [{
-		type: 'text',
-		x: 8,
-		y: 18,
-		text: 'Landcover Proportions',
-		fontSize: 14,
-		fontWeight: 'bold',
-		fillStyle: '#356'
-	}],
-   series: {
-	   colors: ['#f3e45c','#a4b85c','#f3a05a','#6f9fdc','#b7b7b7','#bf8a9a'],
-       type: 'pie3d',
-       highlight: true,
-       angleField: 'data1',
-       label: {
-           field: 'name',
-           display: 'rotate',//'rotate',
-           color: '#333',
-			 font: '12px Helvetica'
-       },
-       donut: 40,
-       thickness: 10,
-       distortion: 0.45
-   }		
-}
 
 Ext.tip.QuickTipManager.init(); // Instantiate the QuickTipManager
 

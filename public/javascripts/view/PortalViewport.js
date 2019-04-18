@@ -11,7 +11,8 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.AOI',
 		'DSS.app_portal.AOI_Refinement',
 		'DSS.app_portal.LaunchSummary',
-		'DSS.app_portal.Assumptions',
+		//'DSS.app_portal.Assumptions',
+		'DSS.app_portal.ValuesAssessment',
 		'DSS.components.d3_nav'
 	],
 
@@ -82,9 +83,9 @@ Ext.define('DSS.view.PortalViewport', {
 					tooltip: 'Tell SmartScape about your values if desired',
 					disabledTooltip: 'Select an Area of Interest to proceed',
 					DSS_selectionChanged: function(selected) {
-						var item = me['DSS_Assumptions'];
+						var item = me['DSS_ValuesAssessment'];
 						if (!item) {
-							item = me['DSS_Assumptions'] = Ext.create('DSS.app_portal.Assumptions');
+							item = me['DSS_ValuesAssessment'] = Ext.create('DSS.app_portal.ValuesAssessment');
 						}
 						if (selected) {
 							Ext.defer(function() {
@@ -95,11 +96,14 @@ Ext.define('DSS.view.PortalViewport', {
 									to: {
 										height: 520
 									}
-								}).show().anchorTo(me.down('#dss-navigator'), 'tc-bc', [0,8])
+								//}).show().anchorTo(me.down('#dss-navigator'), 'tc-bc', [0,8])
+								}).show().anchorTo(me.down('#dss-action-side'), 'tl-tl', [0,0])
 							}, 50);
+							me.down('#dss-pie').setHidden(true);
 						}
 						else {
 							item.setHidden(true);
+							me.down('#dss-pie').setVisible(true);
 						}
 					}
 				},{
@@ -126,20 +130,18 @@ Ext.define('DSS.view.PortalViewport', {
 					}
 				}],
 			},{
-				flex: 20,
 				margin: '0 8 8 8',
-				maxHeight: 520,
-				maxWidth: 760,
-				width: '100%',
-				layout: {
-					type: 'hbox',
-					pack: 'middle',
-					align: 'stretch',
-				},
+				itemId: 'dss-action-side',
+				height: 520,
+				width: 760,
+				layout: 'absolute',
 				items: [{
 					xtype: 'container',
-					margin: '0 8 0 0',
+					itemId: 'dss-action-widget',
+					//x: 0,
+					x: (760 - 380) / 2,
 					width: 380,
+					height: 520,
 					layout: {
 						type: 'vbox',
 						pack: 'start',
@@ -171,8 +173,26 @@ Ext.define('DSS.view.PortalViewport', {
 								id: 'dss-region-grid',
 								xtype: 'aoi',
 								onActivated: function() {
-									me.down('#dss-stats').setVisible(true);
-									me.down('#dss-navigator').enableAll();
+									var stats = me.down('#dss-stats');
+									if (stats.isHidden()) {
+										stats.setX(me.getWidth() + 1);
+										stats.setVisible(true);
+										Ext.defer(function() {
+											stats.animate({
+												duration: 750,
+												to: {
+													x: me.down('#dss-action-side').getX() + 388
+												}
+											})
+										}, 100);
+										me.down('#dss-action-widget').animate({
+											duration: 750,
+											to: {
+												x: me.down('#dss-action-side').getX()
+											}
+										});
+										me.down('#dss-navigator').enableAll();
+									}
 								},
 								maxWidth: 380,
 								x: 0,
@@ -206,14 +226,31 @@ Ext.define('DSS.view.PortalViewport', {
 				},{
 					xtype: 'container',
 					itemId: 'dss-stats',
+					style: 'background: rgba(255,255,255,0.5); border-radius: 8px',
 					hidden: true,
-					flex: 1,
+					padding: 8,
+					width: 380, height: 520,
 					layout: {
 						type: 'vbox',
 						align: 'stretch',
 						pack: 'start'
 					},
-					items: [pieDef, radarDef]
+					items: [{
+						xtype: 'component',
+						style: 'color: #346; font-size: 16px; font-weight: bold',
+						id: 'dss-selected-region',
+//						margin: 8,
+						html: 'Region: '
+					},{
+						xtype: 'component',
+						id: 'dss-selected-info',
+						style: 'color: #333',
+						margin: '4 8 4 8',
+						minHeight: 56
+					},
+						pieDef, 
+						radarDef
+					]
 				}]
 			},{
 				flex: 1,

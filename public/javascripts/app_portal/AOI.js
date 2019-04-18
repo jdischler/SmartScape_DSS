@@ -53,6 +53,7 @@ Ext.define('DSS.app_portal.AOI', {
 				items: [{
 					xtype: 'component',
 					width: '100%',
+					style: 'color: #333',
 					html: 'To get started, SmartScape must first be narrowed down to an Area of Interest. ' + 
 						'Select one of the following choices...or choose directly on the map.'
 				},{
@@ -81,7 +82,11 @@ Ext.define('DSS.app_portal.AOI', {
 								property: 'location',
 								value: self.DSS_areaCode
 							}));
-							DSS_PortalMap.selectFeature('region', self.DSS_areaId, true);							
+							DSS_PortalMap.selectFeature('region', self.DSS_areaId, true);
+							var areas = Ext.data.StoreManager.lookup('dss-areas');
+							var rec = areas.findRecord('value', self.DSS_areaCode);
+							Ext.getCmp('dss-selected-info').setHtml(rec.get('desc'))
+							Ext.getCmp('dss-selected-region').setHtml('Region: ' + rec.get('name'))
 						}
 					},
 					items: [{
