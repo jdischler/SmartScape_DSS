@@ -24,7 +24,7 @@ Ext.define('DSS.components.d3_nav', {
 	DSS_align: 'c', //c = center, r = right, l = left
 	DSS_time: false,
 	DSS_timer: false,
-	DSS_duration: 750.0,
+	DSS_duration: 500.0,
 	DSS_containerPad: 5,
 	DSS_nodePad: 20, // inner padding around each element
 	DSS_nodeSpacing: 10,	//space between nodes

@@ -52,11 +52,11 @@ Ext.define('DSS.view.PortalViewport', {
 						Ext.getCmp('dss-region-grid').updateState(selected);
 						if (selected) {
 							DSS_PortalMap.setMode('region');
-							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 760 }});
-							Ext.getCmp('dss-region-refinement').animate({duration: 750, to: { left: 380 }});
 							Ext.getCmp('dss-region-grid').animate({
-								duration: 750, to: { left: 0 }
+								duration: 500, to: { left: 0 }
 							});
+							Ext.getCmp('dss-region-refinement').animate({duration: 500, to: { left: 380 }});
+							Ext.getCmp('dss-launch-summary').animate({duration: 500, to: { left: 760 }});
 						}
 					}
 				},{
@@ -68,12 +68,12 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						Ext.getCmp('dss-region-refinement').updateState(selected);
 						if (selected) {
-							DSS_PortalMap.setMode('refine');
-							Ext.getCmp('dss-launch-summary').animate({duration: 750, to: { left: 380 }});
-							Ext.getCmp('dss-region-grid').animate({duration: 750, to: { left: -380 }});
 							Ext.getCmp('dss-region-refinement').animate({
-								duration: 750, to: { left: 0 }
+								dynamic: true,duration: 500, to: { left: 0 }
 							});
+							Ext.getCmp('dss-region-grid').animate({dynamic: true,duration: 500, to: { left: -380 }});
+							Ext.getCmp('dss-launch-summary').animate({dynamic: true,duration: 500, to: { left: 380 }});
+							DSS_PortalMap.setMode('refine');
 						}
 					}
 				},{
@@ -85,13 +85,14 @@ Ext.define('DSS.view.PortalViewport', {
 					DSS_selectionChanged: function(selected) {
 						var item = me['DSS_ValuesAssessment'];
 						if (!item) {
-							item = me['DSS_ValuesAssessment'] = Ext.create('DSS.app_portal.ValuesAssessment');
+							item = me['DSS_ValuesAssessment'] = Ext.create('DSS.app_portal.ValuesAssessment',
+									{height: 1});
 						}
 						if (selected) {
 							Ext.defer(function() {
-								item.setHeight(1);
+								//item.setHeight(1);
 								item.animate({
-									duration: 750,
+									duration: 500,
 									dynamic: true,
 									to: {
 										height: 520
@@ -99,11 +100,52 @@ Ext.define('DSS.view.PortalViewport', {
 								//}).show().anchorTo(me.down('#dss-navigator'), 'tc-bc', [0,8])
 								}).show().anchorTo(me.down('#dss-action-side'), 'tl-tl', [0,0])
 							}, 50);
-							me.down('#dss-pie').setHidden(true);
+							var pie = me.down('#dss-pie');
+							me.down('#dss-pie').animate({
+								dynamic: true,
+								to: {
+									height: 80,
+									opacity: 0
+								}
+							})
+							Ext.getCmp('dss-hidden-pad').animate({
+								dynamic: true,
+								to: {
+									height: 48
+								}
+							})
+							Ext.getCmp('dss-selected-info').setHidden(true);
 						}
 						else {
-							item.setHidden(true);
-							me.down('#dss-pie').setVisible(true);
+							if (item.isVisible()) {
+								item.animate({
+									duration: 500,
+									dynamic: true,
+									to: {
+										height: 0
+									},
+									callback: function() {
+										item.setHidden()
+									}
+								})
+							}
+							Ext.getCmp('dss-selected-info').setVisible(true);
+							Ext.getCmp('dss-hidden-pad').animate({
+								dynamic: true,
+								to: {
+									height: 1
+								}
+							})
+							var pie = me.down('#dss-pie');
+							if (pie.height < 180) {
+								pie.animate({
+									dynamic: true,
+									to: {
+										opacity: 1,
+										height: 180
+									}
+								})
+							}
 						}
 					}
 				},{
@@ -117,14 +159,45 @@ Ext.define('DSS.view.PortalViewport', {
 							DSS_PortalMap.setMode('refine');
 							var cmp = Ext.getCmp('dss-region-grid');
 							if (cmp.getX() != -380) {
-								cmp.animate({duration: 750, to: { left: -760 }});
+								cmp.animate({duration: 500, to: { left: -760 }});
 							}
 							cmp = Ext.getCmp('dss-region-refinement');
 							if (cmp.getX() != -380) {
-								cmp.animate({duration: 750, to: { left: -380 }});
+								cmp.animate({duration: 500, to: { left: -380 }});
 							}
 							Ext.getCmp('dss-launch-summary').animate({
-								duration: 750, to: { left: 0 }
+								duration: 500, to: { left: 0 }
+							});
+							me.down('#dss-stats').animate({
+								to: {
+									opacity: 0
+								},
+								callback: function() {
+									me.down('#dss-stats').setHidden(true)
+								}
+								
+							})
+							me.down('#dss-action-widget').animate({
+								duration: 1250,
+								delay: 750,
+								to: {
+									x: me.down('#dss-action-side').getX() + 380/2
+								}
+							});
+						}
+						else {
+							me.down('#dss-stats').setVisible(true)
+							me.down('#dss-stats').animate({
+								delay: 500,
+								to: {
+									opacity: 1
+								}
+							})
+							me.down('#dss-action-widget').animate({
+								duration: 500,
+								to: {
+									x: me.down('#dss-action-side').getX()
+								}
 							});
 						}
 					}
@@ -175,16 +248,48 @@ Ext.define('DSS.view.PortalViewport', {
 								onActivated: function() {
 									var stats = me.down('#dss-stats');
 									if (stats.isHidden()) {
+										var pie = me.down('#dss-pie');
+										var radar = me.down('#DSS-gurf');
+										
 										stats.setX(me.getWidth() + 1);
 										stats.setVisible(true);
-										Ext.defer(function() {
-											stats.animate({
-												duration: 750,
-												to: {
-													x: me.down('#dss-action-side').getX() + 388
-												}
-											})
-										}, 100);
+										stats.animate({
+											delay: 50,
+											duration: 750,
+											to: {
+												x: me.down('#dss-action-side').getX() + 388
+											}
+										})
+										pie.animate({
+											duration: 1,
+											to: {
+												opacity: 0
+											},
+											callback:function() {
+												pie.animate({
+													delay: 600,
+													duration: 1000,
+													to: {
+														opacity: 1
+													}
+												})
+											}
+										})
+										radar.animate({
+											duration: 1,
+											to: {
+												opacity: 0
+											},
+											callback:function() {
+												radar.animate({
+													delay: 1000,
+													duration: 1000,
+													to: {
+														opacity: 1
+													}
+												})
+											}
+										})
 										me.down('#dss-action-widget').animate({
 											duration: 750,
 											to: {
@@ -249,8 +354,12 @@ Ext.define('DSS.view.PortalViewport', {
 						minHeight: 56
 					},
 						pieDef, 
-						radarDef
-					]
+						radarDef,
+					{
+						xtype: 'component',
+						id: 'dss-hidden-pad',
+						height: 1
+					}]
 				}]
 			},{
 				flex: 1,

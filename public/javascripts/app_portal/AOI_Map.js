@@ -293,10 +293,12 @@ Ext.define('DSS.app_portal.AOI_Map', {
 	
 	centerOn: function(feature) {
 		var me = this;
+		var ex = me.getView().calculateExtent(me.getMap().getSize());
+		if (ol.extent.containsExtent(ex, feature.getGeometry().getExtent())) return;
 		me.getView().cancelAnimations();
         me.getView().animate({
 			center: ol.extent.getCenter(feature.getGeometry().getExtent()),
-			duration: 2000,						
+			duration: 500,						
 			//easing: ol.easing.easeOut
 		});		
 	},

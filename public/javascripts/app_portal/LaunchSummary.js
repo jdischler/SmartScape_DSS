@@ -29,16 +29,13 @@ Ext.define('DSS.app_portal.LaunchSummary', {
 			},{				
 				xtype: 'container',
 				flex: 1,
-				padding: 4,
-				layout: {
-					type: 'hbox',
-					pack: 'center',
-					align: 'end'
-				},
+				padding: '16 4',
+				layout: 'center',
 				items: [{
 					xtype: 'button',
-					margin: '0 4',
+					margin: '6 4 10 0',
 					scale: 'medium',
+					cls: 'ext-landing-button',
 					width: 190,
 					text: 'Start SmartScape',
 					handler: function() {

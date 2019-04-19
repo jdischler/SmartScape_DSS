@@ -34,16 +34,19 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 				layout: {
 					type: 'hbox',
 					pack: 'center',
-					align: 'end'
+				},
+				defaults: {
+					xtype: 'button',
+					cls: 'ext-landing-button',
+					margin: '0 4 10 0',
+					scale: 'medium',
+					toggleGroup: 'rbc',
 				},
 				items: [{
-					xtype: 'button',
-					margin: '0 4',
-					scale: 'medium',
 					width: 150,
-					toggleGroup: 'rbc',
 					text: 'Restrict by County',
 					toggleHandler: function(btn, state) {
+						btn.addCls('ext-landing-button'); // eh?
 						if (state) {
 							btn.setText('Done Choosing')
 							DSS_PortalMap.setMode('county');
@@ -53,13 +56,10 @@ Ext.define('DSS.app_portal.AOI_Refinement', {
 						}
 					}
 				},{
-					xtype: 'button',
-					margin: '0 4',
-					scale: 'medium',
 					width: 170,
-					toggleGroup: 'rbc',
 					text: 'Restrict by Watershed',
 					toggleHandler: function(btn, state) {
+						btn.addCls('ext-landing-button'); // eh?
 						if (state) {
 							btn.setText('Done Choosing')
 							DSS_PortalMap.setMode('watershed');

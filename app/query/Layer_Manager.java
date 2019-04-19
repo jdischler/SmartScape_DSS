@@ -49,13 +49,13 @@ public class Layer_Manager
 			// Queryable layers...though some of these are also used by model computations..
 			layer = new Layer_ProceduralFraction(); layer.init();// really has no data...init may not also be needed?
 			newIntegerLayer("cdl_2012").init();
+			newIntegerLayer("wisc_land").init();
 			newFloatLayer("slope").init();
 			newFloatLayer("dist_to_water").init();
 			newFloatLayer("rivers").init();
 			newIntegerLayer("watersheds", Layer_Integer.EType.ERaw).init();
 			newIntegerLayer("huc-8", Layer_Integer.EType.ERaw).init();
 			newIntegerLayer("counties", Layer_Integer.EType.ERaw).init();
-			
 		//	newFloatLayer("cow_index").init();
 			
 			// Layers for model computation

@@ -234,7 +234,31 @@ Ext.define('DSS.components.AttributeBrowser', {
 				],
 			});
 			DSS.Layers.add(lt);
-			
+
+			lt = Ext.create('DSS.components.LayerIndexed', {
+				title: 'Wisc Land',
+				DSS_serverLayer: 'wisc_land',
+				DSS_columns: 3,
+				DSS_indexConfig: [
+					{boxLabel: 'Cont. Corn', name: "wl", indexValues: [1]},
+					{boxLabel: 'Cash Grain', name: "wl", indexValues: [14]},
+					{boxLabel: 'Dairy Rotn', 	name: "wl", indexValues: [15]},
+					{boxLabel: 'Grass', 	name: "wl", indexValues: [2,3,4,5]},
+					{boxLabel: 'Hay', 	name: "wl", indexValues: [2]},
+					{boxLabel: 'Pasture', 	name: "wl", indexValues: [3]},
+					{boxLabel: 'Warm Grass', 	name: "wl", indexValues: [5]},
+					{boxLabel: 'Cool Grass', 	name: "wl", indexValues: [4]},
+					{boxLabel: 'Warm Grass', 	name: "wl", indexValues: [5]},
+					{boxLabel: 'Other Crops', name: "wl", indexValues: [16]},
+					{boxLabel: 'Wetlands', 	name: "wl", indexValues: [10]},
+					{boxLabel: 'Developed', name: "wl", indexValues: [12,13], checked: true},
+					{boxLabel: 'Woodland',	name: "wl", indexValues: [6,7,8]},
+					{boxLabel: 'Conifers',	name: "wl", indexValues: [6]},
+					{boxLabel: 'Deciduous',	name: "wl", indexValues: [7]},
+				],
+			});
+			DSS.Layers.add(lt);
+
 			//----------------------------------------------------------
 			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
 				title: 'Slope',

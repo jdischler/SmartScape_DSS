@@ -218,3 +218,8 @@
 	background: rgba(255,255,255,0.2);
 }
 
+.ext-landing-button {
+	box-shadow: 0 6px 6px rgba(0,0,0,0.2),0 3px 3px rgba(0,0,0,0.2) !important;
+	border-radius: 10px;
+	border-color: #cdf;
+}

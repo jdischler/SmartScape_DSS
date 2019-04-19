@@ -60,16 +60,19 @@ Ext.define('DSS.app_portal.AOI', {
 					xtype: 'container',
 					layout: 'column',
 					itemId: 'dss-button-options',
-					padding: '8 16',
+					padding: '8 16 10 16',
 					width: '100%',
 					defaults: {
 						xtype: 'button',
 						scale: 'medium',
 						columnWidth : 0.5,
+						cls: 'ext-landing-button',
 						margin: 4,
 						toggleGroup: 'dss-toggle',
 						allowDepress: false,
 						toggleHandler: function(self, pressed) {
+							self.addCls('ext-landing-button'); // eh?
+
 							if (!pressed) return;
 							me.onActivated();
 							var chartData = Ext.data.StoreManager.lookup('dss-values');

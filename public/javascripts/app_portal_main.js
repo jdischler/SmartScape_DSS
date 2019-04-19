@@ -85,33 +85,30 @@ Ext.create('Ext.data.Store', {
 	storeId: 'dss-proportions',
 	fields: ['name', 'data1', 'location'],
 	data: [
-	{name: 'Row Crops',		data1: 32.2, 	location: 'uc'},
-	{name: 'Woodland',		data1: 24.3, 	location: 'uc'},
-	{name: 'Grasses',		data1: 22.4,	location: 'uc'},
-	{name: 'Wetlands/Water',data1: 8.8, 	location: 'uc'},
-	{name: 'Developed',		data1: 8.3, 	location: 'uc'},
-	{name: 'Other',			data1: 4, 		location: 'uc'},
+	{name: 'Row Crops',		data1: 40, 	location: 'uc'},
+	{name: 'Woodland',		data1: 22.2, 	location: 'uc'},
+	{name: 'Wetlands/Water',data1: 11.6, 	location: 'uc'},
+	{name: 'Grasses',		data1: 19,	location: 'uc'},
+	{name: 'Developed',		data1: 6.9, 	location: 'uc'},
+//	{name: 'Other',			data1: 4, 		location: 'uc'},
 
 	{name: 'Row Crops',		data1: 26.2, 	location: 'cs'},
 	{name: 'Woodland',		data1: 26.3, 	location: 'cs'},
-	{name: 'Grasses',		data1: 22.4,	location: 'cs'},
 	{name: 'Wetlands/Water',data1: 4.8, 	location: 'cs'},
+	{name: 'Grasses',		data1: 22.4,	location: 'cs'},
 	{name: 'Developed',		data1: 5.3, 	location: 'cs'},
-	{name: 'Other',			data1: 6, 		location: 'cs'},
 
 	{name: 'Row Crops',		data1: 22.2, 	location: 'd'},
 	{name: 'Woodland',		data1: 38.3, 	location: 'd'},
-	{name: 'Grasses',		data1: 22.4,	location: 'd'},
 	{name: 'Wetlands/Water',data1: 4.8, 	location: 'd'},
+	{name: 'Grasses',		data1: 22.4,	location: 'd'},
 	{name: 'Developed',		data1: 4.3, 	location: 'd'},
-	{name: 'Other',			data1: 4, 		location: 'd'},
 	
 	{name: 'Row Crops',		data1: 38.2, 	location: 'frv'},
 	{name: 'Woodland',		data1: 22.3, 	location: 'frv'},
-	{name: 'Grasses',		data1: 22.4,	location: 'frv'},
 	{name: 'Wetlands/Water',data1: 9.8, 	location: 'frv'},
+	{name: 'Grasses',		data1: 22.4,	location: 'frv'},
 	{name: 'Developed',		data1: 7.3, 	location: 'frv'},
-	{name: 'Other',			data1: 3, 		location: 'frv'},
 	
 	],
 	
@@ -156,7 +153,7 @@ var pieDef = {
 	sprites: [{
 		type: 'text',
 		x: 4,
-		y: 18,
+		y: 16,
 		text: 'Landcover Proportions',
 		fontSize: 14,
 		fontWeight: 'bold',
@@ -164,23 +161,24 @@ var pieDef = {
 	},{
 		type: 'line',
 		fromX: 3,
-		fromY: 20,
+		fromY: 18,
 		toX: 102,
-		toY: 20,
+		toY: 18,
 		strokeStyle: '#467'
 	},{
 		type: 'line',
 		fromX: 106,
-		fromY: 20,
+		fromY: 18,
 		toX: 159,
-		toY: 20,
+		toY: 18,
 		strokeStyle: '#467'
 	}],
    series: {
-	   colors: ['#f3e45c','#a4b85c','#f3a05a','#6f9fdc','#b7b7b7','#bf8a9a'],
+	   colors: ['#f3e45c','#f3a05a','#6f9fdc','#a4b85c','#b7b7b7','#bf8a9a'],
        type: 'pie3d',
        highlight: true,
        angleField: 'data1',
+       rotation: 2.0,
        label: {
            field: 'name',
            display: 'rotate',//'rotate',
@@ -219,7 +217,7 @@ var radarDef = {
 	sprites: [{
 		type: 'text',
 		x: 4,
-		y: 18,
+		y: 16,
 		text: 'Current Conditions',
 		fontSize: 14,
 		fontWeight: 'bold',
@@ -227,9 +225,9 @@ var radarDef = {
 	},{
 		type: 'line',
 		fromX: 4,
-		fromY: 20,
+		fromY: 18,
 		toX: 133,
-		toY: 20,
+		toY: 18,
 		strokeStyle: '#467'
 	}],
 	series: [{
