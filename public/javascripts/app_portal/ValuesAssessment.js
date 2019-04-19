@@ -9,7 +9,7 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 	width: 380,
 	height: 1,
 	layout: 'fit',
-	bodyPadding: '16 32',
+	bodyPadding: '8 24',
 	bodyStyle: 'background: rgb(240,240,234)',
 	title: 'Set Personal Values',
 	
@@ -29,7 +29,7 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 					width: 300,
 					minValue: 0,
 					maxValue: 100,
-					margin: '8 32 8 0',
+					margin: '4 32 4 0',
 					labelAlign: 'right',
 					labelWidth: 120,
 					increment: 5,
@@ -38,9 +38,14 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 				items: [{
 					xtype: 'component',
 					width: '100%',
-					margin: '0 0 16 0',
-					html: 'Please adjust your preferences regarding how much importance you place to each of the axes shown to the right. ' +
-						'The values must add up to 100...yadda yadda'
+					margin: '0 0 0 0',
+					html: 'Please adjust your preferences regarding how much importance you place to each of the axes shown to the right.'
+				},{
+					xtype: 'component',
+					width: 200,
+					height: 160,
+					margin: '0 0 0 48',
+					html: '<img id="ddd" src="assets/images/triangle_selector.png" style="width:100%; opacity: 0.9">'
 				},{
 					fieldLabel: 'Net Income'
 				},{

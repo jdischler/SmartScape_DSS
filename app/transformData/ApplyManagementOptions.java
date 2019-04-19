@@ -44,32 +44,32 @@ public class ApplyManagementOptions
 	//--------------------------------------------------------------------------
 	public static void now() {
 		
-		Logger.info("Adding management options to CDL:");
+		Logger.info("Adding management options to Wisc Land:");
 		
-		Layer_Base cdl = Layer_Base.getLayer("cdl_2012");
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
 
-		if (cdl == null) {
+		if (wl == null) {
 			try {
 				
-				cdl = new Layer_Integer("cdl_2012"); cdl.init();
+				wl = new Layer_Integer("wisc_land"); wl.init();
 			}
 			catch (Exception e) {
 				Logger.warn(e.toString());
-				return;
+			}
+			finally {
+				if (wl == null) return;
 			}
 		}
-
-		if (cdl == null) return;
 		
-		int grassMask = ((Layer_Integer)cdl).convertStringsToMask("grass");
-		int cornMask = ((Layer_Integer)cdl).convertStringsToMask("corn");
-		int soyMask = ((Layer_Integer)cdl).convertStringsToMask("soy");
-		int alfalfaMask = ((Layer_Integer)cdl).convertStringsToMask("alfalfa");
+		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
+		int cornMask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
+		int soyMask = wl.stringToMask("fixme");
+		int alfalfaMask = wl.stringToMask("fixme");		
 		int totalMask = grassMask | cornMask | soyMask | alfalfaMask;
 
-		int width = cdl.getWidth();
-		int height = cdl.getHeight();
-		int[][] rasterData = cdl.getIntData();
+		int width = wl.getWidth();
+		int height = wl.getHeight();
+		int[][] rasterData = wl.getIntData();
 		
 		// Get some other layers we'll query to help decide what to put where, 
 		//	e.g., flat land is not likely to be contoured or terraced...

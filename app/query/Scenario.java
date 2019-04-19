@@ -62,7 +62,7 @@ public class Scenario
 		
 		mAssumptions = new GlobalAssumptions();
 		try {
-			mAssumptions.setAssumptionsFromClient(clientAssumptions);
+			mAssumptions.setFromClient(clientAssumptions);
 		} 
 		catch (Exception e) {
 			Logger.info(e.toString());
@@ -237,7 +237,7 @@ public class Scenario
 				
 				int newLandUse = transformConfigObj.get("LandUse").intValue();
 				detailedLog("  + New land use code: " + Integer.toString(newLandUse));
-				newLandUse = Layer_Integer.convertIndexToMask(newLandUse);
+				newLandUse = Layer_Integer.indexToMask(newLandUse);
 				
 				JsonNode managementOptions = transformConfigObj.get("Options");
 				if (managementOptions != null && managementOptions.isObject()) {

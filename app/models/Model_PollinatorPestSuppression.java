@@ -44,10 +44,10 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		
 		// Mask
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Alfalfa_Mask = cdl.convertStringsToMask("alfalfa");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
+		int Grass_Mask = cdl.stringToMask("grass");
+		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
+		int Corn_Mask = cdl.stringToMask("corn");
+		int Soy_Mask = cdl.stringToMask("soy");
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
 		// full raster save process...
@@ -55,7 +55,7 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		float [][] pollinatorData = new float[height][width];
 		
 		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
-		Moving_Z_Window.Z_WindowPoint point = zWin.getPoint();
+		Moving_Z_Window.WindowPoint point = zWin.getPoint();
 
 		float max = (float)Math.pow(0.75f + 2.5f + 1.0f, 2.0f);
 		

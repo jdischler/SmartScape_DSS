@@ -307,7 +307,7 @@ public abstract class Layer_Base
 	//--------------------------------------------------------------------------
 	public static void execQuery(JsonNode layerList, Selection selection, ClientUser user) {
 
-		String cdlTest = "cdl_2012";
+		String wisc_land = "wisc_land";
 
 		int userAccessRights = 0;
 		if (user != null) {
@@ -316,7 +316,7 @@ public abstract class Layer_Base
 
 		if (layerList != null && layerList.isArray()) {
 	
-			boolean queriedCDL = false;
+			boolean queriedWiscLand = false;
 			ArrayNode arNode = (ArrayNode)layerList;
 			int count = arNode.size();
 			for (int i = 0; i < count; i++) {
@@ -327,8 +327,8 @@ public abstract class Layer_Base
 					Layer_Base layer = Layer_Base.getLayer(layerName.textValue());
 					if (layer != null) {
 						if (layer.allowAccessFor(userAccessRights)) {
-							if (cdlTest.equalsIgnoreCase(layerName.textValue())) {
-								queriedCDL = true;
+							if (wisc_land.equalsIgnoreCase(layerName.textValue())) {
+								queriedWiscLand = true;
 							}
 							layer.query(arElem, selection);
 						}
@@ -339,23 +339,23 @@ public abstract class Layer_Base
 				}
 			}
 			
-			// If a CDL query item didn't come from the client, crutch one up that
-			//	auto-selects all (currently) four options...
-			if (!queriedCDL) {
-				detailedLog("Did not have a CDL query so creating one with our four main landcover types");
-				Layer_Integer layer = (Layer_Integer)Layer_Base.getLayer(cdlTest);
+			// If query didn't contain wisc_land, force one to restrict changes to only the
+			//	types of landcover that SmartScape allows changing...
+			if (!queriedWiscLand) {
+				detailedLog("Did not have a wisc_land query component. Manually adding one");
+				Layer_Integer layer = (Layer_Integer)Layer_Base.getLayer(wisc_land);
 				if (layer != null) {
 					
 					ObjectNode fakeQueryObj = JsonNodeFactory.instance.objectNode();
 					ArrayNode queryParms = JsonNodeFactory.instance.arrayNode();
 			
-					queryParms.add(layer.getIndexForString("corn"));
-					queryParms.add(layer.getIndexForString("grass"));
-					queryParms.add(layer.getIndexForString("soy"));
-					queryParms.add(layer.getIndexForString("alfalfa"));
-					queryParms.add(layer.getIndexForString("alfalfa"));
-					queryParms.add(layer.getIndexForString("woodland"));
-					queryParms.add(layer.getIndexForString("grains"));
+					queryParms.add(layer.getIndexForString("continuous corn"));
+					queryParms.add(layer.getIndexForString("cash grain"));
+					queryParms.add(layer.getIndexForString("dairy rotation"));
+					queryParms.add(layer.getIndexForString("hay"));
+					queryParms.add(layer.getIndexForString("pasture"));
+					queryParms.add(layer.getIndexForString("cool-season grass"));
+					queryParms.add(layer.getIndexForString("warm-season grass"));
 					fakeQueryObj.set("matchValues", queryParms);
 			
 					layer.query(fakeQueryObj, selection);

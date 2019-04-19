@@ -36,15 +36,15 @@ public class Model_HabitatIndex extends Model_Base
 		
 		// Mask
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int TotalMask = cdl.convertStringsToMask("grass") | cdl.convertStringsToMask("alfalfa") 
-				| cdl.convertStringsToMask("corn") | cdl.convertStringsToMask("soy");
+		int TotalMask = cdl.stringToMask("grass") | cdl.stringToMask("alfalfa") 
+				| cdl.stringToMask("corn") | cdl.stringToMask("soy");
 		
 		// --- Model specific code starts here
 		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
 		
 		boolean moreCells = true;
 		while (moreCells) {
-			Moving_Z_Window.Z_WindowPoint point = zWin.getPoint();
+			Moving_Z_Window.WindowPoint point = zWin.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
 			if ((rotationData[point.mY][point.mX] & TotalMask) > 0 && zWin.canGetProportions()) {

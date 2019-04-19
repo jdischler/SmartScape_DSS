@@ -5,14 +5,15 @@ import query.Layer_Base;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.ManagementOptions;
+import utils.Utils;
 
 //------------------------------------------------------------------------------
 // Modeling Process
 //
-// This program uses slope, soil depth, silt and CEC to calculate corn, soy, grass and alfalfa yield (Tonnes per hec) 
+// This model uses slope, soil depth, silt, and CEC to calculate corn, soy, grass, and alfalfa yield 
 // This model is from unpublished work by Tim University of Wisconsin Madison
-// Inputs are slope, soil depth, silt and CEC layers, selected cells in the raster map and crop rotation layer 
-// Outputs are ASCII map of corn, soy, grass and alfalfa yield
+// Inputs are slope, soil depth, silt, CEC layers, and the selected cells in the raster & rotation map 
+// Outputs are an array of corn, soy, grass, and alfalfa yields. The units are in tonnes per hectare
 // Version 08/20/2013
 //
 //------------------------------------------------------------------------------
@@ -34,29 +35,29 @@ public class Model_CropYield extends Model_Base
 		float CC_M = 1.0f;
 		
 		// Multipliers from client variables
-		float annualNoTillageModifier = 1.0f; //
-		float annualCoverCropModifier = 1.0f;		
+		Float annualNoTillageModifier = 1.0f; //
+		Float annualCoverCropModifier = 1.0f;		
 
 		// Get user changeable yield scaling values from the client...
 		//----------------------------------------------------------------------
 		try {	
 			// values come in as straight multiplier
-			annualNoTillageModifier = scenario.mAssumptions.getAssumptionFloat("y_nt_annuals");
-			annualCoverCropModifier = scenario.mAssumptions.getAssumptionFloat("y_cc_annuals");		
+			annualNoTillageModifier = scenario.mAssumptions.getFloat("y_nt_annuals");
+			annualCoverCropModifier = scenario.mAssumptions.getFloat("y_cc_annuals");		
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
 		}
 		
-		debugLog(" Agricultural no till from client = " + Float.toString(annualNoTillageModifier) );
-		debugLog(" Agricultural cover crop from client = " + Float.toString(annualCoverCropModifier) );
+		debugLog(" Agricultural no till from client = " + annualNoTillageModifier);
+		debugLog(" Agricultural cover crop from client = " + annualCoverCropModifier);
 		
 		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
-		int Alfalfa_Mask = cdl.convertStringsToMask("Alfalfa");
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
+		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
+		int Soy_Mask = wl.stringToMask("fixme");
+		int Alfalfa_Mask = wl.stringToMask("fixme");
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
 		// Corn and Grass Yield
@@ -68,32 +69,24 @@ public class Model_CropYield extends Model_Base
 		float Yield = 0;
 
 		// Yield Modification/Scalar - default to multiply by 1.0, which is NO change
-		float cornYieldModifier = 1.0f; //
-		float soyYieldModifier = 1.0f; //
-		float alfalfaYieldModifier = 1.0f; //
-		float grassYieldModifier = 1.0f; //
+		Float cornYieldModifier = 1.0f; //
+		Float soyYieldModifier = 1.0f; //
+		Float alfalfaYieldModifier = 1.0f; //
+		Float grassYieldModifier = 1.0f; //
 		
 		// Get user changeable yield scaling values from the client...
 		//----------------------------------------------------------------------
 		try {	
-			// Value comes in as a percent, e.g. -5%...convert to a multipler
-			cornYieldModifier = scenario.mAssumptions.getAssumptionFloat("ym_corn") / 100.0f + 1.0f;
-			soyYieldModifier = scenario.mAssumptions.getAssumptionFloat("ym_soy") / 100.0f + 1.0f;
-			alfalfaYieldModifier = scenario.mAssumptions.getAssumptionFloat("ym_alfalfa") / 100.0f + 1.0f;
-			grassYieldModifier = scenario.mAssumptions.getAssumptionFloat("ym_grass") / 100.0f + 1.0f;
+			// Value comes in as a percent, e.g. -5%...convert to a multiplier
+			cornYieldModifier = scenario.mAssumptions.getFloat("ym_corn") / 100.0f + 1.0f;
+			soyYieldModifier = scenario.mAssumptions.getFloat("ym_soy") / 100.0f + 1.0f;
+			alfalfaYieldModifier = scenario.mAssumptions.getFloat("ym_alfalfa") / 100.0f + 1.0f;
+			grassYieldModifier = scenario.mAssumptions.getFloat("ym_grass") / 100.0f + 1.0f;
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
 		}
 		
-		debugLog(" Corn yield from client = " + Float.toString(cornYieldModifier) );
-		debugLog(" Soy yield from client = " + Float.toString(soyYieldModifier) );
-		debugLog(" Alfalfa yield from client = " + Float.toString(alfalfaYieldModifier) );
-		debugLog(" Grass yield from client = " + Float.toString(grassYieldModifier) );
-		//----------------------------------------------------------------------		
-		
-		// Define separate arrays to keep corn and grass production
-		// Crop Yield
 		float[][] yield = new float[height][width];
 		debugLog("  > Allocated memory for Yield");
 		
@@ -102,89 +95,70 @@ public class Model_CropYield extends Model_Base
 		float depth[][] = Layer_Base.getLayer("Depth").getFloatData();
 		float cec[][] = Layer_Base.getLayer("CEC").getFloatData();
 		
+		float cornCoefficient = 1.30f 	// correction for technological advances 
+				* 2.0f 					// contribution of stover 
+				* 0.053f 				// conversion to Mg per Ha 
+				* cornYieldModifier;	// user-set assumption
+		
+		float grassCoefficient = 1.05f 	// correction for technological advances
+				* 1.91f					// conversion to Mg per Ha
+				* grassYieldModifier;	// user-set assumption
+		
+		float soyCoefficient = 1.2f		// Correct for techno advances
+				* 0.0585f				// conversion to Mg per Ha
+				* 2.5f					// contribution of soy residue
+				* soyYieldModifier;		// user-set assumption
+
+		float alfalfaCoefficient = 1.05f // Correction Factor for modern yield
+				* 1.905f				// conversion to Mg per Ha
+				* alfalfaYieldModifier;	// user-set assumption
+
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				
 				int landCover = rotationData[y][x];
 									
-				if ((landCover & TotalMask) > 0) {
-					NT_M = 1.0f;
-					CC_M = 1.0f;
-				
-					if (slope[y][x] < 0 || depth[y][x] < 0 || silt[y][x] < 0 || cec[y][x] < 0) {
-						yield[y][x] = -9999.0f;
-					}
-					else if ((landCover & Corn_Mask) > 0) {
-						// Return tillage modififier if cell is Tilled
-						NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover, 1.0f, annualNoTillageModifier);
-						CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, annualCoverCropModifier, 1.0f);
-						
-						// Bushels per Ac
-						Corn_Y = 22.000f - 1.05f * slope[y][x] + 0.190f * depth[y][x] + 0.817f * silt[y][x] + 1.32f * cec[y][x];
-						// Correct for techno advances
-						Corn_Y = Corn_Y * 1.30f;
-						// add stover
-						Corn_Y = Corn_Y + Corn_Y;
-						// Mg per Ha
-						Yield = Corn_Y * 0.053f;
-						// Factor in yield modifcation from client, which defaults to 0% change, ie * 1.0f
-						Yield *= cornYieldModifier;
-						// Land management factors
-						Yield *= NT_M * CC_M;
-					}
-					else if ((landCover & Grass_Mask) > 0) {
-						// short tons per Ac
-						Grass_Y = 0.77f - 0.031f * slope[y][x] + 0.008f * depth[y][x] + 0.029f * silt[y][x] + 0.038f * cec[y][x];
-						// Correct for techno advances
-						Grass_Y = Grass_Y * 1.05f;
-						// Mg per Ha
-						Yield = Grass_Y * 1.91f;
-						// Factor in yield modification from client, which defaults to 0% change, ie * 1.0f
-						Yield *= grassYieldModifier;
-					}
-					else if ((landCover & Soy_Mask) > 0) {
-						// Return tillage modififier if cell is Tilled
-						NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover, 1.0f, annualNoTillageModifier);
-						CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, annualCoverCropModifier, 1.0f);
-						// Bushels per Ac
-						Soy_Y = 6.37f - 0.34f * slope[y][x] + 0.065f * depth[y][x] + 0.278f * silt[y][x] + 0.437f * cec[y][x];
-						// Correct for techno advances
-						Soy_Y = Soy_Y * 1.2f;
-						// Mg per Ha
-						Soy_Y = Soy_Y * 0.0585f;
-						// add residue
-						Yield = Soy_Y + Soy_Y * 1.5f;
-						// Factor in yield modifcation from client, which defaults to 0% change, ie * 1.0f
-						Yield *= soyYieldModifier;
-						// Land management factors
-						Yield *= NT_M * CC_M;
-					}
-					else if ((landCover & Alfalfa_Mask) > 0) {
-						// Short tons per Acre
-						Alfalfa_Y = 1.26f - 0.045f * slope[y][x] + 0.007f * depth[y][x] + 0.027f * silt[y][x] + 0.041f * cec[y][x];
-						// Yield Correction Factor for modern yield
-						Alfalfa_Y = Alfalfa_Y * 1.05f;
-						// Mg per Ha
-						Yield = Alfalfa_Y * 1.905f;
-						// Factor in yield modification from client, which defaults to 0% change, ie * 1.0f
-						Yield *= alfalfaYieldModifier;
-					}
+				if ((landCover & TotalMask) <= 0 || slope[y][x] < 0 || 
+						depth[y][x] < 0 || silt[y][x] < 0 || cec[y][x] < 0) {
 					
-					// Ensure sane range
-					if (Yield < 0) {
-						yield[y][x] = 0.0f;
-					}
-					else if (Yield > 25) {
-						yield[y][x] = 25.0f;
-					}
-					else {
-						yield[y][x] = Yield;
-					}
-				}
-				else {
 					yield[y][x] = -9999.0f;
+					continue;
+				}
+			
+				if ((landCover & Corn_Mask) > 0) {
+					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
+					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
+					Corn_Y = 22.0f - 1.05f * slope[y][x] + 0.19f * depth[y][x] + 0.817f * silt[y][x] + 1.32f * cec[y][x];
+					// Combined corn coefficients & Land management factors
+					Corn_Y = Corn_Y * cornCoefficient * NT_M * CC_M;
+					// Ensure sane range
+					Yield = Utils.clamp(Corn_Y, 0.0f, 25.0f);
+				}
+				else if ((landCover & Soy_Mask) > 0) {
+					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
+					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
+					// Bushels per acre
+					Soy_Y = 6.37f - 0.34f * slope[y][x] + 0.065f * depth[y][x] + 0.278f * silt[y][x] + 0.437f * cec[y][x];
+					Soy_Y = Soy_Y * soyCoefficient * NT_M * CC_M;
+					// Ensure sane range
+					Yield = Utils.clamp(Soy_Y, 0.0f, 25.0f);
+				}
+				else if ((landCover & Alfalfa_Mask) > 0) {
+					// Short tons per A\acre
+					Alfalfa_Y = 1.26f - 0.045f * slope[y][x] + 0.007f * depth[y][x] + 0.027f * silt[y][x] + 0.041f * cec[y][x];
+					Alfalfa_Y = Alfalfa_Y * alfalfaCoefficient;
+					// Ensure sane range
+					Yield = Utils.clamp(Alfalfa_Y, 0.0f, 25.0f);
+				}
+				else if ((landCover & Grass_Mask) > 0) {
+					// short tons per acre
+					Grass_Y = 0.77f - 0.031f * slope[y][x] + 0.008f * depth[y][x] + 0.029f * silt[y][x] + 0.038f * cec[y][x];
+					Grass_Y = Grass_Y * grassCoefficient;
+					// Ensure sane range
+					Yield = Utils.clamp(Grass_Y, 0.0f, 25.0f);
 				}
 				
+				yield[y][x] = Yield;
 			}
 		}
 		

@@ -52,10 +52,10 @@ public class Model_Soil_Loss extends Model_Base {
 		
 		// Mask
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012");
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Alfalfa_Mask = cdl.convertStringsToMask("alfalfa");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
+		int Grass_Mask = cdl.stringToMask("grass");
+		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
+		int Corn_Mask = cdl.stringToMask("corn");
+		int Soy_Mask = cdl.stringToMask("soy");
 		int Ag_Mask = Corn_Mask | Soy_Mask;
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
@@ -93,9 +93,9 @@ public class Model_Soil_Loss extends Model_Base {
 		//----------------------------------------------------------------------
 		try {
 			// values come in as straight multiplier
-			annualCoverCropModifier = scenario.mAssumptions.getAssumptionFloat("sl_cc_annuals");
-			Management_P1 = scenario.mAssumptions.getAssumptionFloat("sl_Contouring_P1");
-			Management_P2 = scenario.mAssumptions.getAssumptionFloat("sl_Terrace_P2");
+			annualCoverCropModifier = scenario.mAssumptions.getFloat("sl_cc_annuals");
+			Management_P1 = scenario.mAssumptions.getFloat("sl_Contouring_P1");
+			Management_P2 = scenario.mAssumptions.getFloat("sl_Terrace_P2");
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
@@ -124,18 +124,18 @@ public class Model_Soil_Loss extends Model_Base {
 					// C and P are coming from biophysical table (Invest)
 					if ((landCover & Grass_Mask) > 0) {
 						C = 0.02f;
-						P = ManagementOptions.E_Terrace.getIfActiveOn(landCover, Management_P2, 1.0f);
+						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
 					} 
 					else if ((landCover & Alfalfa_Mask) > 0) {
 						C = 0.02f;
-						P = ManagementOptions.E_Terrace.getIfActiveOn(landCover, Management_P2, 1.0f);
+						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
 					} 
 					// Agriculture
 					else if ((landCover & Ag_Mask) > 0) {
 						C = 0.3f;
-						CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, annualCoverCropModifier, 1.0f);
-						P = ManagementOptions.E_Contour.getIfActiveOn(landCover, Management_P1, 1.0f) *
-						ManagementOptions.E_Terrace.getIfActiveOn(landCover, Management_P2, 1.0f);
+						CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
+						P = ManagementOptions.E_Contour.getIfActive(landCover, Management_P1, 1.0f) *
+						ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
 					}
 
 					// Convert Mg per Ha to Mg per cell

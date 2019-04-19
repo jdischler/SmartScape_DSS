@@ -49,11 +49,11 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		float Net_Energy_C = 0;
 		float Net_Energy_S = 0;
 		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
-		int Alfalfa_Mask = cdl.convertStringsToMask("Alfalfa");
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
+		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
+		int Soy_Mask = wl.stringToMask("fixme");
+		int Alfalfa_Mask = wl.stringToMask("fixme");
 		
 		// Proportion of Stover 
 		float Prop_Stover_Harvest = 0.38f;
@@ -108,17 +108,17 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		// Net Income
 		try {
 			// Production
-			PC_Cost = scenario.mAssumptions.getAssumptionFloat("p_corn_p");
-			PCS_Cost = scenario.mAssumptions.getAssumptionFloat("p_stover_p");
-			PG_Cost = scenario.mAssumptions.getAssumptionFloat("p_grass_p");
-			PS_Cost = scenario.mAssumptions.getAssumptionFloat("p_soy_p");
-			PA_Cost = scenario.mAssumptions.getAssumptionFloat("p_alfalfa_p");
+			PC_Cost = scenario.mAssumptions.getFloat("p_corn_p");
+			PCS_Cost = scenario.mAssumptions.getFloat("p_stover_p");
+			PG_Cost = scenario.mAssumptions.getFloat("p_grass_p");
+			PS_Cost = scenario.mAssumptions.getFloat("p_soy_p");
+			PA_Cost = scenario.mAssumptions.getFloat("p_alfalfa_p");
 			// Sell
-			P_Per_Corn = scenario.mAssumptions.getAssumptionFloat("p_corn_s");
-			P_Per_Stover = scenario.mAssumptions.getAssumptionFloat("p_stover_s");
-			P_Per_Grass = scenario.mAssumptions.getAssumptionFloat("p_grass_s");
-			P_Per_Soy = scenario.mAssumptions.getAssumptionFloat("p_soy_s");
-			P_Per_Alfalfa = scenario.mAssumptions.getAssumptionFloat("p_alfalfa_s");
+			P_Per_Corn = scenario.mAssumptions.getFloat("p_corn_s");
+			P_Per_Stover = scenario.mAssumptions.getFloat("p_stover_s");
+			P_Per_Grass = scenario.mAssumptions.getFloat("p_grass_s");
+			P_Per_Soy = scenario.mAssumptions.getFloat("p_soy_s");
+			P_Per_Alfalfa = scenario.mAssumptions.getFloat("p_alfalfa_s");
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
@@ -127,17 +127,17 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		// Net Energy
 		try {
 			// Energy Input at Farm
-			EI_CF = scenario.mAssumptions.getAssumptionFloat("e_corn");
-			EI_CSF = scenario.mAssumptions.getAssumptionFloat("e_stover");
-			EI_GF = scenario.mAssumptions.getAssumptionFloat("e_grass");
-			EI_SF = scenario.mAssumptions.getAssumptionFloat("e_soy");
-			EI_AF = scenario.mAssumptions.getAssumptionFloat("e_alfalfa");
+			EI_CF = scenario.mAssumptions.getFloat("e_corn");
+			EI_CSF = scenario.mAssumptions.getFloat("e_stover");
+			EI_GF = scenario.mAssumptions.getFloat("e_grass");
+			EI_SF = scenario.mAssumptions.getFloat("e_soy");
+			EI_AF = scenario.mAssumptions.getFloat("e_alfalfa");
 			// Conversion Efficiency
-			CEO_C = scenario.mAssumptions.getAssumptionFloat("e_corn_ce");
-			CEO_CS = scenario.mAssumptions.getAssumptionFloat("e_stover_ce");
-			CEO_G = scenario.mAssumptions.getAssumptionFloat("e_grass_ce");
-			CEO_S = scenario.mAssumptions.getAssumptionFloat("e_soy_ce");
-			CEO_A = scenario.mAssumptions.getAssumptionFloat("e_alfalfa_ce");
+			CEO_C = scenario.mAssumptions.getFloat("e_corn_ce");
+			CEO_CS = scenario.mAssumptions.getFloat("e_stover_ce");
+			CEO_G = scenario.mAssumptions.getFloat("e_grass_ce");
+			CEO_S = scenario.mAssumptions.getFloat("e_soy_ce");
+			CEO_A = scenario.mAssumptions.getFloat("e_alfalfa_ce");
 		}
 		
 		catch (Exception e) {

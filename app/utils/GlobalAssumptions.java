@@ -41,7 +41,7 @@ public class GlobalAssumptions
 		addOptionalHelpTextProperty(options, "Sell price per dry metric ton");
 		
 		// P - Crop prices into Net Income Model
-		ObjectNode category = createAssumptionCategory("Net Income Model", "economic_icon.png");
+		ObjectNode category = createCategory("Net Income Model", "economic_icon.png");
 		// Sell -> Price per tonne
 		createAssumption(category,	"p_corn_s", 	"Corn Price", 			240.0f, options);
 		createAssumption(category,	"p_stover_s", 	"Corn Stover Price", 	50.0f, 	options);
@@ -71,7 +71,7 @@ public class GlobalAssumptions
 		addOptionalHelpTextProperty(options, "Net Energy Input at Farm metric MJ/Ha");
 		
 		// Energy Input at Farm
-		category = createAssumptionCategory("Net Energy Model", "energy_icon.png", false);
+		category = createCategory("Net Energy Model", "energy_icon.png", false);
 		createAssumption(category,	"e_corn", 		"Corn Energy at Farm", 			18151.0f, options);
 		createAssumption(category,	"e_stover", 	"Corn Stover Energy at Farm", 	2121.0f, 	options);
 		createAssumption(category,	"e_soy", 		"Soy Energy at Farm", 			6096.0f, options);
@@ -101,7 +101,7 @@ public class GlobalAssumptions
 		addOptionalHelpTextProperty(options, "Yield modification as a perfcentage. E.g. 5 is a 5% increase in yield.");
 		
 		// YM - Yield modification/multiplier
-		category = createAssumptionCategory("Yield Modification", "percent_icon.png", false); // false means closed
+		category = createCategory("Yield Modification", "percent_icon.png", false); // false means closed
 		createAssumption(category,	"ym_corn", 		"Corn Yield", 		0.0f,	options);
 		createAssumption(category,	"ym_soy", 		"Soy Yield", 		0.0f,	options);
 		createAssumption(category,	"ym_alfalfa", 	"Alfalfa Yield", 	0.0f,	options);
@@ -113,7 +113,7 @@ public class GlobalAssumptions
 		addOptionalUnitLabelProperty(multiplierOptions, "Pre", "x"); // options are "Pre" and "Post"
 		
 		// SOIL LOSS MODEL Multipliers
-		category = createAssumptionCategory("Soil Loss Model", "down.png", false); // false means closed category
+		category = createCategory("Soil Loss Model", "down.png", false); // false means closed category
 		//createAssumption(category,	"sl_t_annuals_C1", 	"Till - Annual Crops", 			1.30f,	multiplierOptions);
 		createAssumption(category,	"sl_Contouring_P1", 	"With Contouring", 				0.90f,	multiplierOptions);
 		// Terracing currently made to have no effect whatsoever
@@ -121,7 +121,7 @@ public class GlobalAssumptions
 		createAssumption(category,	"sl_cc_annuals",	"With Cover Crop - Annual Crops", 	0.75f,	multiplierOptions);
 		
 		// PHOSPHORUS MODEL Multipliers
-		category = createAssumptionCategory("Phosphorus Model", "down.png", false); // false means closed category
+		category = createCategory("Phosphorus Model", "down.png", false); // false means closed category
 		createAssumption(category,	"p_m_annuals",		"Manure - Annual Crops",		1.03f,	multiplierOptions);
 		createAssumption(category,	"p_fm_annuals",		"Fall Manure - Annual Crops",	1.06f,	multiplierOptions);
 		createAssumption(category,	"p_t_annuals",		"Till - Annual Crops",			1.25f,	multiplierOptions);
@@ -130,7 +130,7 @@ public class GlobalAssumptions
 		createAssumption(category,	"p_fm_perennials",	"Fall Manure - Perennial Crops",1.04f,	multiplierOptions);
 		
 		// YIELD MODEL Multipliers
-		category = createAssumptionCategory("Yield Model", "down.png", false); // false means closed category
+		category = createCategory("Yield Model", "down.png", false); // false means closed category
 		//createAssumption(category,	"y_m_annuals",		"Manure - Annual Crops",		1.05f,	multiplierOptions);
 		//createAssumption(category,	"y_fm_annuals",		"Fall Manure - Annual Crops",	1.35f,	multiplierOptions);
 		createAssumption(category,	"y_nt_annuals",		"No Till - Annual Crops",			0.90f,	multiplierOptions);
@@ -141,7 +141,7 @@ public class GlobalAssumptions
 		// TODO: ADD assumptions to yield model here
 		
 		// SOC MODEL Multipliers
-		category = createAssumptionCategory("Soil Organic Carbon Model", "down.png", false); // false means closed category
+		category = createCategory("Soil Organic Carbon Model", "down.png", false); // false means closed category
 		// TODO: ADD assumptions to SOC model here
 		createAssumption(category,	"soc_m_annuals",		"Manure - Annual Crops",		1.02f,	multiplierOptions);
 		createAssumption(category,	"soc_fm_annuals",		"Fall Manure - Annual Crops",	1.04f,	multiplierOptions);
@@ -152,7 +152,7 @@ public class GlobalAssumptions
 		createAssumption(category,	"soc_fm_perennials",	"Fall Manure - Perennial Crops",1.03f,	multiplierOptions);
 		
 		// N20 MODEL Multipliers
-		category = createAssumptionCategory("Nitrous Oxide Model", "down.png", false); // false means closed category
+		category = createCategory("Nitrous Oxide Model", "down.png", false); // false means closed category
 		// TODO: ADD assumptions to N20 model here
 		createAssumption(category,	"n_m_annuals",		"Manure - Annual Crops",		1.03f,	multiplierOptions);
 		createAssumption(category,	"n_fm_annuals",		"Fall Manure - Annual Crops",	1.06f,	multiplierOptions);
@@ -166,14 +166,14 @@ public class GlobalAssumptions
 
 	// We put properties into Categories, generally, for user convenience in find things...
 	//--------------------------------------------------------------------------
-	private static ObjectNode createAssumptionCategory(String categoryName, String icon)
+	private static ObjectNode createCategory(String categoryName, String icon)
 	{
-		return createAssumptionCategory(categoryName,icon,true); // default to open
+		return createCategory(categoryName,icon,true); // default to open
 	}
 
 	// We put properties into Categories, generally, for user convenience in find things...
 	//--------------------------------------------------------------------------
-	private static ObjectNode createAssumptionCategory(String categoryName, String icon, boolean open)
+	private static ObjectNode createCategory(String categoryName, String icon, boolean open)
 	{
 		ObjectNode node = JsonNodeFactory.instance.objectNode();
 		node.put("CategoryName", categoryName);
@@ -238,7 +238,7 @@ public class GlobalAssumptions
 	
 	// Working with Hierarchical values is easier for the client...
 	//--------------------------------------------------------------------------
-	public static ObjectNode getAssumptionDefaultsForClient() {
+	public static ObjectNode getDefaultsForClient() {
 		
 		return mHierarchicalAssumptions;
 	}
@@ -251,7 +251,7 @@ public class GlobalAssumptions
 	}
 	
 	//--------------------------------------------------------------------------
-	public void setAssumptionsFromClient(JsonNode clientSend) throws Exception {
+	public void setFromClient(JsonNode clientSend) throws Exception {
 		
 		JsonNode res = clientSend.get("assumptions");
 		if (res == null) {
@@ -265,7 +265,7 @@ public class GlobalAssumptions
 	}
 	
 	//--------------------------------------------------------------------------
-	public float getAssumptionFloat(String variableName) throws Exception  {
+	public float getFloat(String variableName) throws Exception  {
 		
 		if (mClientSentAssumptions == null) {
 			throw new Exception();
@@ -273,17 +273,17 @@ public class GlobalAssumptions
 
 		JsonNode res = mClientSentAssumptions.findValue(variableName);
 		if (res == null) {
-			Logger.warn(" ..getAssumptionFloat: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getFloat: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 		if (!res.isObject()) {
-			Logger.warn(" ..getAssumptionFloat: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getFloat: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 
 		res = ((ObjectNode)res).get("DefaultValue");
 		if (!res.isNumber()) {
-			Logger.warn(" ..getAssumptionFloat: " + variableName + " failed - is not a number");
+			Logger.warn(" ...getFloat: " + variableName + " failed - is not a number");
 			throw new Exception();
 		}
 		
@@ -291,7 +291,7 @@ public class GlobalAssumptions
 	}
 
 	//--------------------------------------------------------------------------
-	public int getAssumptionInt(String variableName) throws Exception  {
+	public int getInt(String variableName) throws Exception  {
 		
 		if (mClientSentAssumptions == null) {
 			throw new Exception();
@@ -299,17 +299,17 @@ public class GlobalAssumptions
 
 		JsonNode res = mClientSentAssumptions.findValue(variableName);
 		if (res == null) {
-			Logger.warn(" ..getAssumptionInt: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getInt: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 		if (!res.isObject()) {
-			Logger.warn(" ..getAssumptionInt: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getInt: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 
 		res = ((ObjectNode)res).get("DefaultValue");
 		if (!res.isNumber()) {
-			Logger.warn(" ..getAssumptionInt: " + variableName + " failed - as not Number");
+			Logger.warn(" ...getInt: " + variableName + " failed - as not Number");
 			throw new Exception();
 		}
 		
@@ -317,7 +317,7 @@ public class GlobalAssumptions
 	}
 	
 	//--------------------------------------------------------------------------
-	public String getAssumptionString(String variableName) throws Exception  {
+	public String getString(String variableName) throws Exception  {
 		
 		if (mClientSentAssumptions == null) {
 			throw new Exception();
@@ -325,17 +325,17 @@ public class GlobalAssumptions
 
 		JsonNode res = mClientSentAssumptions.findValue(variableName);
 		if (res == null) {
-			Logger.warn(" ..getAssumptionString: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getString: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 		if (!res.isObject()) {
-			Logger.warn(" ..getAssumptionString: " + variableName + " failed - does not exist");
+			Logger.warn(" ...getString: " + variableName + " failed - does not exist");
 			throw new Exception();
 		}
 
 		res = ((ObjectNode)res).get("DefaultValue");
 		if (!res.isTextual()) {
-			Logger.warn(" ..getAssumptionString: " + variableName + " failed - is not textual");
+			Logger.warn(" ...getString: " + variableName + " failed - is not textual");
 			throw new Exception();
 		}
 		

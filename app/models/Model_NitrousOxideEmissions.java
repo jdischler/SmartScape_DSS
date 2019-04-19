@@ -41,10 +41,10 @@ public class Model_NitrousOxideEmissions extends Model_Base
 		
 		// Mask
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
-		int Alfalfa_Mask = cdl.convertStringsToMask("Alfalfa");
+		int Grass_Mask = cdl.stringToMask("grass");
+		int Corn_Mask = cdl.stringToMask("corn");
+		int Soy_Mask = cdl.stringToMask("soy");
+		int Alfalfa_Mask = cdl.stringToMask("Alfalfa");
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
 		// Input layers
@@ -62,12 +62,12 @@ public class Model_NitrousOxideEmissions extends Model_Base
 		//----------------------------------------------------------------------
 		try {	
 			// values come in as straight multiplier
-			annualTillageModifier = scenario.mAssumptions.getAssumptionFloat("n_t_annuals");
-			annualCoverCropModifier = scenario.mAssumptions.getAssumptionFloat("n_cc_annuals");		
-			annualFertilizerModifier = scenario.mAssumptions.getAssumptionFloat("n_m_annuals");
-			perennialFertilizerModifier = scenario.mAssumptions.getAssumptionFloat("n_m_perennials");	
-			annualFallFertilizerModifier = scenario.mAssumptions.getAssumptionFloat("n_fm_annuals");
-			perennialFallFertilizerModifier = scenario.mAssumptions.getAssumptionFloat("n_fm_perennials");	
+			annualTillageModifier = scenario.mAssumptions.getFloat("n_t_annuals");
+			annualCoverCropModifier = scenario.mAssumptions.getFloat("n_cc_annuals");		
+			annualFertilizerModifier = scenario.mAssumptions.getFloat("n_m_annuals");
+			perennialFertilizerModifier = scenario.mAssumptions.getFloat("n_m_perennials");	
+			annualFallFertilizerModifier = scenario.mAssumptions.getFloat("n_fm_annuals");
+			perennialFallFertilizerModifier = scenario.mAssumptions.getFloat("n_fm_perennials");	
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
@@ -109,8 +109,8 @@ public class Model_NitrousOxideEmissions extends Model_Base
 						fertRate = 168.0f;
 						
 						// Return tillage modifier if cell is Tilled
-						T_M = ManagementOptions.E_Till.getIfActiveOn(landCover, annualTillageModifier, 1.0f);
-						CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, annualCoverCropModifier, 1.0f);
+						T_M = ManagementOptions.E_Till.getIfActive(landCover, annualTillageModifier, 1.0f);
+						CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
 						F_M = ManagementOptions.getFertilizerMultiplier(landCover, 
 									1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 									annualFallFertilizerModifier, annualFertilizerModifier);
@@ -129,8 +129,8 @@ public class Model_NitrousOxideEmissions extends Model_Base
 						cropRotation = -1.023f;
 						
 						// Return tillage modifier if cell is Tilled
-						T_M = ManagementOptions.E_Till.getIfActiveOn(landCover, annualTillageModifier, 1.0f);
-						CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, annualCoverCropModifier, 1.0f);
+						T_M = ManagementOptions.E_Till.getIfActive(landCover, annualTillageModifier, 1.0f);
+						CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
 						F_M = ManagementOptions.getFertilizerMultiplier(landCover, 
 									1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 									annualFallFertilizerModifier, annualFertilizerModifier);

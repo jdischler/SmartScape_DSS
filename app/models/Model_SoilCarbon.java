@@ -47,10 +47,10 @@ public class Model_SoilCarbon extends Model_Base {
 		debugLog("  > Allocated memory for SOC");
 
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
-		int Alfalfa_Mask = cdl.convertStringsToMask("Alfalfa");
+		int Grass_Mask = cdl.stringToMask("grass");
+		int Corn_Mask = cdl.stringToMask("corn");
+		int Soy_Mask = cdl.stringToMask("soy");
+		int Alfalfa_Mask = cdl.stringToMask("Alfalfa");
 		
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		float factor = -1.0f;
@@ -68,12 +68,12 @@ public class Model_SoilCarbon extends Model_Base {
 		//----------------------------------------------------------------------
 		try {	
 			// values come in as straight multiplier
-			annualNoTillageModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_nt_annuals") - 1) / 20;
-			annualCoverCropModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_cc_annuals") - 1) / 20;		
-			annualFertilizerModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_m_annuals") - 1) / 20;
-			perennialFertilizerModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_m_perennials") - 1) / 20;	
-			annualFallFertilizerModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_fm_annuals") - 1) / 20;
-			perennialFallFertilizerModifier = 1 + (scenario.mAssumptions.getAssumptionFloat("soc_fm_perennials") - 1) / 20; 	
+			annualNoTillageModifier = 1 + (scenario.mAssumptions.getFloat("soc_nt_annuals") - 1) / 20;
+			annualCoverCropModifier = 1 + (scenario.mAssumptions.getFloat("soc_cc_annuals") - 1) / 20;		
+			annualFertilizerModifier = 1 + (scenario.mAssumptions.getFloat("soc_m_annuals") - 1) / 20;
+			perennialFertilizerModifier = 1 + (scenario.mAssumptions.getFloat("soc_m_perennials") - 1) / 20;	
+			annualFallFertilizerModifier = 1 + (scenario.mAssumptions.getFloat("soc_fm_annuals") - 1) / 20;
+			perennialFallFertilizerModifier = 1 + (scenario.mAssumptions.getFloat("soc_fm_perennials") - 1) / 20; 	
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
@@ -158,8 +158,8 @@ public class Model_SoilCarbon extends Model_Base {
 							else if ((landCover_T & Corn_Mask) > 0) {
 								factor = -RSCCF_Corn_Alfalfa; // ...CORN
 								// Return tillage modifier if cell is Tilled
-								NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover_T, 1.0f, annualNoTillageModifier);
-								CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover_T, annualCoverCropModifier, 1.0f);
+								NT_M = ManagementOptions.E_Till.getIfActive(landCover_T, 1.0f, annualNoTillageModifier);
+								CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover_T, annualCoverCropModifier, 1.0f);
 								F_M = ManagementOptions.getFertilizerMultiplier(landCover_T, 
 											1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 											annualFallFertilizerModifier, annualFertilizerModifier);
@@ -167,8 +167,8 @@ public class Model_SoilCarbon extends Model_Base {
 							else if ((landCover_T & Soy_Mask) > 0) {
 								factor = -RSCCF_Soy_Alfalfa; // ...SOY
 								// Return tillage modifier if cell is Tilled
-								NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover_T, 1.0f, annualNoTillageModifier);
-								CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover_T, annualCoverCropModifier, 1.0f);
+								NT_M = ManagementOptions.E_Till.getIfActive(landCover_T, 1.0f, annualNoTillageModifier);
+								CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover_T, annualCoverCropModifier, 1.0f);
 								F_M = ManagementOptions.getFertilizerMultiplier(landCover_T, 
 											1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 											annualFallFertilizerModifier, annualFertilizerModifier);
@@ -178,8 +178,8 @@ public class Model_SoilCarbon extends Model_Base {
 							if ((landCover_T & Corn_Mask) > 0) {
 								factor = -RSCCF_Corn_Grass; // ...CORN
 								// Return tillage modifier if cell is Tilled
-								NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover_T, 1.0f, annualNoTillageModifier);
-								CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover_T, annualCoverCropModifier, 1.0f);
+								NT_M = ManagementOptions.E_Till.getIfActive(landCover_T, 1.0f, annualNoTillageModifier);
+								CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover_T, annualCoverCropModifier, 1.0f);
 								F_M = ManagementOptions.getFertilizerMultiplier(landCover_T, 
 											1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 											annualFallFertilizerModifier, annualFertilizerModifier);
@@ -187,8 +187,8 @@ public class Model_SoilCarbon extends Model_Base {
 							else if ((landCover_T & Soy_Mask) > 0) {
 								factor = -RSCCF_Soy_Grass; // ...SOY
 								// Return tillage modififier if cell is Tilled
-								NT_M = ManagementOptions.E_Till.getIfActiveOn(landCover_T, 1.0f, annualNoTillageModifier);
-								CC_M = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover_T, annualCoverCropModifier, 1.0f);
+								NT_M = ManagementOptions.E_Till.getIfActive(landCover_T, 1.0f, annualNoTillageModifier);
+								CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover_T, annualCoverCropModifier, 1.0f);
 								F_M = ManagementOptions.getFertilizerMultiplier(landCover_T, 
 											1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 											annualFallFertilizerModifier, annualFertilizerModifier);

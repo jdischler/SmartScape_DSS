@@ -27,8 +27,8 @@ public class Model_HerdSuitabilityIndex extends Model_Base
 
 		// Mask
 		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int skipMask = cdl.convertStringsToMask("Wetland") | cdl.convertStringsToMask("Water") 
-				| cdl.convertStringsToMask("Suburban") | cdl.convertStringsToMask("Urban");
+		int skipMask = cdl.stringToMask("Wetland") | cdl.stringToMask("Water") 
+				| cdl.stringToMask("Suburban") | cdl.stringToMask("Urban");
 
 		float slope[][] = ((Layer_Float)Layer_Base.getLayer("slope")).getFloatData();
 		float rivers[][] = ((Layer_Float)Layer_Base.getLayer("rivers")).getFloatData();
@@ -50,7 +50,7 @@ public class Model_HerdSuitabilityIndex extends Model_Base
 		
 		boolean moreCells = true;
 		while (moreCells) {
-			Moving_Z_Window.Z_WindowPoint point = zWin.getPoint();
+			Moving_Z_Window.WindowPoint point = zWin.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
 			if (zWin.canGetProportions()) {

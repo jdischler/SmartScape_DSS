@@ -38,38 +38,38 @@ public class Model_P_LossEpic extends Model_Base {
 		float TM = 1.0f;// till multiplier
 		
 		// Manure values from client
-		float manureAnnualModifier = 1.0f; 
-		float fallManureAnnualModifier = 1.0f; 
-		float covercropAnnualModifier = 1.0f;
-		float tillAnnualModifier = 1.0f;
+		Float manureAnnualModifier = 1.0f; 
+		Float fallManureAnnualModifier = 1.0f; 
+		Float covercropAnnualModifier = 1.0f;
+		Float tillAnnualModifier = 1.0f;
 
-		float manurePerennialModifier = 1.0f;
-		float fallManurePerennialModifier = 1.0f;		
+		Float manurePerennialModifier = 1.0f;
+		Float fallManurePerennialModifier = 1.0f;		
 	
 		// Get user changeable yield scaling values from the client...
 		//----------------------------------------------------------------------
 		try {	
 			// values come in as straight multiplier
-			manureAnnualModifier = scenario.mAssumptions.getAssumptionFloat("p_m_annuals");
-			fallManureAnnualModifier = scenario.mAssumptions.getAssumptionFloat("p_fm_annuals");
-			covercropAnnualModifier = scenario.mAssumptions.getAssumptionFloat("p_cc_annuals");
-			tillAnnualModifier = scenario.mAssumptions.getAssumptionFloat("p_t_annuals");
+			manureAnnualModifier = scenario.mAssumptions.getFloat("p_m_annuals");
+			fallManureAnnualModifier = scenario.mAssumptions.getFloat("p_fm_annuals");
+			covercropAnnualModifier = scenario.mAssumptions.getFloat("p_cc_annuals");
+			tillAnnualModifier = scenario.mAssumptions.getFloat("p_t_annuals");
 
 			// values come in as straight multiplier
-			manurePerennialModifier = scenario.mAssumptions.getAssumptionFloat("p_m_perennials");
-			fallManurePerennialModifier = scenario.mAssumptions.getAssumptionFloat("p_fm_perennials");
+			manurePerennialModifier = scenario.mAssumptions.getFloat("p_m_perennials");
+			fallManurePerennialModifier = scenario.mAssumptions.getFloat("p_fm_perennials");
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
 		}
 		
-		debugLog(" PLoss - annuals manure from client = " + Float.toString(manureAnnualModifier) );
-		debugLog(" PLoss - annuals fall manure from client = " + Float.toString(fallManureAnnualModifier) );
-		debugLog(" PLoss - annuals cover crop from client = " + Float.toString(covercropAnnualModifier) );
-		debugLog(" PLoss - annuals till from client = " + Float.toString(tillAnnualModifier) );
+		debugLog(" PLoss - annuals manure from client = " + manureAnnualModifier);
+		debugLog(" PLoss - annuals fall manure from client = " + fallManureAnnualModifier);
+		debugLog(" PLoss - annuals cover crop from client = " + covercropAnnualModifier);
+		debugLog(" PLoss - annuals till from client = " + tillAnnualModifier);
 
-		debugLog(" PLoss - perennial manure from client = " + Float.toString(manurePerennialModifier) );
-		debugLog(" PLoss - perennial fall manure from client = " + Float.toString(fallManurePerennialModifier) );
+		debugLog(" PLoss - perennial manure from client = " + manurePerennialModifier);
+		debugLog(" PLoss - perennial fall manure from client = " + fallManurePerennialModifier);
 
 		// Spatial Layers
 		int[][] rotationData = scenario.mNewRotation;
@@ -79,14 +79,14 @@ public class Model_P_LossEpic extends Model_Base {
 		float[][] Corn_p = Layer_Base.getLayer("corn_p").getFloatData();
 		float[][] Soy_p = Layer_Base.getLayer("soy_p").getFloatData();
 		float[][] Grass_p = Layer_Base.getLayer("grass_p").getFloatData();
-		// Distance to river
-		float[][] Rivers = Layer_Base.getLayer("rivers").getFloatData();
+		// Distance to water
+		float[][] waterDist = Layer_Base.getLayer("dist_to_water").getFloatData();
 		
 		// Mask
-		int Grass_Mask = cdl.convertStringsToMask("grass");
-		int Alfalfa_Mask = cdl.convertStringsToMask("alfalfa");
-		int Corn_Mask = cdl.convertStringsToMask("corn");
-		int Soy_Mask = cdl.convertStringsToMask("soy");
+		int Grass_Mask = cdl.stringToMask("grass");
+		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
+		int Corn_Mask = cdl.stringToMask("corn");
+		int Soy_Mask = cdl.stringToMask("soy");
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
 		float[][] PhosphorusData = new float[height][width];
@@ -127,8 +127,8 @@ public class Model_P_LossEpic extends Model_Base {
 						MM = ManagementOptions.getFertilizerMultiplier(landCover, 
 								1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 								fallManureAnnualModifier, manureAnnualModifier);
-						TM = ManagementOptions.E_Till.getIfActiveOn(landCover, tillAnnualModifier, 1.0f);
-						CCM = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, covercropAnnualModifier, 1.0f);
+						TM = ManagementOptions.E_Till.getIfActive(landCover, tillAnnualModifier, 1.0f);
+						CCM = ManagementOptions.E_CoverCrop.getIfActive(landCover, covercropAnnualModifier, 1.0f);
 					}
 					// Soy
 					else if ((landCover & Soy_Mask) > 0 && Soy_p[y][x] > -9999) {
@@ -138,8 +138,8 @@ public class Model_P_LossEpic extends Model_Base {
 						MM = ManagementOptions.getFertilizerMultiplier(landCover, 
 								1.0f, 1.0f, // these values correspond to NO Fert multiplier and synthetic multiplier
 								fallManureAnnualModifier, manureAnnualModifier);
-						TM = ManagementOptions.E_Till.getIfActiveOn(landCover, tillAnnualModifier, 1.0f);
-						CCM = ManagementOptions.E_CoverCrop.getIfActiveOn(landCover, covercropAnnualModifier, 1.0f);
+						TM = ManagementOptions.E_Till.getIfActive(landCover, tillAnnualModifier, 1.0f);
+						CCM = ManagementOptions.E_CoverCrop.getIfActive(landCover, covercropAnnualModifier, 1.0f);
 					} 
 					// Alfalfa
 					else if ((landCover & Alfalfa_Mask) > 0 && Alfa_p[y][x] > -9999) {
@@ -153,8 +153,8 @@ public class Model_P_LossEpic extends Model_Base {
 					
 					if (Transmission >= 0.0f) {
 						// Correct phosphorus Calculation for each cell in the landscape based on the distance
+						Dist = (int)(waterDist[y][x] / 30.0f) + 1;
 						// Convert Kg per Ha to Mg per cell
-						Dist = (int)(Rivers[y][x] / 30.0f) + 1;
 						PhosphorusData[y][x] = (PhosphorusData[y][x] *
 								MM * TM * CCM * // apply multipliers for management options that came from client 
 								900.0f * 0.0001f * (float)(Math.pow(Transmission, Dist))) / 1000.0f;

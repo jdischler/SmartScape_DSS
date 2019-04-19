@@ -21,14 +21,16 @@ package utils;
 //------------------------------------------------------------------------------
 public enum ManagementOptions 
 {
-	// These correspond to bits encoded in the CDL. They MUST NOT overlap with
-	//	the lower CDL indexes that represent things like, Corn, Soy, Urban, Water, etc...
+	// These correspond to bits encoded in the CDL. 
+	// They MUST NOT overlap with the lower CDL indexes that represent things such as:
+	//	Corn, Soy, Urban, Water, etc...
+	// They also MUST NOT go above 31
     E_Till  		(25), // Tilled if true, No Till if false
     E_Fertilizer	(26), // Fertilizer used if true, No Fertilizer if false
     E_Manure		(27), // ONLY check if E_Fertilizier == true
     E_FallManure	(28), // ONLY check if E_Manure == true
-    E_CoverCrop		(29), // CANNOT go above 31
-    E_Contour  		(30), // Countour if true, No Countour if false
+    E_CoverCrop		(29), // Generic cover crop if true, not if false
+    E_Contour  		(30), // Contour if true, No Contour if false
     E_Terrace 		(31); // Terrace if true, No Terrace if false
 
     private final int mIndexMask; // stores the shifted value for easy masking
@@ -49,7 +51,7 @@ public enum ManagementOptions
 
 	// Returns the true value if the given management option is active on compareValue, else the falseValue    
     //--------------------------------------------------------------------------
-    public final float getIfActiveOn(int compareValue, float trueValue, float falseValue) {
+    public final float getIfActive(int compareValue, float trueValue, float falseValue) {
     	
     	if ((compareValue & mIndexMask) > 0) 
     		return trueValue;

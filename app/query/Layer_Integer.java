@@ -23,37 +23,119 @@ public class Layer_Integer extends Layer_Base
 	// Internal helper class to store color key information...
 	//--------------------------------------------------------------------------
 	protected class Layer_Key {
-		
-		public int mIndex;
-		public String mLabel, mHexColor;
-		
-		// NOTE: if no color, string will come in as NULL
-		public Layer_Key(int index, String label, String hexColor) {
-			mIndex = index;
-			mLabel = label;
-			mHexColor = hexColor;
-		}
 
-		// NOTE: returns NULL if color string is NULL
-		public JsonNode getAsJson() {
+		private class Key_Item {
+			public int mIndex;
+			public String mLabel, mHexColor, mTooltip;
 			
-			if (mHexColor == null) {
-				return null;
+			// NOTE: if no color, string will come in as NULL. Same for client tooltips, which are optional
+			public Key_Item(int index, String label, String hexColor, String tooltip) {
+				mIndex = index;
+				mLabel = label;
+				mHexColor = hexColor;
+				mTooltip = tooltip;
+			}
+			// NOTE: returns NULL if color string is NULL
+			public JsonNode toJson() {
+				
+				if (mHexColor == null) {
+					return null;
+				}
+				
+				ObjectNode ret = JsonNodeFactory.instance.objectNode();
+				
+				ret.put("index", mIndex);
+				ret.put("label", mLabel);
+				ret.put("color", mHexColor);
+				ret.put("tip", mTooltip);
+				
+				return ret;
 			}
 			
-			ObjectNode ret = JsonNodeFactory.instance.objectNode();
+		}
+
+		public Map<String,Key_Item> mKeys = null;
+		
+		public void tryLoad(String layerName) {
+			File keyFile = new File("./layerData/" + layerName + ".key");
+			if (!keyFile.exists())
+			{
+				return;
+			}
 			
-			ret.put("index", mIndex);
-			ret.put("label", mLabel);
-			ret.put("color", mHexColor);
+			Logger.info("  Attempting to read color and name key file.");
+			mKeys = new HashMap<String,Key_Item>();
+			try (BufferedReader br = new BufferedReader(new FileReader(keyFile))) {
+	
+				// now read the array data
+				while (br.ready()) {
+					String line = br.readLine().trim();
+					
+					if (line.startsWith(";") || line.length() <= 0) {
+						continue;
+					}
+					
+					if (line.startsWith(">")) {
+						// translation shortcuts;
+						continue;
+					}
+					String split[] = line.split(",");
+				
+					if (split.length < 2 || split.length > 4) {
+						Logger.error("  Parse error reading /layerData/" + layerName + ".key");
+						Logger.error("  Error: <read>" + line);
+						Logger.error("    Expected Line Format: Index, Display Name, Display Color (hex), Optional Client Tooltip");
+						throw new Exception();
+					}
+					else {
+						int index = Integer.parseInt(split[0].trim());
+						String label = split[1].trim();
+						
+						String color = null;
+						if (split.length == 3) {
+							color = split[2].trim();
+						}
+						
+						String tooltip = null;
+						if (split.length == 4) {
+							tooltip = split[3].trim();
+						}
+
+						Key_Item keyItem = new Key_Item(index, label, color, tooltip);
+						mKeys.put(label.toLowerCase(), keyItem);
+					}
+				}
+			}
+			catch (Exception e) {
+				Logger.error("Keyfile was invalid, key entries dumped");
+				Logger.warn(" > " + e.toString());
+				mKeys = null;
+			}
+		}
+
+		public int getIndex(String indexName) {
+			if (mKeys == null) return 0;
+			Key_Item ki = mKeys.get(indexName);
+			if (ki == null) return 0;
+			return ki.mIndex;
+		}
+		
+		public JsonNode toJson() {
 			
+			if (mKeys == null) return null;
+			
+			ArrayNode ret = JsonNodeFactory.instance.arrayNode();
+			mKeys.forEach((k,v) -> {
+				if (v.toJson() != null) ret.add(v.toJson());
+			});
+
 			return ret;
 		}
 	}
 	
-	private ArrayList<Layer_Key> mLayerKey;
+	private Layer_Key mLayerKey = new Layer_Key();
 	protected int[][] mIntData;
-	protected int mNoDataValue;
+	protected int mNoDataValue = -9999;// TODO: load from file...
 	protected int mConvertedNoDataValue;
 	protected EType mLayerDataFormat;
 	protected boolean mbInitedMinMaxCache;
@@ -65,8 +147,6 @@ public class Layer_Integer extends Layer_Base
 		
 		super(name);
 		
-		mLayerKey = new ArrayList<Layer_Key>();
-		mNoDataValue = -9999; // TODO: load from file...
 		// if raw, don't convert the no-data value...otherwise it isn't really raw anymore...
 		if (layerType == EType.ERaw) {
 			mConvertedNoDataValue = mNoDataValue;
@@ -176,59 +256,7 @@ public class Layer_Integer extends Layer_Base
 		
 		Logger.info("  Value range is: " + Integer.toString(mMin) + 
 						" to " + Integer.toString(mMax));
-		
-		File colorKeyFile = new File("./layerData/" + mName + ".key");
-		if (!colorKeyFile.exists())
-		{
-			return;
-		}
-		
-		Logger.info("  Attempting to read color and name key file.");
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(colorKeyFile));
-
-			// now read the array data
-			while (br.ready()) {
-				String line = br.readLine().trim();
-				
-				if (!line.startsWith(";") && line.length() > 0) {
-					String split[] = line.split(",");
-				
-					if (split.length < 2 || split.length > 3) {
-						Logger.error("  Parse error reading /layerData/" + mName + ".key");
-						Logger.error("  Error: <read>" + line);
-						Logger.error("    Expected Line Format: Index, Display Name, Display Color (hex)");
-						throw new Exception();
-					}
-					else {
-						int index = Integer.parseInt(split[0].trim());
-						String label = split[1].trim();
-						
-						String color = null;
-						if (split.length == 3) {
-							color = split[2].trim();
-						}
-								
-						Layer_Key keyItem = new Layer_Key(index, label, color);
-						mLayerKey.add(keyItem);
-					}
-				}
-			}
-		}
-		catch (Exception e) {
-			Logger.warn("  " + e.toString());
-		}
-		finally {
-			if (br != null) {
-				try {
-					br.close();
-				}
-				catch (Exception e) {
-					Logger.warn("  " + e.toString());
-				}
-			}
-		}
+		mLayerKey.tryLoad(mName);
 	}
 	
 	//--------------------------------------------------------------------------
@@ -240,34 +268,16 @@ public class Layer_Integer extends Layer_Base
 
 		String type = clientRequest.get("type").textValue();
 		if (type.equals("colorKey")) {
-			ret = getColorKeyAsJson();
+			ret = mLayerKey.toJson();
 		}
 		
 		return ret;
 	}
 	
-	//--------------------------------------------------------------------------
-	public JsonNode getColorKeyAsJson() {
-		
-		ArrayNode ret = JsonNodeFactory.instance.arrayNode();
-		
-		for (int i = 0; i < mLayerKey.size(); i++) {
-			
-			// NOTE: some color keys may have a NULL color hex string which
-			//	means that they do not get sent to the client.
-			//	They can still be queried from the JAVA code...
-			JsonNode val = mLayerKey.get(i).getAsJson();
-			if (val != null) {
-				ret.add(val);
-			}
-		}
-		
-		return ret;
-	}
-
 	// Takes an index on an indexed raster and converts it to the appropriate
 	//	bit position. Index must be 1 based and not more than 31 (ie, 1-31)
 	//--------------------------------------------------------------------------
+	@Deprecated
 	public static int convertIndexToMask(int index) {
 		
 		if (index <= 0 || index > 31) {
@@ -277,38 +287,53 @@ public class Layer_Integer extends Layer_Base
 		
 		return (1 << (index-1));
 	}
-	
+
+	public static int indexToMask(int index) {
+		
+		if (index <= 0 || index > 31) {
+			Logger.warn("Bad index in convertIndexToMask: " + Integer.toString(index));
+			return 0;
+		}
+		
+		return (1 << (index-1));
+	}
+
 	// Takes a variable number of integer arguments...can be called like these: 
 	//	int mask1 = Layer_Indexed.convertIndicesToMask(1,5,8,11,15);
 	//	int mask2 = Layer_Indexed.convertIndicesToMask(2,3,7);
 	//--------------------------------------------------------------------------
+	@Deprecated
 	public static int convertIndicesToMask(int... indicesList) {
 		
 		int result = 0;
 		for (int i=0; i < indicesList.length; i++) {
-			result |= convertIndexToMask(indicesList[i]);
+			result |= indexToMask(indicesList[i]);
 		}
 		
 		return result;
 	}
 
+	public static int indexToMask(int... indicesList) {
+		
+		int result = 0;
+		for (int i=0; i < indicesList.length; i++) {
+			result |= indexToMask(indicesList[i]);
+		}
+		
+		return result;
+	}
+	
 	//--------------------------------------------------------------------------
 	public int getIndexForString(String indexName) {
 		
-		for (int t=0; t < mLayerKey.size(); t++) {
-			Layer_Key key = mLayerKey.get(t);
-			if (key != null && key.mLabel.equalsIgnoreCase(indexName)) {
-				return key.mIndex;
-			}
-		}
-		
-		return 0;
+		return mLayerKey.getIndex(indexName);
 	}
 	
 	// Takes a variable number of String arguments...can be called like these: 
 	//	int mask1 = Layer_Indexed.convertStringsToMask("corn","soy","woodland");
 	//	int mask2 = Layer_Indexed.convertStringsToMask("corn");
 	//--------------------------------------------------------------------------
+	@Deprecated
 	public int convertStringsToMask(String... nameList) {
 		
 		int result = 0;
@@ -318,7 +343,17 @@ public class Layer_Integer extends Layer_Base
 		
 		return result;
 	}
-	
+
+	public int stringToMask(String... nameList) {
+		
+		int result = 0;
+		for (int i=0; i < nameList.length; i++) {
+			result |= convertIndexToMask(getIndexForString(nameList[i]));
+		}
+		
+		return result;
+	}
+
 	//--------------------------------------------------------------------------
 	private int getCompareBitMask(JsonNode matchValuesArray) {
 		
