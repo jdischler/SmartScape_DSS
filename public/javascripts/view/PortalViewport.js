@@ -5,6 +5,8 @@ Ext.define('DSS.view.PortalViewport', {
 	extend: 'Ext.container.Viewport',
     renderTo: Ext.getBody(),
 	
+    id: 'dss-main-view',
+    
 	requires: [
 		'DSS.app_portal.Footer',
 		'DSS.app_portal.AOI_Map',
@@ -12,6 +14,7 @@ Ext.define('DSS.view.PortalViewport', {
 		'DSS.app_portal.AOI_Refinement',
 		'DSS.app_portal.LaunchSummary',
 		//'DSS.app_portal.Assumptions',
+		'DSS.components.TriangleMixer',
 		'DSS.app_portal.ValuesAssessment',
 		'DSS.components.d3_nav'
 	],
@@ -111,7 +114,7 @@ Ext.define('DSS.view.PortalViewport', {
 							Ext.getCmp('dss-hidden-pad').animate({
 								dynamic: true,
 								to: {
-									height: 48
+									height: 80
 								}
 							})
 							Ext.getCmp('dss-selected-info').setHidden(true);
@@ -377,8 +380,150 @@ Ext.define('DSS.view.PortalViewport', {
 				Ext.defer(me.doFakeArrow, 200);
 			}
 		}).show().anchorTo(me, 'tr-tr', [-16,16]);
+		
+		me.getProportions();
+		me.getRadar();
 	},
 	
+	//------------------------------------------------------------------
+	getProportions: function(selected) {
+    	var me = this;
+		var obj = Ext.Ajax.request({
+			url: '/app/getLandcoverProportions',
+			jsonData: selected || {},
+			timeout: 10000,
+			scope: me,
+			
+			success: function(response, opts) {
+				if (response.responseText != '') {
+					var obj = JSON.parse(response.responseText);
+					var chartData = Ext.data.StoreManager.lookup('dss-proportions');
+					for (var i = 0; i < obj.length; i++) {
+						var rec = chartData.findRecord("name", obj[i].type);
+						if (rec) {
+							rec.set('data1', obj[i].val, {commit:true});
+							rec.set('sub', obj[i].sub, {commit:true});
+						}
+					}
+				}
+			},
+			failure: function(response, opts) {
+				console.log(response);
+			}
+		});
+		
+	},
+	
+	//------------------------------------------------------------------
+	getRadar: function(selected) {
+    	var me = this;
+    	
+    	
+    	function rescale(val, baseline) {
+    		var max = val;
+    		if (baseline > max) {
+    			max = baseline;
+    		}
+    		// Fix negative value problem
+    		if (val < 0 & baseline < 0){
+    			val = -val;
+    			baseline = -baseline;
+    			
+    			var max = val;
+    			if (baseline > max) {
+    				max = baseline;
+    			}
+    		}
+    		else if (val < 0){
+    			max = baseline - 2 * val;
+    			val = -val;
+    			baseline = max;
+    		}
+    		else if (baseline < 0){
+    			max = val - 2 * baseline;
+    			baseline = -baseline;
+    			val = max;
+    		}
+			return {val: val/max * 100.0, base: baseline / max * 100.0};
+    	}
+    	
+		var obj = Ext.Ajax.request({
+			url: '/app/getRadarData',
+			jsonData: selected || {},
+			timeout: 10000,
+			scope: me,
+			
+			success: function(response, opts) {
+				if (response.responseText != '') {
+					var obj = JSON.parse(response.responseText);
+					console.log(obj);
+					var radarData = Ext.data.StoreManager.lookup('dss-values');
+					
+					var rec = radarData.findRecord("type", 'pl');
+					if (rec) {
+						var v = rescale(obj.pl, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					rec = radarData.findRecord("type", 'bh');
+					if (rec) {
+						var v = rescale(obj.bh, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					rec = radarData.findRecord("type", 'ps');
+					if (rec) {
+						var v = rescale(obj.ps, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					rec = radarData.findRecord("type", 'ni');
+					if (rec) {
+						var v = rescale(obj.ni, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					
+					rec = radarData.findRecord("type", 'sr');
+					if (rec) {
+						var v = rescale(obj.sl, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					rec = radarData.findRecord("type", 'sc');
+					if (rec) {
+						var v = rescale(obj.sc, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+
+					rec = radarData.findRecord("type", 'gb');
+					if (rec) {
+						var v = rescale(obj.gb, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+					
+					rec = radarData.findRecord("type", 'em');
+					if (rec) {
+						var v = rescale(obj.em, rec.get('base'))
+						rec.set('data1', v.val, {commit:true})
+						rec.set('data2', v.base, {commit:true});
+					}
+				}
+			},
+			failure: function(response, opts) {
+				console.log(response);
+			}
+		});
+	},
+	
+	//------------------------------------------------------------------
 	doFakeArrow: function() {
 		var img = Ext.create('Ext.Img', {
 			src: 'assets/images/focus-arrow-icon.png',

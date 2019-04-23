@@ -327,8 +327,8 @@ Ext.define('DSS.components.AttributeBrowser', {
 			}));
 			
 			DSS.Layers.add(Ext.create('DSS.components.LayerClickSelect', {
-				title: 'HUC-8 Watershed',
-				DSS_serverLayer: 'huc-8',
+				title: 'HUC-10 Watershed',
+				DSS_serverLayer: 'huc-10',
 				DSS_vectorLayer: watershed
 			}));
 			

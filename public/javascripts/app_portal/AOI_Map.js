@@ -110,7 +110,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 		
 		// FOR DEV
 		me.getMap().on('click', function(evt){
-		    console.info(me.getMap().getCoordinateFromPixel(evt.pixel));
+		//    console.info(me.getMap().getCoordinateFromPixel(evt.pixel));
 		});
 
 		me.callParent(arguments);
@@ -233,18 +233,20 @@ Ext.define('DSS.app_portal.AOI_Map', {
 
 	//--------------------------------------------------------------------------
 	countyClicked: function(feature) {
+		Ext.getCmp('dss-main-view').getProportions(this.getSelected());
+		Ext.getCmp('dss-main-view').getRadar(this.getSelected());
 		if (feature.selected.length > 0) {
 			var sel = feature.selected[0].get("OBJECTID");
-//			console.log('clicked county: ' + sel)
 		//	me.getSelectionModel().select(sel);
 		}
 	},
 
 	//--------------------------------------------------------------------------
 	watershedClicked: function(feature) {
+		Ext.getCmp('dss-main-view').getProportions(this.getSelected());
+		Ext.getCmp('dss-main-view').getRadar(this.getSelected());
 		if (feature.selected.length > 0) {
 			var sel = feature.selected[0].get("OBJECTID");
-//			console.log('clicked watershed: ' + sel)
 		//	me.getSelectionModel().select(sel);
 		}
 	},
@@ -320,6 +322,26 @@ Ext.define('DSS.app_portal.AOI_Map', {
 				}
 			}
 		}
+	},
+	
+	getSelected: function() {
+		var me = this;
+		var counties = [];
+		var watersheds = [];
+		var res = {};
+		me.DSS_OL.county.clickTool.getFeatures().forEach(function(item) {
+			counties.push(item.get("OBJECTID"));
+		});
+		me.DSS_OL.watershed.clickTool.getFeatures().forEach(function(item) {
+			watersheds.push(item.get("OBJECTID"));
+		});
 		
+		if (counties.length > 0) {
+			res['counties'] = counties;
+		}
+		if (watersheds.length > 0) {
+			res['watersheds'] = watersheds;
+		}
+		return res;
 	}
 });

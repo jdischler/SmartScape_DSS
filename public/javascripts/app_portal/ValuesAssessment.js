@@ -43,9 +43,14 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 				},{
 					xtype: 'component',
 					width: 200,
+					style: 'cursor:move',
+					//hidden: true,
 					height: 160,
 					margin: '0 0 0 48',
 					html: '<img id="ddd" src="assets/images/triangle_selector.png" style="width:100%; opacity: 0.9">'
+				},{
+					xtype: 'triangle_mixer',
+					hidden: true
 				},{
 					fieldLabel: 'Net Income'
 				},{

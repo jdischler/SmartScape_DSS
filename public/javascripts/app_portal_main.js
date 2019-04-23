@@ -28,50 +28,51 @@ Ext.define('Ext.chart.theme.Custom', {
     }
 });		
 
-var niText = 'Net\n    Income';
-var scText = 'Soil\nCarbon  ';
-var bhText = 'Bird  \nHabitat  ';
-var srText = 'Soil  \nRetention  ';
-var gbText = '  Gross\n  Biofuel';
+var niText = 'Net Income';
+var scText = 'Soil Carbon';
+var bhText = 'Bird   \nHabitat';
+var srText = '  Soil\nRetention  ';
+var gbText = 'Gross\n       Biofuel';
+var psText = 'Pest\nSupression       ';
 Ext.create('Ext.data.Store', {
 	storeId: 'dss-values',
-	fields: ['name', 'data1', 'location'],
+	fields: ['type','name', 'data1', 'location'],
 	data: [
-	{name: niText, data1: 90.1, location: 'uc'},
-	{name: gbText, data1: 80.5, location: 'uc'},
-	{name: 'Emissions',data1: 90.7, location: 'uc'},
-	{name: srText ,data1: 30.1, location: 'uc'},
-	{name: scText, data1: 20.1, location: 'uc'},
-	{name: bhText, data1: 10.9, location: 'uc'},
-	{name: 'Pest Supression',data1: 15.6, location: 'uc'},
-	{name: '     Pollinators',data1: 30.4, location: 'uc'},
+	{type:'em',name: '          Emissions',data1: 90.7, data2: 100,location: 'uc',base:0.000828},
+	{type:'sr',name: srText ,data1: 30.1, data2: 100,location: 'uc', base:0.10442078},
+	{type:'sc',name: scText, data1: 20.1, data2: 100,location: 'uc',base:11.103638},
+	{type:'bh',name: bhText, data1: 10.9, data2: 100,location: 'uc',base:0.3476668},
+	{type:'ps',name: psText,data1: 15.6, data2: 100,location: 'uc',base:0.428911},
+	{type:'pl',name: 'Pollinators',data1: 30.4, data2: 100,location: 'uc',base:0.094198},
+	{type:'ni',name: niText, data1: 91.8, data2: 100, location: 'uc', base:-31.1382},
+	{type:'gb',name: gbText, data1: 80.5, data2: 100,location: 'uc', base:310.64678},
 	
-	{name: niText, data1: 25.1, location: 'cs'},
-	{name:  gbText, data1: 70.5, location: 'cs'},
-	{name: 'Emissions',data1: 60.7, location: 'cs'},
-	{name: srText, data1: 28.1, location: 'cs'},
-	{name: scText,data1: 17.1, location: 'cs'},
-	{name: bhText, data1: 28.9, location: 'cs'},
-	{name: 'Pest Supression',data1: 19.6, location: 'cs'},
-	{name: '     Pollinators',data1: 40.4, location: 'cs'},
+	{type:'em',name: '          Emissions',data1: 60.7, data2:100,location: 'cs'},
+	{type:'sr',name: srText, data1: 100, data2:90,location: 'cs'},
+	{type:'sc',name: scText,data1: 17.1, data2:100,location: 'cs'},
+	{type:'bh',name: bhText, data1: 48.9, data2:100,location: 'cs'},
+	{type:'ps',name: psText,data1: 39.6, data2:100,location: 'cs'},
+	{type:'pl',name: 'Pollinators',data1: 40.4, data2:100,location: 'cs'},
+	{type:'ni',name: niText, data1: 25.1, data2: 100, location: 'cs'},
+	{type:'gb',name:  gbText, data1: 70.5, data2:100,location: 'cs'},
 	
-	{name: niText,data1: 35.1, location: 'd'},
-	{name:  gbText, data1: 20.5, location: 'd'},
-	{name: 'Emissions',data1: 30.7, location: 'd'},
-	{name: srText, data1: 20.1, location: 'd'},
-	{name: scText,data1: 80.0, location: 'd'},
-	{name: bhText, data1: 100.0, location: 'd'},
-	{name: 'Pest Supression',data1: 100.0, location: 'd'},
-	{name: '     Pollinators',data1: 100.0, location: 'd'},
+	{type:'em',name: '          Emissions',data1: 30.7, data2:100,location: 'd'},
+	{type:'sr',name: srText, data1: 20.1, data2:100,location: 'd'},
+	{type:'sc',name: scText,data1: 80.0, data2:100,location: 'd'},
+	{type:'bh',name: bhText, data1: 100.0, data2:78,location: 'd'},
+	{type:'ps',name: psText,data1: 100.0,data2:64, location: 'd'},
+	{type:'pl',name: 'Pollinators',data1: 100.0,data2:55, location: 'd'},
+	{type:'ni',name: niText,data1: 35.1, data2:100,location: 'd'},
+	{type:'gb',name:  gbText, data1: 20.5, data2:100,location: 'd'},
 	
-	{name: niText,data1: 100.0, location: 'frv'},
-	{name:  gbText, data1: 100.0, location: 'frv'},
-	{name: 'Emissions',data1: 100.0, location: 'frv'},
-	{name: srText, data1: 40.1, location: 'frv'},
-	{name: scText,data1: 32.1, location: 'frv'},
-	{name: bhText, data1: 34.9, location: 'frv'},
-	{name: 'Pest Supression',data1: 30.6, location: 'frv'},
-	{name: '     Pollinators',data1: 45.4, location: 'frv'},
+	{type:'em',name: '          Emissions',data1: 100.0,data2:78.0, location: 'frv'},
+	{type:'sr',name: srText, data1: 40.1, data2:100,location: 'frv'},
+	{type:'sc',name: scText,data1: 32.1, data2:100, location: 'frv'},
+	{type:'bh',name: bhText, data1: 34.9, data2:100,location: 'frv'},
+	{type:'ps',name: psText,data1: 30.6,data2:100, location: 'frv'},
+	{type:'pl',name: 'Pollinators',data1: 45.4,data2:100, location: 'frv'},
+	{type:'ni',name: niText,data1: 100.0, data2:80.0, location: 'frv'},
+	{type:'gb',name:  gbText, data1: 100.0, data2:90.2,location: 'frv'},
 	],
 
 	filters: [{
@@ -83,13 +84,13 @@ Ext.create('Ext.data.Store', {
 
 Ext.create('Ext.data.Store', {
 	storeId: 'dss-proportions',
-	fields: ['name', 'data1', 'location'],
+	fields: ['name', 'data1', 'location', 'sub'],
 	data: [
-	{name: 'Row Crops',		data1: 40, 	location: 'uc'},
-	{name: 'Woodland',		data1: 22.2, 	location: 'uc'},
-	{name: 'Wetlands/Water',data1: 11.6, 	location: 'uc'},
-	{name: 'Grasses',		data1: 19,	location: 'uc'},
-	{name: 'Developed',		data1: 6.9, 	location: 'uc'},
+	{name: 'Row Crops',		data1: 40.65, 	location: 'uc', sub:{'Continuous Corn':5.05,'Dairy Rotation':16.61,'Cash Grain':18.99}},
+	{name: 'Woodland',		data1: 22.55, 	location: 'uc', sub:{'Conifers':1.48,'Deciduous':21.06}},
+	{name: 'Wetlands/Water',data1: 11.47, 	location: 'uc', sub:{'Open Water':2.37,'Wetlands':9.1}},
+	{name: 'Grasses',		data1: 19.18,	location: 'uc', sub:{'Hay':5.8,'Pasture':8.14,'Cool-Season Grass':1.83,'Warm-Season Grass':3.4}},
+	{name: 'Developed',		data1: 6.16, 	location: 'uc', sub:{'Urban':1.76,'Suburban':4.4}},
 //	{name: 'Other',			data1: 4, 		location: 'uc'},
 
 	{name: 'Row Crops',		data1: 26.2, 	location: 'cs'},
@@ -185,6 +186,16 @@ var pieDef = {
            color: '#333',
 			 font: '12px Helvetica'
        },
+       tooltip: {
+           renderer: function(tip, item) {
+        	   var t = '<u><b>' + item.get('name') + ':</b> ' + Ext.util.Format.number(item.get('data1'), '0.0#%</u>');
+        	   var sub = item.get('sub');
+        	   Ext.Object.each(sub, function(key, value) {
+        		  t += '<br/>&nbsp;&nbsp;&nbsp;' + key + ": " + Ext.util.Format.number(value, '0.0#%');
+        	   });
+               tip.update(t);
+           }
+       },
        donut: 40,
        thickness: 10,
        distortion: 0.45
@@ -202,7 +213,7 @@ var radarDef = {
 	flex: 1,
 	bodyStyle: 'background: transparent',
 	background: 'transparent',
-	innerPadding: 4,
+	innerPadding: 5,
 	header: false,
 	insetPadding: {
 		top: 45,
@@ -232,9 +243,23 @@ var radarDef = {
 	}],
 	series: [{
 		type: 'radar',
-		title: 'Default',
+		title: 'Selected',
 		angleField: 'name',
 		radiusField: 'data1',
+		marker: {radius: 4, fillOpacity: 0.7},
+		highlight: {fillStyle: '#FFF',strokeStyle: '#000'},
+		tooltip: {
+			trackMouse: false,
+			renderer: function(toolTip, record, ctx) {
+				toolTip.setHtml(record.get('name') + ': ' + record.get('data1'));
+			}
+		},			
+		style: {fillOpacity: .3}
+	},{
+		type: 'radar',
+		title: 'Baseline',
+		angleField: 'name',
+		radiusField: 'data2',
 		marker: {radius: 4, fillOpacity: 0.7},
 		highlight: {fillStyle: '#FFF',strokeStyle: '#000'},
 		tooltip: {
@@ -248,7 +273,7 @@ var radarDef = {
 	axes: [{
 		type: 'numeric',
 		position: 'radial',
-		fields: 'data1',
+		fields: ['data1','data2'],
 		style: {
 			minStepSize: 10,
 			estStepSize: 10

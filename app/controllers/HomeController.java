@@ -8,6 +8,8 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import analysis.Analyzer_LandcoverProportions;
+import analysis.Analyzer_ModelResults;
 import play.Logger;
 import play.mvc.*;
 import play.mvc.Http.Context;
@@ -124,4 +126,15 @@ public class HomeController extends Controller {
 		}
 	}
 	
+	//--------------------------------------------------------------------------
+	public Result getLandcoverProportions() {
+		
+		return ok(Analyzer_LandcoverProportions.get(request().body().asJson()));
+	}
+
+	//--------------------------------------------------------------------------
+	public Result getRadarData() {
+
+		return ok(Analyzer_ModelResults.get(request().body().asJson()));
+	}
 }

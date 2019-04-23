@@ -93,7 +93,7 @@ public class Model_SoilCarbon extends Model_Base {
 		// Fertiliezer Multiplier
 		float F_M = 1.0f;
 		
-		int [][] rotationD_Data = Layer_Base.getLayer("cdl_2012").getIntData();
+		int [][] rotationD_Data = cdl.getIntData();
 		// Mg per Ha
 		float[][] SOC = Layer_Base.getLayer("SOC").getFloatData();
 		

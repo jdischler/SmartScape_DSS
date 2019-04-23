@@ -187,7 +187,7 @@ public class Scenario
 	private int[][] duplicateRotation() {
 	
 		// uses clone to duplicate the data array
-		Layer_Base original = Layer_Base.getLayer("cdl_2012");//.getIntData().clone();
+		Layer_Base original = Layer_Base.getLayer("wisc_land");//.getIntData().clone();
 		int [][] originalData = original.getIntData();
 		
 		int height = original.getHeight();

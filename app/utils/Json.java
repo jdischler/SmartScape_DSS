@@ -24,7 +24,7 @@ public class Json
 	//	Key must be a String
 	//	Value should be some kind of Object (Boolean, Long, Double, String, JsonNode...)
 	//--------------------------------------------------------------------------	
-	public static JsonNode packageData(Object ... arguments) throws RuntimeException {
+	public static JsonNode pack(Object ... arguments) throws RuntimeException {
 		
 		ObjectNode data = JsonNodeFactory.instance.objectNode();
 		if (!(arguments.length % 2 == 0)){
@@ -47,6 +47,9 @@ public class Json
 			
 		} else if (value instanceof Double) {
 			carrierNode.put(key, (Double)value);
+
+		} else if (value instanceof Float) {
+			carrierNode.put(key, (Float)value);
 			
 		} else if (value instanceof Long) {
 			carrierNode.put(key, (Long)value);

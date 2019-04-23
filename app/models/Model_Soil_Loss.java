@@ -51,13 +51,11 @@ public class Model_Soil_Loss extends Model_Base {
 		float[][] LS = Layer_Base.getLayer("LS").getFloatData();
 		
 		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012");
-		int Grass_Mask = cdl.stringToMask("grass");
-		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
-		int Corn_Mask = cdl.stringToMask("corn");
-		int Soy_Mask = cdl.stringToMask("soy");
-		int Ag_Mask = Corn_Mask | Soy_Mask;
-		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
+		
+		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
+		int agMask = wl.stringToMask("continuous corn","cash grain","dairy rotation","other crops");
+		int totalMask = agMask | grassMask;
 		
 		// Arrays to save soil loss at cell base (Mg/ha)
 		float[][] Soil_Loss_Data = new float[height][width];
@@ -115,23 +113,24 @@ public class Model_Soil_Loss extends Model_Base {
 				int landCover = rotationData[y][x];
 				CC_M = 1.0f;
 				
-				if ((landCover & TotalMask) > 0 &&
+				if ((landCover & totalMask) > 0 &&
 					Rainfall_Erosivity[y][x] > -9999.0f && 
 					Soil_Erodibility[y][x] > -9999.0f && 
 					LS[y][x] > -9999.0f) {
 					
 					// Update C and P factors for different LUCC type
 					// C and P are coming from biophysical table (Invest)
-					if ((landCover & Grass_Mask) > 0) {
+					if ((landCover & grassMask) > 0) {
 						C = 0.02f;
 						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
 					} 
-					else if ((landCover & Alfalfa_Mask) > 0) {
+					/*// NOTE: alfalfa no longer a crop type though it is a component of a rotation?
+					 * else if ((landCover & Alfalfa_Mask) > 0) {
 						C = 0.02f;
 						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
-					} 
+					} */
 					// Agriculture
-					else if ((landCover & Ag_Mask) > 0) {
+					else if ((landCover & agMask) > 0) {
 						C = 0.3f;
 						CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
 						P = ManagementOptions.E_Contour.getIfActive(landCover, Management_P1, 1.0f) *

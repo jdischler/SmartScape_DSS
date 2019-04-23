@@ -118,6 +118,14 @@ public class QueuedWriter implements Runnable {
 		}
 	}
 	
+	//--------------------------------------------------------------------------
+	public final static boolean hasFilesQueued() {
+		
+		synchronized(mSynchronizationObject) {
+			return (mResultsToWrite.size() > 0 || mScenarioSetupsToWrite.size() > 0);
+		}
+	}
+	
 	// run can't be made private despite the fact that we really want it for internal use onlly...
 	//--------------------------------------------------------------------------
 	public void run() {

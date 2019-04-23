@@ -80,7 +80,7 @@ public abstract class Moving_Window
 		mForestMask = wl.stringToMask("coniferous","deciduous","mixed woodland");
 		mAgMask = wl.stringToMask("continuous corn","cash grain","dairy rotation","other crops");
 		mDevelopedMask = wl.stringToMask("urban","suburban");
-		mWaterMask = wl.stringToMask("water","wetlands");
+		mWaterMask = wl.stringToMask("open water","wetland");
 		
 		mPoint = new WindowPoint(mAt_X, mAt_Y);
 		

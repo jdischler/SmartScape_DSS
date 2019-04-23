@@ -34,11 +34,11 @@ public class Model_HabitatIndex extends Model_Base
 		float [][] habitatData = new float[height][width];
 		debugLog("  > Allocated memory for Habitat Index");
 		
-		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int TotalMask = cdl.stringToMask("grass") | cdl.stringToMask("alfalfa") 
-				| cdl.stringToMask("corn") | cdl.stringToMask("soy");
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
 		
+		int totalMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
+				"continuous corn","cash grain","dairy rotation","other crops");
+
 		// --- Model specific code starts here
 		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
 		
@@ -47,7 +47,7 @@ public class Model_HabitatIndex extends Model_Base
 			Moving_Z_Window.WindowPoint point = zWin.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
-			if ((rotationData[point.mY][point.mX] & TotalMask) > 0 && zWin.canGetProportions()) {
+			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && zWin.canGetProportions()) {
 				float proportionAg = zWin.getProportionAg();
 				float proportionGrass = zWin.getProportionGrass();
 				

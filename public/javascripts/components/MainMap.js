@@ -17,7 +17,7 @@ var waterStyle = new ol.style.Style({
 	updateWhileInteracting: true,
 
         source: new ol.source.Vector({
-          url: './assets/huc-8.geojson',//'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+          url: './assets/huc-10.geojson',//'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
           format: new ol.format.GeoJSON()
         })
       });

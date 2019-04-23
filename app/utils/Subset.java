@@ -82,7 +82,7 @@ public class Subset {
 	//-------------------------------------------------------------------------
 	private void write() {
 		
-		JsonNode data = Json.packageData("name", mSubsetName,
+		JsonNode data = Json.pack("name", mSubsetName,
 					"description", mSubsetDescription,
 					"atX", mCornerCoordsX,
 					"atY", mCornerCoordsY,

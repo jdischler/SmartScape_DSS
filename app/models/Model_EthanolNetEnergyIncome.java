@@ -28,6 +28,11 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 	private static String mNetEnergyModelFile = "net_energy";
 	private static String mNetIncomeModelFile = "net_income";
 	
+	// slot is 0-4, which corresponds to 5 - 12-bit chunks in a 64 bit long
+	private final float unpackYield(long lValue, int slot) {
+		Long res = (lValue >> (slot * 12)) & 0xfff;
+		return res * (25.0f / 4095.0f);
+	}	
 	//--------------------------------------------------------------------------
 	public List<ModelResult> run(Scenario scenario) {
 
@@ -39,7 +44,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		
 		// Precompute yield....
 		Model_CropYield cropYield = new Model_CropYield();
-		float[][] calculatedYield = cropYield.run(scenario);
+		long[][] packedYield = cropYield.run(scenario);
 
 		float [][] netEnergyData = new float[height][width];
 		float [][] netIncomeData = new float[height][width];
@@ -52,8 +57,10 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
 		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
 		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
-		int Soy_Mask = wl.stringToMask("fixme");
-		int Alfalfa_Mask = wl.stringToMask("fixme");
+		int Soy_Mask = wl.stringToMask("cash grain");
+		int Alfalfa_Mask = wl.stringToMask("dairy rotation");
+		int dr = wl.stringToMask("dairy rotation");
+		int cg = wl.stringToMask("cash grain");
 		
 		// Proportion of Stover 
 		float Prop_Stover_Harvest = 0.38f;
@@ -90,18 +97,18 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		
 		// Net Income 
 		// Price for production
-		float PC_Cost = 1135; // $ per ha cost for Corn
-		float PCS_Cost = 412; // $ per ha cost for Corn Stover
-		float PG_Cost = 412; // $ per ha cost for Grass
-		float PS_Cost = 627; // $ per ha cost for Soy
-		float PA_Cost = 620; // $ per ha cost for Alfalfa
+		Float PC_Cost = 1135f; // $ per ha cost for Corn
+		Float PCS_Cost = 4120f; // $ per ha cost for Corn Stover
+		Float PG_Cost = 412f; // $ per ha cost for Grass
+		Float PS_Cost = 627f; // $ per ha cost for Soy
+		Float PA_Cost = 620f; // $ per ha cost for Alfalfa
 		
 		// Price per tonne for sell
-		float P_Per_Corn = 274;
-		float P_Per_Stover = 70;
-		float P_Per_Grass = 107;
-		float P_Per_Soy = 249;
-		float P_Per_Alfalfa = 230;
+		Float P_Per_Corn = 274f;
+		Float P_Per_Stover = 70f;
+		Float P_Per_Grass = 107f;
+		Float P_Per_Soy = 249f;
+		Float P_Per_Alfalfa = 230f;
 
 		// Get user changeable values from the client...
 		//----------------------------------------------------------------------
@@ -146,82 +153,109 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		
 		// Net Income
 		// Production
-		debugLog(" Corn production price from client = " + Float.toString(PC_Cost) );
-		debugLog(" Stover production price from client = " + Float.toString(PCS_Cost) );
-		debugLog(" Grass production price from client = " + Float.toString(PG_Cost) );
-		debugLog(" Soy production price from client = " + Float.toString(PS_Cost) );
-		debugLog(" Alfalfa production price from client = " + Float.toString(PA_Cost) );
+		debugLog(" Corn production price from client = " + PC_Cost);
+		debugLog(" Stover production price from client = " + PCS_Cost);
+		debugLog(" Grass production price from client = " + PG_Cost);
+		debugLog(" Soy production price from client = " + PS_Cost);
+		debugLog(" Alfalfa production price from client = " + PA_Cost);
 		
 		// Sell
-		debugLog(" Corn price from client = " + Float.toString(P_Per_Corn) );
-		debugLog(" Stover price from client = " + Float.toString(P_Per_Stover) );
-		debugLog(" Grass price from client = " + Float.toString(P_Per_Grass) );
-		debugLog(" Soy price from client = " + Float.toString(P_Per_Soy) );
-		debugLog(" Alfalfa price from client = " + Float.toString(P_Per_Alfalfa) );
+		debugLog(" Corn price from client = " + P_Per_Corn);
+		debugLog(" Stover price from client = " + P_Per_Stover);
+		debugLog(" Grass price from client = " + P_Per_Grass);
+		debugLog(" Soy price from client = " + P_Per_Soy);
+		debugLog(" Alfalfa price from client = " + P_Per_Alfalfa);
 		//----------------------------------------------------------------------		
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				
-				float yield = calculatedYield[y][x];
-				float ethanol = 0, netEnergy = 0, netIncome = 0;
-				if (yield > -9999.0f) {
-					if ((rotationData[y][x] & Corn_Mask) > 0) {
-						// L per Ha
-						ethanol = yield * 0.5f * CEO_C + yield * 0.25f * CEO_CS;
-						// Net_Energy - MJ per Ha
-						Net_Energy_C = (yield * 0.5f * CEO_C * EO_C) - (EI_CF + EI_CP * yield * 0.5f * CEO_C);
-						Net_Energy_S = (yield * Prop_Stover_Harvest * 0.5f * CEO_CS * EO_CS) - (EI_CSF + EI_CSP * yield * Prop_Stover_Harvest * 0.5f * CEO_CS);
-						netEnergy = Net_Energy_C + Net_Energy_S;
-						// Gross inc return $ per Ha
-						returnAmount = P_Per_Corn * 0.5f * yield + P_Per_Stover * Prop_Stover_Harvest * 0.5f * yield;
-						// Net Income $ per Ha
-						netIncome = returnAmount - PC_Cost - PCS_Cost;
-					}
-					else if ((rotationData[y][x] & Grass_Mask) > 0) {
-						// L per Ha
-						ethanol = yield * CEO_G;
-						// MJ per Ha
-						netEnergy = (yield * CEO_G * EO_G) - (EI_GF + EI_GP * yield * CEO_G);
-						// Gross return $ per ha
-						returnAmount = P_Per_Grass * yield;
-						// Net Income $ per ha
-						netIncome = returnAmount  - PG_Cost;
-					}
-					else if ((rotationData[y][x] & Soy_Mask) > 0) {
-						// L per Ha
-						ethanol = yield * CEO_S;
-						// MJ per Ha
-						netEnergy = (yield * 0.40f * CEO_S * EO_S) - (EI_SF + EI_SP * yield * CEO_S);
-						// Soy return $ per Ha
-						returnAmount = P_Per_Soy * yield;
-						// Net Income $ per Ha
-						netIncome = returnAmount  - PS_Cost;
-					}
-					else if ((rotationData[y][x] & Alfalfa_Mask) > 0) {
-						// L per Ha
-						ethanol = yield * CEO_A;
-						// MJ per Ha
-						netEnergy = (yield * CEO_A * EO_A) - (EI_AF + EI_AP * yield * CEO_A);
-						// Alfalfa return $ per Ha
-						returnAmount = P_Per_Alfalfa * yield;
-						// Net Income $ per Ha
-						netIncome = returnAmount  - PA_Cost;
-					}
-					
-					// Convert L per Ha to L per cell
-					//ethanolData[y][x] = Math.round(ethanol * 900.0f / 10000.0f * 100.0f) / 100.0f;
-					ethanolData[y][x] = ethanol * 900.0f / 10000.0f;
-					// Convert MJ per Ha to MJ per cell
-					netEnergyData[y][x] = netEnergy * 900.0f / 10000.0f;
-					// Convert $ per Ha to $ per cell
-					netIncomeData[y][x] = netIncome * 900.0f / 10000.0f;
-				}
-				else {
+				long pYield = packedYield[y][x];
+				if (pYield < 0) {
 					ethanolData[y][x] = -9999.0f;
 					netEnergyData[y][x] = -9999.0f;
 					netIncomeData[y][x] = -9999.0f;
+					continue;
 				}
+
+				float ethanol = 0, netEnergy = 0, netIncome = 0;
+				
+				if ((rotationData[y][x] & Corn_Mask) > 0) {
+					float yield = unpackYield(pYield, 0);
+					float cropProp = 1.0f;
+					if ((rotationData[y][x] & cg) > 0) {
+						cropProp = 0.5f; yield *= cropProp; 
+					}
+					else if ((rotationData[y][x] & dr) > 0) {
+						cropProp = 0.3333f; yield *= cropProp; 
+					}
+					
+					// L per Ha
+					ethanol += yield * 0.5f * CEO_C + yield * 0.25f * CEO_CS;
+					// Net_Energy - MJ per Ha
+					Net_Energy_C = (yield * 0.5f * CEO_C * EO_C) - (EI_CF + EI_CP * yield * 0.5f * CEO_C);
+					Net_Energy_S = (yield * Prop_Stover_Harvest * 0.5f * CEO_CS * EO_CS) - (EI_CSF + EI_CSP * yield * Prop_Stover_Harvest * 0.5f * CEO_CS);
+					netEnergy = Net_Energy_C + Net_Energy_S;
+					// Gross inc return $ per Ha
+					returnAmount = P_Per_Corn * 0.5f * yield + P_Per_Stover * Prop_Stover_Harvest * 0.5f * yield;
+					// Net Income $ per Ha
+					netIncome = returnAmount - (PC_Cost * cropProp) - (PCS_Cost * cropProp);
+				}
+				
+				if ((rotationData[y][x] & Soy_Mask) > 0) {
+					float yield = unpackYield(pYield, 1);
+					float cropProp = 1.0f;
+					if ((rotationData[y][x] & cg) > 0) {
+						cropProp = 0.5f; yield *= cropProp; 
+					}
+					
+					// L per Ha
+					ethanol += yield * CEO_S;
+					// MJ per Ha
+					netEnergy += (yield * 0.40f * CEO_S * EO_S) - (EI_SF + EI_SP * yield * CEO_S);
+					// Soy return $ per Ha
+					returnAmount = P_Per_Soy * yield;
+					// Net Income $ per Ha
+					netIncome += returnAmount - (PS_Cost * cropProp);
+				}
+				
+				if ((rotationData[y][x] & Alfalfa_Mask) > 0) {
+					float yield = unpackYield(pYield, 2);
+					float cropProp = 1.0f;
+					if ((rotationData[y][x] & dr) > 0) {
+						cropProp = 0.6667f; yield *= cropProp;
+					}
+					
+					// L per Ha
+					ethanol += yield * CEO_A;
+					// MJ per Ha
+					netEnergy += (yield * CEO_A * EO_A) - (EI_AF + EI_AP * yield * CEO_A);
+					// Alfalfa return $ per Ha
+					returnAmount = P_Per_Alfalfa * yield;
+					// Net Income $ per Ha
+					netIncome += returnAmount - (PA_Cost * cropProp);
+				}
+				
+				if ((rotationData[y][x] & Grass_Mask) > 0) {
+					float yield = unpackYield(pYield, 3);
+					
+					// L per Ha
+					ethanol += yield * CEO_G;
+					// MJ per Ha
+					netEnergy += (yield * CEO_G * EO_G) - (EI_GF + EI_GP * yield * CEO_G);
+					// Gross return $ per ha
+					returnAmount = P_Per_Grass * yield;
+					// Net Income $ per ha
+					netIncome += returnAmount  - PG_Cost;
+				}
+				
+				// Convert L per Ha to L per cell
+				//ethanolData[y][x] = Math.round(ethanol * 900.0f / 10000.0f * 100.0f) / 100.0f;
+				ethanolData[y][x] = ethanol * 900.0f / 10000.0f;
+				// Convert MJ per Ha to MJ per cell
+				netEnergyData[y][x] = netEnergy * 900.0f / 10000.0f;
+				// Convert $ per Ha to $ per cell
+				netIncomeData[y][x] = netIncome * 900.0f / 10000.0f;
 			}
 		}
 		

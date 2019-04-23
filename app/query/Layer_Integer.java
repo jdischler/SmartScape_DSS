@@ -115,7 +115,7 @@ public class Layer_Integer extends Layer_Base
 
 		public int getIndex(String indexName) {
 			if (mKeys == null) return 0;
-			Key_Item ki = mKeys.get(indexName);
+			Key_Item ki = mKeys.get(indexName.toLowerCase());
 			if (ki == null) return 0;
 			return ki.mIndex;
 		}

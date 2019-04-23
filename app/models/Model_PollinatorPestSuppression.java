@@ -42,13 +42,11 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		debugLog(">>> Computing Model Pest/ Pollinator");
 		PerformanceTimer timer = new PerformanceTimer();
 		
-		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
-		int Grass_Mask = cdl.stringToMask("grass");
-		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
-		int Corn_Mask = cdl.stringToMask("corn");
-		int Soy_Mask = cdl.stringToMask("soy");
-		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
+		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
+		
+		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
+		int totalMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
+				"continuous corn","cash grain","dairy rotation","other crops");
 		
 		// full raster save process...
 		float [][] pestData = new float[height][width];
@@ -57,13 +55,14 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
 		Moving_Z_Window.WindowPoint point = zWin.getPoint();
 
-		float max = (float)Math.pow(0.75f + 2.5f + 1.0f, 2.0f);
+		// derived from pollinatorIndex formula. 
+		float max = (float)Math.pow(2.8f, 2.0f);
 		
 		boolean moreCells = true;
 		while (moreCells) {
 			
 			point = zWin.getPoint();
-			if ((rotationData[point.mY][point.mX] & TotalMask) > 0 && zWin.canGetProportions()) {
+			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && zWin.canGetProportions()) {
 				
 				float proportionForest = zWin.getProportionForest();
 				float proportionGrass = zWin.getProportionGrass();
@@ -77,12 +76,12 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 				
 				// Crop type is zero for Ag, Crop type is 1 for grass
 				float cropType = 0.0f;
-				if ((rotationData[point.mY][point.mX] & Grass_Mask) > 0) {
+				if ((rotationData[point.mY][point.mX] & grassMask) > 0) {
 					cropType = 1.0f;
 				}
 					
 				// Pest suppression calculation
-				float pestSuppression = 0.25f + (0.19f * cropType) + (0.62f * proportionGrass);
+				float pestSuppression = 0.24f + (0.18f * cropType) + (0.58f * proportionGrass);
 	
 				pestData[point.mY][point.mX] = pestSuppression;
 			}
