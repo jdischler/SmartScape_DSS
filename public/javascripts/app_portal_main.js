@@ -251,7 +251,7 @@ var radarDef = {
 		tooltip: {
 			trackMouse: false,
 			renderer: function(toolTip, record, ctx) {
-				toolTip.setHtml(record.get('name') + ': ' + record.get('data1'));
+				toolTip.setHtml(record.get('name') + ': ' + Ext.util.Format.number(record.get('data1'), '0.0#%'));
 			}
 		},			
 		style: {fillOpacity: .3}
@@ -265,7 +265,7 @@ var radarDef = {
 		tooltip: {
 			trackMouse: false,
 			renderer: function(toolTip, record, ctx) {
-				toolTip.setHtml(record.get('name') + ': ' + record.get('data1'));
+				toolTip.setHtml(record.get('name') + ': ' + Ext.util.Format.number(record.get('data2'), '0.0#%'));
 			}
 		},			
 		style: {fillOpacity: .3}

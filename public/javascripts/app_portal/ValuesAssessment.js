@@ -29,7 +29,7 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 					width: 300,
 					minValue: 0,
 					maxValue: 100,
-					margin: '4 32 4 0',
+					margin: '2 32 2 0',
 					labelAlign: 'right',
 					labelWidth: 120,
 					increment: 5,
@@ -38,19 +38,19 @@ Ext.define('DSS.app_portal.ValuesAssessment', {
 				items: [{
 					xtype: 'component',
 					width: '100%',
-					margin: '0 0 0 0',
-					html: 'Please adjust your preferences regarding how much importance you place to each of the axes shown to the right.'
+					margin: '0 0 4 0',
+					html: 'Please adjust your preferences on the triangle below regarding how much importance you place to each of the axes shown to the right.'
 				},{
 					xtype: 'component',
 					width: 200,
 					style: 'cursor:move',
-					//hidden: true,
+					hidden: true,
 					height: 160,
 					margin: '0 0 0 48',
 					html: '<img id="ddd" src="assets/images/triangle_selector.png" style="width:100%; opacity: 0.9">'
 				},{
 					xtype: 'triangle_mixer',
-					hidden: true
+					//hidden: true
 				},{
 					fieldLabel: 'Net Income'
 				},{

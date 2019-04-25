@@ -456,65 +456,72 @@ Ext.define('DSS.view.PortalViewport', {
 			success: function(response, opts) {
 				if (response.responseText != '') {
 					var obj = JSON.parse(response.responseText);
-					console.log(obj);
 					var radarData = Ext.data.StoreManager.lookup('dss-values');
 					
 					var rec = radarData.findRecord("type", 'pl');
 					if (rec) {
 						var v = rescale(obj.pl, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 					
 					rec = radarData.findRecord("type", 'bh');
 					if (rec) {
 						var v = rescale(obj.bh, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 					
 					rec = radarData.findRecord("type", 'ps');
 					if (rec) {
 						var v = rescale(obj.ps, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 					
 					rec = radarData.findRecord("type", 'ni');
 					if (rec) {
 						var v = rescale(obj.ni, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
-					
 					
 					rec = radarData.findRecord("type", 'sr');
 					if (rec) {
 						var v = rescale(obj.sl, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 					
 					rec = radarData.findRecord("type", 'sc');
 					if (rec) {
 						var v = rescale(obj.sc, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 
 					rec = radarData.findRecord("type", 'gb');
 					if (rec) {
 						var v = rescale(obj.gb, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
 					
 					rec = radarData.findRecord("type", 'em');
 					if (rec) {
 						var v = rescale(obj.em, rec.get('base'))
-						rec.set('data1', v.val, {commit:true})
-						rec.set('data2', v.base, {commit:true});
+						rec.set('data1', v.val)
+						rec.set('data2', v.base);
+						rec.set('dataBak', v.val)
 					}
+					radarData.commitChanges();
 				}
 			},
 			failure: function(response, opts) {
