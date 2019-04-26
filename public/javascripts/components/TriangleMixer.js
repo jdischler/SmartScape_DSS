@@ -150,7 +150,7 @@ Ext.define('DSS.components.TriangleMixer', {
 			.attr("fill", function(d) {
 				return d.col;
 			})
-			.attr("opacity", 0.4)
+			.attr("opacity", 0.5)
 
 		var grid = [];
 		for (var i = -5; i <=5; i++) {
@@ -223,29 +223,37 @@ Ext.define('DSS.components.TriangleMixer', {
 		var overlayRoot = me.DSS_svg.append('g')
 			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.6) + ')scale(0.88,0.88)');
 		
-		overlayRoot
+		var draggable = overlayRoot
 			.selectAll('circle')
 			.data(circle)
 			.enter()
 			.append("g")
+				.attr("transform", "translate(0,0)")
+				.attr("cursor", "move")
+				.attr("filter", "url(#button-shadow")
+				.call(d3.drag()
+					.subject(function(d) { 
+						return d; 
+					})
+					.on("start", dragstart)
+					.on("drag", dragmove)
+					.on("end", dragend));
+
+
+		draggable
 			.append("circle")
-			.attr("transform", "translate(0,0)")
+			.attr("class", "d3-circle-knob")
 			.attr("fill", "rgb(71,110,156)")
 			.attr("stroke", "#fff")
-			.attr("cursor", "move")
-			.attr("r", 16)
-			.attr("filter", "url(#button-shadow")
-			.call(d3.drag()
-				.subject(function(d) { 
-					return d; 
-				})
-				.on("start", dragstart)
-				.on("drag", dragmove)
-				.on("end", dragend));
+			.attr("r", 16);
+		draggable
+		.append("circle")
+		.attr("fill", "#fff")
+		.attr("r", 1.5)
 		
 		  function dragstart(d) {
 			  event.preventDefault()
-			  d3.select(this).attr('opacity', '0.7');
+			  draggable.select('.d3-circle-knob').attr('opacity', 0.7);
 		  }
 		  
 		  function dragmove(d) {
@@ -254,9 +262,9 @@ Ext.define('DSS.components.TriangleMixer', {
 			  d.y = d.y + d3.event.dy
 
 			// convert coords with a given triangle...and test point..
-		    var X1 = 0, Y1 = -142;
-		    var X2 = -120, Y2 = 70;
-		    var X3 = 120, Y3 = 70;
+		    var X1 = 0, Y1 = -144;
+		    var X2 = -124, Y2 = 72;
+		    var X3 = 124, Y3 = 72;
 		    var X4 = d.x, Y4 = d.y;
 		    
 		    //to UVW barycentric coords, ie, a tuple that represents the ratio(proportion) of each triangle
@@ -334,9 +342,8 @@ Ext.define('DSS.components.TriangleMixer', {
 		  }
 		  
 		function dragend(d) { 
-			d3.select(this)
-				.attr('opacity', 1)
-				
+			draggable.select('.d3-circle-knob').attr('opacity', 1);
+			
 			// fix real value to whatever the snap was so the internal values don't
 			//	drift so far away from the clamped representation...
 			d.x = d.dx;

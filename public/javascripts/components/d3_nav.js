@@ -304,7 +304,8 @@ Ext.define('DSS.components.d3_nav', {
 
 			var realWidth = me.calcNavWidth();
 			const cx = (me.DSS_align === "c") ? (me.getWidth() - realWidth) / 2 : 
-				(me.DSS_align === "l") ? 0 : me.getWidth() - realWidth;
+				(me.DSS_align === "l") ? 20 : (me.getWidth() - realWidth) - 20;// account for shadow
+
 			var atX = me.DSS_containerPad;
 			svg.selectAll('.d3-nav')
 				.attr("class", function(d) {

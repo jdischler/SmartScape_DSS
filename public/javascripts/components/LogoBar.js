@@ -32,7 +32,7 @@ Ext.define('DSS.components.LogoBar', {
 		xtype: 'd3_nav',
 		width: 640, 
 		height: 58,
-		padding: '4 0 0 32',
+		padding: '4 0 0 8',
 		DSS_tooltipOffset: [-64,-18],
 		DSS_align: 'l',
 		DSS_duration: 500.0,
@@ -56,12 +56,16 @@ Ext.define('DSS.components.LogoBar', {
 			text: 'Analyze',
 			activeText: 'Analyze Results',
 			tooltip: 'Analyze the modeled outcomes from the user-chosen landscape changes',
+			disabledTooltip: 'Transform the landscape to proceed',
+			disabled: true,
 			DSS_selectionChanged: function(selected) {
 			}
 		},{
 			text: 'Next?',
 			activeText: 'Step 4 (what next?) Mockup',
 			tooltip: 'Dig a little deeper and explore meta-model outcomes',
+			disabledTooltip: 'Transform the landscape to proceed',
+			disabled: true,
 			DSS_selectionChanged: function(selected) {
 				if (selected) {
 					Ext.create('DSS.components.Step4').show().center();
