@@ -1,5 +1,5 @@
 .d3-nav-bg {
-	stroke: #ccc;
+	stroke: #aaa;
 	stroke-width: 1;
 	fill: #fff;
 }
@@ -19,7 +19,7 @@
 }
 
 .d3-nav:hover {
-	fill: #2a6e9f;
+	fill: #4f9fd8;
 	text-shadow: 0 0 2px #99f;
 }
 
@@ -44,5 +44,6 @@
     border-radius: 4px;
     color: #333;			
     pointer-events: none;
-    box-shadow: 0 4px 4px rgba(0,0,0,0.2)		
+    box-shadow: 0 4px 4px rgba(0,0,0,0.2);
+    z-index: 32000;		
 }

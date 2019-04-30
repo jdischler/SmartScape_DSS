@@ -51,22 +51,21 @@ Ext.define('DSS.components.LayerClickSelect', {
 			items: [{
 				xtype: 'container',
 				layout: DSS.utils.layout('hbox', 'center', 'stretch'),
+				padding: '0 0 0 32',
 				items: [{
 					xtype: 'button',
 					itemId: 'dss-choice-toggle',
 					scale: 'medium',
 					text: me.DSS_startChoosingButton,
-					width: 140,
+					width: 142,
 					margin: 4,
 					toggleGroup: me.DSS_serverLayer,
 					toggleHandler: function(self, state) {
 						if (state) {
-							DSS.Layers.cancelClickActionsForAllBut(me);
+							me.DSS_browser.cancelClickActionsForAllBut(me);
 							
 							self.setText(me.DSS_stopChoosingButton);
 							me.DSS_vectorLayer.setVisible(true);
-						//	me.DSS_clickInteraction.f.setOpacity(1);
-							//me.DSS_clickInteraction.setMap(globalMap);
 							globalMap.addInteraction(me.DSS_clickInteraction);
 							me.DSS_hoverInteraction.setMap(globalMap);
 						}
@@ -74,9 +73,7 @@ Ext.define('DSS.components.LayerClickSelect', {
 							self.setText(me.DSS_startChoosingButton);
 							
 							me.DSS_vectorLayer.setVisible(false);
-						//	me.DSS_clickInteraction.f.setOpacity(0.4);
 							globalMap.removeInteraction(me.DSS_clickInteraction);
-							//me.DSS_clickInteraction.setMap(null);
 							me.DSS_hoverInteraction.setMap(null);
 						}
 					}
@@ -84,19 +81,37 @@ Ext.define('DSS.components.LayerClickSelect', {
 					xtype: 'button',
 					scale: 'medium',
 					text: 'Clear Selection',
-					width: 140,
+					width: 142,
 					margin: 4,
 					handler: function(self) {
 						me.DSS_clickInteraction.getFeatures().clear();
-						DSS.Layers.valueChanged();
+						me.DSS_browser.valueChanged();
+						me.updateSelectionCount();
 					}
 				}]
+			},{
+				xtype: 'component',
+				itemId: 'DSS-selection-count',
+				style: 'color: #444; text-align: center',
+				margin: '2 32',
+				listeners: {
+					afterrender: function() {
+						me.updateSelectionCount();
+					}
+				}
 			}]
 		});
 		
 		me.callParent(arguments);
 		me.configInteractionStyles();
 		me.createInteractions();
+	},
+	
+	//-----------------------------------------------------------------------
+	updateSelectionCount: function() {
+		var me = this;
+		var count = me.DSS_clickInteraction.getFeatures().getLength();
+		me.getComponent('DSS-selection-count').setHtml('Features Selected: ' + count);
 	},
 	
 	//-----------------------------------------------------------------------
@@ -120,40 +135,23 @@ Ext.define('DSS.components.LayerClickSelect', {
 		
 		me.DSS_clickInteraction = new ol.interaction.Select({
 			condition: ol.events.condition.click,
+			toggleCondition: ol.events.condition.always,
 			layers: [me.DSS_vectorLayer],
 			style: me.DSS_clickStyle,
 		});
 		me.DSS_clickInteraction.on('select', function() {
-			DSS.Layers.valueChanged();
+			me.updateSelectionCount();
+			me.DSS_browser.valueChanged();
 		})
 		//globalMap.addInteraction(me.DSS_clickInteraction);
 		//me.DSS_clickInteraction.setMap(null);
 	},
 	
 	//--------------------------------------------------------------------------
-	expandInternal: function() {
-		var me = this;
-		//me.DSS_clickInteraction.f.setVisible(true);
-	},
-	
-	//--------------------------------------------------------------------------
-	collapseInternal: function() {
-		var me = this;
-		//me.DSS_clickInteraction.f.setVisible(false);// evil. F is the internal (and private) interaction layer that wants access for opacity control...
-		
-		var toggle = me.down('#dss-choice-toggle');
-		if (toggle.pressed) {
-			toggle.toggle(false);
-		}
-	},
-	
-	//--------------------------------------------------------------------------
 	configureSelection: function() {
 
 		var me = this;
-		if (me.getCollapsed() || me.isHidden()) {
-			return false;
-		}
+		if (me.isHidden()) {return false;}
 		
 		var queryLayer = { 
 			name: me.DSS_serverLayer,

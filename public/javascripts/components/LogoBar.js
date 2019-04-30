@@ -11,28 +11,51 @@ Ext.define('DSS.components.LogoBar', {
 		'DSS.components.d3_nav'
 	],
     
-	region: 'north',
-	height: 60,
-	style: "background: -webkit-linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed; " + 
-		"background: linear-gradient(to top, #000, rgb(72,96,32), rgb(210,223,207)) fixed;",
+	style: "background: transparent",
 	
 	layout: {
 		type: 'hbox',
 		pack: 'start',
-//		align: 'center'
 	},
 
 	items: [{
 		xtype: 'component',
-		margin: '1 0 0 10',
-		width: 260, 
-		height: 60, // a fixed height improves page layout responsiveness unfortunately
-		html: '<a href="/"><img id="ddd" src="assets/images/dss_logo.png" style="width:100%"></a>',
+		margin: '4 0 0 0',
+		width: 290, 
+		height: 74, // a fixed height improves page layout responsiveness unfortunately
+		html: '<a href="/"><img id="ddd" src="assets/images/dss-logo-white.png" style="width:100%"></a>',
+/*	},{
+		xtype: 'component', 
+		id: 'dss-selection-loading',
+		margin: '-6 -56 -8 -8',
+		width: 80, height: 80,
+		style: 'opacity:0.8; position: absolute; background-image: url(assets/images/spinner-icon-gif-24.gif); background-size: cover;',
+*/	},{
+		xtype: 'container',
+		layout: 'absolute',
+		id: 'dss-selection-loading',
+	//	margin: '0 -32 -8 -8',
+		width: 16, height: 60,
+		style: 'opacity: 0.8',
+		defaults: {
+			xtype: 'component',
+			width: 60, height: 60,
+			margin: '4 2'
+		},
+		items: [{
+			y: 8,
+			style: 'filter: blur(2px); opacity: 0.6; position: absolute; background: url(assets/images/dss-spinner-shadow.png); background-size: cover;',
+			cls: 'spinner-rotate',
+		},{
+			style: 'animation: rotation 1s infinte linear; position: absolute; background: url(assets/images/dss-spinner.png); background-size: cover;',
+			cls: 'spinner-rotate',
+		}]
 	},{
 		xtype: 'd3_nav',
-		width: 640, 
-		height: 58,
-		padding: '4 0 0 8',
+		itemId: 'd3-nav-bar',
+		width: 660, 
+		height: 66,
+		padding: '10 0 0 32',
 		DSS_tooltipOffset: [-64,-18],
 		DSS_align: 'l',
 		DSS_duration: 500.0,
@@ -50,7 +73,7 @@ Ext.define('DSS.components.LogoBar', {
 			activeText: 'Transform the Landscape',
 			tooltip: 'Alter the landcover in selected areas to create a user-scenario',
 			DSS_selectionChanged: function(selected) {
-				Ext.getCmp('dss-scenario-grid').setVisible(selected);
+				DSS_viewport.updateScenarioManager(selected)
 			}
 		},{
 			text: 'Analyze',
@@ -59,6 +82,7 @@ Ext.define('DSS.components.LogoBar', {
 			disabledTooltip: 'Transform the landscape to proceed',
 			disabled: true,
 			DSS_selectionChanged: function(selected) {
+				DSS_viewport.positionAnalyzer(selected);
 			}
 		},{
 			text: 'Next?',
@@ -72,9 +96,12 @@ Ext.define('DSS.components.LogoBar', {
 				}
 			}
 		}]
-	},{
-		xtype: 'container',
-		flex: 1,
-	}]
+	}],
+	
+	//--------------------------------------------------------------------------
+	enableNavBar: function() {
+		var me = this;
+		me.getComponent('d3-nav-bar').enableAll();
+	}
 	
 });

@@ -69,7 +69,7 @@ var globalMap = new ol.Map({
 			collapsible: true
 		}
 	}).extend([
-		new ol.control.ScaleLine(),
+	//	new ol.control.ScaleLine(),
 //		new olCustomButton()
 	]),
 	layers: [
@@ -117,45 +117,19 @@ var selectionLayer = new ol.layer.Image({
 //
 //-----------------------------------------------------
 Ext.define('DSS.components.MainMap', {
-    extend: 'Ext.panel.Panel',
+    extend: 'GeoExt.component.Map',
     alias: 'widget.mainmap',
  
-    requires: [
-	    'GeoExt.component.Map',
-    ],
-    
-	header: false/*{
-		style: 'border-right: 1px solid #bcd; border-left: 1px solid #bcd;',
-	*/,
-	region: 'center',
-	layout: 'fit',
+	header: false,
+	map: globalMap,
+	animate: false,
+	style: 'background-color: rgb(198,208,168)', // rgb(217,221,183)
 
-	listeners: {
-		afterrender: function(self) {
-			Ext.defer(function() { 
-				var rt = Ext.dom.Query.select('.ol-overlaycontainer-stopevent');
-				console.log(rt);
-				Ext.create('Ext.container.Container', {
-					id: 'dss-selection-loading',
-					hidden: true,
-					style: 'top: 0; left: 2em; width: 5em; height: 5em; opacity:0.8; position: absolute; background-image: url(assets/images/spinner-icon-gif-24.gif); background-size: cover;',
-					renderTo: rt
-				});
-			}, 500)
-		}
-	},
-	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
 		
 		Ext.applyIf(me, {
-			items: [{
-				xtype: 'gx_map',
-				map: globalMap,
-				animate: false,
-				style: 'background-color: rgb(198,208,168)' // rgb(217,221,183)
-			}]
 		});
 		
 		me.callParent(arguments);

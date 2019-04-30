@@ -3,59 +3,73 @@
  */
 
 var DSS_DefaultScenarioSetup = {
-	Active: true, 
-	SelectionName: null,//'Double Click to Set Custom Name', 
-	TransformText: null,//'Double Click to Set Crop',
-	ManagementText: '',
-	Transform: { LandUse: 1, Options: undefined },
-	Query: {}
+	selection_name: null,//'Double Click to Set Custom Name', 
+	transform_text: null,//'Double Click to Set Crop',
+	management_text: '',
+	transform: { land_use: 1, options: undefined },
+	query: {}
 };
 
 var occlusionExample = [{
-	Active: true, SelectionName: 'Row crops near open water', TransformText: 'Mixed Grass(C3 / C4)',
-	Query: [{
+	selection_name: 'Row crops near open water', transform_text: 'Mixed Grass(C3 / C4)',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
 		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
 	}]
 },{
-	Active: true, SelectionName: 'Row crops on marginal soils', TransformText: 'Mixed Grass(C3 / C4)',
-	Query: [{
+	selection_name: 'Row crops on marginal soils', transform_text: 'Mixed Grass(C3 / C4)',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
 		"name":"lcc","type":"indexed","matchValues":[5,6,7,8]
 	}]
 },{
-	Active: true, SelectionName: 'Row crops near public lands', TransformText: 'Mixed Grass(C3 / C4)',
-	Query: [{
+	selection_name: 'Row crops near public lands', transform_text: 'Mixed Grass(C3 / C4)',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
 		"name":"public_land","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":1000
 	}]
 },{
-	Active: true, SelectionName: 'Row crops on low slopes', TransformText: 'Keep (increase nutrient spreading)',
-	Query: [{
+	selection_name: 'Row crops on low slopes', transform_text: 'Keep (increase nutrient spreading)',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 7, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
 		"name":"slope","type":"continuous","lessThanTest":"<","greaterThanTest":">=","lessThanValue":4
 	}]
 },{
-	Active: true, SelectionName: 'Row crops on steeper slopes', TransformText: 'C3 Grass',
-	Query: [{
+	selection_name: 'Row crops on steeper slopes', transform_text: 'C3 Grass',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
 		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","greaterThanValue":5
 	}]
 },{
-	Active: true, SelectionName: 'All remaining row crops', TransformText: 'Alfalfa',
-	Query: [{
+	selection_name: 'All remaining row crops', transform_text: 'Alfalfa',
+	transform: { land_use: 5, options: [{type: 'fertilizer',value: 2 }] },
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	}]
 },{
-	Active: true, SelectionName: 'C4 Grasses', TransformText: 'Mixed Row Crops',
-	Query: [{
+	selection_name: 'C4 Grasses', transform_text: 'Dairy Rotation',
+	transform: { land_use: 3, options: [{type: 'fertilizer',value: 2 }] },
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[5]
-	}]}];
+	}]
+}];
 
 var DSS_EmptySelectionName = 'Double Click to Name Selection', 
 	DSS_EmptyTransformText = 'Click to Choose a New Landcover Type';
@@ -64,17 +78,8 @@ var DSS_EmptySelectionName = 'Double Click to Name Selection',
 Ext.create('Ext.data.Store', {
 	
 	storeId: 'dss-scenario-store',
-    fields: ['Active', 'SelectionName', 'TransformText', 'ManagementText', 'Transform', 'Query'],
-    data: {
-        items: occlusionExample
-    },
-    proxy: {
-        type: 'memory',
-        reader: {
-            type: 'json',
-            root: 'items'
-        }
-    },
+    fields: ['selection_name', 'transform_text', 'management_text', 'transform', 'query'],
+    data: occlusionExample,
     listeners: {
     	// blah, just force the commit to happen, no reason not to save it right away IMHO
     	update: function(store, record, operation, eOps) {
@@ -89,7 +94,6 @@ Ext.create('Ext.data.Store', {
 // Scenario Summary....
 //------------------------------------------------------------------------------
 Ext.define('DSS.components.ScenarioGrid', {
-		
     extend: 'Ext.grid.Panel',
     alias: 'widget.scenario_grid',
 
@@ -98,14 +102,7 @@ Ext.define('DSS.components.ScenarioGrid', {
     ],
   
 	autoScroll: true,
-    height: 220,
-    maxWidth: 960,
-    minWidth: 640,
-    header: {
-    	iconAlign: 'right'
-    },
-    collapsible: true,
-	title: 'Transform the Landscape',
+    header: false,
 	dockedItems: [{
 		xtype: 'toolbar',
 		dock: 'right',
@@ -151,12 +148,13 @@ Ext.define('DSS.components.ScenarioGrid', {
 		    toolPressedCls: 'dss-tool-pressed',
 		    toolOverCls: 'dss-tool-over',		
 			width: 28, height: 28,
-			tooltip: 'Calculate the outcomes for my landscape transformations'
+			tooltip: 'Calculate the outcomes for my landscape transformations',
+			callback: function(toolOwner, tool) {
+				// TODO: actually run the simulation
+				DSS_viewport.enableNavBar();
+			}
 		}]
 	}],
-	viewConfig: {
-		stripeRows: true
-	},
     bodyStyle: {'background-color': '#fafcff'},
 	
     store: 'dss-scenario-store',
@@ -174,20 +172,15 @@ Ext.define('DSS.components.ScenarioGrid', {
 						// no real need for validation, but if we don't commit the changes,
 						//	changed fields will show a red triangle in the corner...
 						e.record.commit();
-						var dssLeftPanel = Ext.getCmp('DSS_LeftPanel');
-						dssLeftPanel.up().DSS_SetTitle(e.record.get('SelectionName'));
+					//	var dssLeftPanel = Ext.getCmp('DSS_LeftPanel');
+					//	dssLeftPanel.up().DSS_SetTitle(e.record.get('selection_name'));
 					}
 				}
 			}
 		})
 	],
 	viewConfig: {
-		getRowClass: function(record, index) {
-			var c = record.get('Active')
-			if (c == false) {
-				return 'dss-greyed';
-			}
-		},
+		stripeRows: true,
 		plugins: {
 			ptype: 'gridviewdragdrop',
 			dragText: 'Drag and drop transforms to reorder them'
@@ -196,33 +189,25 @@ Ext.define('DSS.components.ScenarioGrid', {
 	
 	listeners: {
 		cellclick: function(me, td, cellIndex, record, tr, rowIndex, e, eOpts) {
-			
-		/*	if (cellIndex == 3) {
-				record.set('Active', !record.get('Active')); // Toggle active field
-				record.commit();
+			if (cellIndex == 1 || cellIndex == 2) {
+				var query = record.get('query');
+				var name = record.get('selection_name')
+				DSS_viewport.updateLayerBrowser(query, name);
 			}
-			else*/ 
 			if (cellIndex == 3) {
 				var rectOfClicked = e.target.getBoundingClientRect();
 				me.up().showTransformPopup(me, rowIndex, rectOfClicked);
 			}
 		},
 		beforedeselect: function(me, record, index, eOpts) {
-			/*var query = DSS_ViewSelectToolbar.buildQuery()
-			record.set('Query', query);
-			record.commit();*/
-		},
-		select: function(me, record, index, eOpts) {
-			/*var query = record.get('Query');
-			DSS_ViewSelectToolbar.setUpSelectionFromQuery(query);
-			var dssLeftPanel = Ext.getCmp('DSS_LeftPanel');
-			var panel = dssLeftPanel.up();
-			panel.DSS_SetTitle(record.get('SelectionName'), panel.getCollapsed());*/
+			var query = DSS_viewport.getLayerBrowserQuery();
+			record.set('query', query);
+			record.commit();
 		},
 		viewready: function(me, eOpts ) {
 			/*var query = DSS_ViewSelectToolbar.buildQuery()
 			var record = me.getStore().getAt(0);
-			record.set('Query', query);
+			record.set('query', query);
 			record.commit();
 			*/
 			//me.getSelectionModel().select(0);
@@ -257,6 +242,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 	            },{
 	            	xtype: 'container',
 	            	margin: '-8 2 2 -16',
+	            	itemId: 'management',
 	            	html: '<ul><li>50% synthetic fertilizer</li><li>50% Manure (fall spread)</li><li>Cover crop: alfalfa</li></ul>',
 	            }],
 	            // Render immediately so that tip.body can be referenced prior to the first show.
@@ -267,7 +253,9 @@ Ext.define('DSS.components.ScenarioGrid', {
 	                	if (!Ext.fly(tip.triggerElement).hasCls('dss-trx-col'))
 	                		return false;
 	                	var tt = tip.down('#msg');
-	                	tt.update('To: "' + view.getRecord(tip.triggerElement).get('TransformText') + '"');
+	                	tt.update('To: ' + view.getRecord(tip.triggerElement).get('transform_text'));
+	                	tt = tip.down('#management');
+	                	tt.update(view.getRecord(tip.triggerElement).get('management_text'));
 	                }
 	            }
 	        });  
@@ -291,23 +279,23 @@ Ext.define('DSS.components.ScenarioGrid', {
 					var queries1 = [];
 					for (var i = 0; i < rowIndex; i++) {
 						queries1.push({
-							queryLayers: grid.getStore().getAt(i).get('Query')
+							queryLayers: grid.getStore().getAt(i).get('query')
 						});
 					}
-					var query2 = grid.getStore().getAt(rowIndex).get('Query');
-					DSS.Layers.showOcclusion(queries1, {
+					var query2 = grid.getStore().getAt(rowIndex).get('query');
+					Ext.getCmp('DSS_attributeFixMe').showOcclusion(queries1, {
 						queryLayers: query2
 					});
 				}
 				else {
-					var query2 = grid.getStore().getAt(rowIndex).get('Query');
-					DSS.Layers.showOcclusion(null, {
+					var query2 = grid.getStore().getAt(rowIndex).get('query');
+					Ext.getCmp('DSS_attributeFixMe').showOcclusion(null, {
 						queryLayers: query2
 					});
 				}
 /*				var record = grid.getStore().getAt(rowIndex);
 				grid.getSelectionModel().select([record]); // make record selected to make things less confusing IMO
-				var query = record.get('Query');
+				var query = record.get('query');
 				if (query) {
 					DSS.Layers.showOcclusion(null, query);
 				}*/
@@ -319,7 +307,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 			dirtyText: null, // prevents addition of an unneeded DOM el
 			width: 66,
 		},{
-			dataIndex: 'SelectionName',
+			dataIndex: 'selection_name',
 			text: 'User-Named Selection',
 			flex: 1, 
 		//	maxWidth: 280,
@@ -339,7 +327,7 @@ Ext.define('DSS.components.ScenarioGrid', {
     		},
 			tdCls: 'dss-grey-scenario-grid'
 		},{
-			dataIndex: 'TransformText',
+			dataIndex: 'transform_text',
 			text: 'Transforms & Managment',
 			flex: 1, 
 		//	maxWidth: 280,
@@ -353,15 +341,6 @@ Ext.define('DSS.components.ScenarioGrid', {
 			//	meta.tdAttr = 'data-qtip=" wow stuff' + record.get("ManagementText") + '"';
 				return value;
 			}
-		},{
-			xtype: 'checkcolumn',
-			dataIndex: 'Active',
-			text: 'Active',
-			dirtyText: null, // prevents addition of an unneeded DOM el
-			align: 'center',
-			width: 60,
-			resizable: false,
-			tdCls: 'dss-grey-scenario-grid'
 		},{
 			xtype: 'actioncolumn',
 			width: 32,
@@ -406,18 +385,16 @@ Ext.define('DSS.components.ScenarioGrid', {
 	showTransformPopup: function(grid,rowIndex, rectOfClicked) {
 		
 		var record = grid.getStore().getAt(rowIndex);
-		var transform = record.get('Transform');
+		var transform = record.get('transform');
 		var window = Ext.create('DSS.components.TransformPopup', {
 			DSS_TransformIn: transform,
 			listeners: {
-				beforedestroy: {
-					fn: function(win) {
-						if (win.DSS_Transform) {
-							record.set('Transform', win.DSS_Transform.Config);
-							record.set('TransformText', win.DSS_Transform.Text);
-							record.set('ManagementText', win.DSS_Transform.Management);
-							record.commit();
-						}
+				beforedestroy: function(win) {
+					if (win.DSS_Transform) {
+						record.set('transform', win.DSS_Transform.config);
+						record.set('transform_text', win.DSS_Transform.text);
+						record.set('management_text', win.DSS_Transform.m_text);
+						record.commit();
 					}
 				}
 			}});
@@ -465,7 +442,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 		}
 		
 		// Add the new record and select it in the combo box....
-		DSS_ScenarioComparisonStore.add({'Index': DSS_currentModelRunID, 'ScenarioName': 'Unstored Scenario Result'});
+		DSS_ScenarioComparisonStore.add({'Index': DSS_currentModelRunID, 'scenario_name': 'Unstored Scenario Result'});
 		DSS_ScenarioComparisonStore.commitChanges(); // FIXME: this necessary?
 		Ext.getCmp('DSS_ScenarioCompareCombo_2').setValue(DSS_currentModelRunID);
 
@@ -475,12 +452,12 @@ Ext.define('DSS.components.ScenarioGrid', {
 			var rec = st.getAt(idx);
 			
 			if (rec.get('Active')) {
-				var query = rec.get('Query');		
+				var query = rec.get('query');		
 				if (query == null) {
 					break;
 				}
 				
-				var trx = rec.get('Transform');
+				var trx = rec.get('transform');
 				if (trx == null) {
 					trx = DSS_DefaultScenarioSetup.Transform; // blurf, set to corn....
 				}

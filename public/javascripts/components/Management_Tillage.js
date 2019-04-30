@@ -24,6 +24,9 @@ Ext.define('DSS.components.Management_Tillage', {
 	width: '100%',
 	layout: 'fit',
 	
+	DSS_optionType: 'tillage',
+	DSS_label: 'Tillage',
+	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
@@ -32,7 +35,7 @@ Ext.define('DSS.components.Management_Tillage', {
 			items: [{
 				xtype: 'combobox',
 				itemId: 'dss-data',
-				fieldLabel: 'Tillage',
+				fieldLabel: me.DSS_label,
 				labelAlign: 'right',
 				labelWidth: 80,
 				displayField: 'name',
@@ -45,42 +48,37 @@ Ext.define('DSS.components.Management_Tillage', {
 		
 		me.callParent(arguments);
 		
-	//	this.setFromTransform(this.DSS_Transform);
+		this.setFromTransform(this.DSS_Transform);
 	},
 	
 	//--------------------------------------------------------------------------
-	setFromTransform: function(transform) {
+	setFromTransform: function(tr) {
+		var me = this;
 		
-		if (transform && transform.Options && transform.Options.CoverCrop) {
-			var coverCrop = this.getComponent('DSS_CoverCrop');
-			coverCrop.setValue({'CoverCrop': !transform.Options.CoverCrop.CoverCrop});
+		if (tr && tr.options) {
+			Ext.each(tr.options, function(o) {
+				if (o.type === me.DSS_optionType) {
+					var field = me.getComponent('dss-data');
+					field.setValue(o.value);
+				}
+			})
 		}
 	},
 	
 	//--------------------------------------------------------------------------
-	collectChanges: function(transform) {
+	collectChanges: function() {
+		var me = this,
+			res = {type: me.DSS_optionType};
 		
-		var obj = {
-			CoverCrop: false,
-			text: '<b>Cover Crop:</b> '
-		};
+		var field = this.getComponent('dss-data');
+		res['value'] = field.getValue()
+				
+		var store = Ext.data.StoreManager.lookup('dss-tillage');
+		var rec = store.findRecord('index', res.value);
 		
-		var tillageType = this.getComponent('DSS_CoverCrop');
-		var value = tillageType.getValue()['CoverCrop'];
-		console.log(value);
+		res['text'] = '<li>' + me.DSS_label + ': ' + rec.get('name') + '</li>';
 		
-		if (value == 0) {
-			obj.text += 'Yes';
-			obj.CoverCrop = true;
-		}
-		else if (value == 1) {
-			obj.text += 'None';
-		}
-		
-		transform['CoverCrop'] = obj;
-		
-		return obj;
+		return res;
 	}
 	
 });
-

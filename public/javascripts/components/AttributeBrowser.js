@@ -1,98 +1,12 @@
-//------------------------------------------------------------------------------
-Ext.define('DSS.components.OpacitySlider', {
-//------------------------------------------------------------------------------
-	extend: 'Ext.menu.Menu',
-	alias: 'widget.opacity_slider',
-	
-	OL_Layer: null, // set to the open layers layer to control... can be an array
-	
-	// MIN value of 0 is not properly supported. Handling for flowlines will need some
-	//	work if this is changed due to them being handled as an array where both
-	//	opacities are adjusted at the same time...but one layer is normally toggled as not visible.
-	//	When sliding up from zero, there'd have to be code to determine which layer should
-	//	be made visible...since sliding to zero would've made both layers invisible.
-	minValue: 20, 
-	maxValue: 100,
-	value: 80,
-	increment: 10,
-	plain: true,
-	bodyPadding: 4,
-	
-	//--------------------------------------------------------------------------
-	initComponent: function() {
-	
-		var me = this;
-		me.value = me.OL_Layer.opacity * 100.0;
-		
-		if (!me.items) me.items = [];
-		me.items.push({
-			xtype: 'slider',
-			itemId: 'slider',
-			hideEmptyLabel: true,
-			margin: 0,
-			width: 140,
-			minValue: me.minValue,
-			maxValue: me.maxValue,
-			value: me.value,
-			increment: me.increment,
-			listeners: {
-				change: function(slider, newVal) {
-					me.value = newVal;
-					if (newVal == 0) {
-						me.OL_Layer.setVisibility(false);
-					}
-					else {
-						if (me.minValue == 0) {
-							me.OL_Layer.setVisibility(true);
-						}
-						me.OL_Layer.setOpacity(newVal / 100.0);
-					}
-				}
-			}
-		});
-
-		me.listeners = Ext.applyIf(me.listeners || {}, {
-			show: function(me) {
-				me.down('#slider').setValue(me.OL_Layer.getOpacity() * 100.0, false);
-			}
-		});
-
-		me.callParent(arguments);
-	},
-	
-});
-	
-function getLegendChip(color, text) {
-	
-	return {
-		xtype: 'container',
-		margin: '2 8',
-		width: 240,
-		layout: 'hbox',
-		style: 'background-color: #fff; border-radius: 5px',
-		items: [{
-			xtype: 'container',
-			style: 'background-color: ' + color + '; border-radius: 3px', // matched selection - no conflicts
-			height: 16, width: 16,
-			margin: '3 3',
-		},{
-			xtype: 'container',
-			html: text,
-			margin: '2 6'
-		}]
-	}	
-};
-
 //-----------------------------------------------------
 // DSS.components.AttributeBrowser
 //
 //-----------------------------------------------------
 Ext.define('DSS.components.AttributeBrowser', {
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.container.Container',
     alias: 'widget.attributebrowser',
  
     requires: [
-        'DSS.components.AccordionLayout',
         'DSS.components.LayerBase',
         'DSS.components.LayerIndexed',
         'DSS.components.LayerFloat',
@@ -100,126 +14,27 @@ Ext.define('DSS.components.AttributeBrowser', {
         'DSS.components.LayerDrawShape',
     ],
     
-	id: 'DSS_findLandByAttr',
-	title: 'Find Land By Attributes',
-	stateful: true,
-	stateId: 'DSS_findLandByAttr',
-	
-	region: 'west',
-	width: 380,
-	bodyStyle: 'background-color: #bbb',
-	collapsible: 'true',
-	scrollable: 'vertical',
-	
+    padding: 4,
+	style: 'background: rgba(48,64,96,0.8); border: 1px solid #256;border-radius: 16px; box-shadow: 0 10px 10px rgba(0,0,0,0.4)' ,
+//	resizable: 'true',
+//	resizeHandles: 's',
 	layout: {
-		type: 'DSS_accordion',
-		fill: false,
-		multi: true,
-		allowCollapseAll: true
+		type: 'vbox',
+		align: 'center',
+		//pack: 'center'
 	},
 	
-	dockedItems: [{
-		xtype: 'container',
-		dock: 'bottom',
-		margin: '4 12',
-		items: [{
-			xtype: 'checkbox',
-			boxLabel: 'Enable Advanced Finders',
-			checked: false,
-			handler: function(self, value) {
-				//------------------------------------------------------------
-				Ext.suspendLayouts();
-				//------------------------------------------------------------
-				Ext.each(DSS.Layers.layers, function(layer){
-					if (layer.DSS_advancedLayer) {
-						layer.setVisible(value);
-					}
-				})
-				//------------------------------------------------------------
-				Ext.resumeLayouts(true);
-				//------------------------------------------------------------
-				DSS.Layers.valueChanged();
-			}
-		},{
-			xtype: 'container',
-			padding: '4 8',
-			layout: {
-				type: 'vbox',
-				align: 'middle'
-			},
-			items: [{
-				xtype: 'container',
-				padding: '4 8',
-				items: [{
-					xtype: 'button',
-					width: 100,
-					scale: 'small',
-					textAlign: 'left',
-					text: 'Subset',
-					iconCls: 'transparency-icon',
-					tooltip: DSS.utils.tooltip('Adjust layer transparency'),
-					arrowAlign: 'right',
-					menuAlign: 'l-r?',
-					menu: Ext.create('DSS.components.OpacitySlider', {
-						OL_Layer: maskLayer
-					})
-				}]
-			},{
-				xtype: 'button',
-				width: 100,
-				scale: 'small',
-				textAlign: 'left',
-				text: 'Selection',
-				iconCls: 'transparency-icon',
-				tooltip: DSS.utils.tooltip('Adjust layer transparency'),
-				arrowAlign: 'right',
-				menuAlign: 'l-r?',
-				menu: Ext.create('DSS.components.OpacitySlider', {
-					OL_Layer: selectionLayer
-				})
-			},
-			getLegendChip('#5a79ee','Matching selection'),
-			getLegendChip('#d73171','Matched but conflicting selection'),
-			getLegendChip('#40495a','Not selected but already trxformed'), {
-				xtype: 'container',
-				id: 'yes-dss-selection-container',
-				layout: 'hbox',
-				padding: 8,
-				margin: '0 -10',
-				flex: 1,
-				items: [{
-					xtype: 'container',
-					html: '<b>Selected:<br/>% Area:</b>',
-					width: 60,
-					style: 'text-align: right'
-				},{
-					xtype: 'container',
-					id: 'yes-dss-selected-stats',
-					width: 115,
-					padding: '0 0 0 4',
-					html: '--<br/>--'
-				},{
-					xtype: 'container',
-					html: '<b>Occluded:<br/>% Occ.:</b>',
-					width: 64,
-					style: 'text-align: right'
-				},{
-					xtype: 'container',
-					id: 'yes-dss-selected-stats2',
-					width: 115,
-					padding: '0 0 0 4',
-					html: '--<br/>--'
-				}]
-			}]
-		}]
-	}],
+	id: 'DSS_attributeFixMe',
+	DSS_Layers: [],
+	DSS_Processing: false,
+	DSS_TimeoutId: false,
 	
 	listeners: {
-		afterrender: function() {
+		afterrender: function(me) {
 			//------------------------------------------------------------
 			Ext.suspendLayouts();
 			//------------------------------------------------------------
-			var lt = Ext.create('DSS.components.LayerIndexed', {
+			var lt/* = Ext.create('DSS.components.LayerIndexed', {
 				title: 'Landcover Type',
 				DSS_serverLayer: 'cdl_2012',
 				DSS_indexConfig: [
@@ -233,12 +48,13 @@ Ext.define('DSS.components.AttributeBrowser', {
 					{boxLabel: 'Woodland',	name: "lt", indexValues: [7]}
 				],
 			});
-			DSS.Layers.add(lt);
+			DSS.Layers.add(lt);*/
 
-			lt = Ext.create('DSS.components.LayerIndexed', {
+/*			lt = Ext.create('DSS.components.LayerIndexed', {
 				title: 'Wisc Land',
 				DSS_serverLayer: 'wisc_land',
 				DSS_columns: 3,
+				hidden: true,
 				DSS_indexConfig: [
 					{boxLabel: 'Cont. Corn', name: "wl", indexValues: [1]},
 					{boxLabel: 'Cash Grain', name: "wl", indexValues: [14]},
@@ -257,11 +73,31 @@ Ext.define('DSS.components.AttributeBrowser', {
 					{boxLabel: 'Deciduous',	name: "wl", indexValues: [7]},
 				],
 			});
-			DSS.Layers.add(lt);
-
+			me.addLayer(lt);
+*/			
 			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
+			lt = Ext.create('DSS.components.LayerIndexed', {
+				title: 'Landcover Type (WiscLand 2.0)',
+				DSS_serverLayer: 'wisc_land',
+				DSS_active: true,
+				DSS_columns: 3,
+				DSS_indexConfig: [
+					{boxLabel: 'Cont. Corn', name: "wl", indexValues: [1]},
+					{boxLabel: 'Cash Grain', name: "wl", indexValues: [14]},
+					{boxLabel: 'Dairy Rotn', name: "wl", indexValues: [15]},
+					{boxLabel: 'Hay', 		name: "wl", indexValues: [2]},
+					{boxLabel: 'Pasture', 	name: "wl", indexValues: [3]},
+					{boxLabel: 'Warm Grass', name: "wl", indexValues: [5]},
+					{boxLabel: 'Cool Grass', name: "wl", indexValues: [4]},
+					{boxLabel: 'Developed', name: "wl", indexValues: [12,13], checked: true},
+				],
+			});
+			me.addLayer(lt);
+			
+			//----------------------------------------------------------
+			me.addLayer(Ext.create('DSS.components.LayerFloat', {
 				title: 'Slope',
+				hidden: true,
 				DSS_shortTitle: 'Slope',
 				DSS_serverLayer: 'slope',
 				DSS_layerUnit: ' (degrees)',
@@ -269,8 +105,9 @@ Ext.define('DSS.components.AttributeBrowser', {
 			}));
 
 			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
+			me.addLayer(Ext.create('DSS.components.LayerFloat', {
 				title: 'Distance to Streams / Surface Water',
+				hidden: true,
 				DSS_shortTitle: 'Distance',
 				DSS_serverLayer: 'dist_to_water',
 				DSS_lessThanValue: 120,
@@ -280,18 +117,20 @@ Ext.define('DSS.components.AttributeBrowser', {
 			}));
 
 		/*	//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
+			me.addLayer(Ext.create('DSS.components.LayerFloat', {
 				title: 'Distance to Rivers',
+				hidden: true,
 				DSS_shortTitle: 'Distance',
 				DSS_serverLayer: 'rivers',
 				DSS_greaterThanValue: 90,
 				DSS_maxValue: 5250,
 				DSS_stepSize: 30
-			}));*/
-	
+			}));
+	*/
 			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerIndexed', {
+			me.addLayer(Ext.create('DSS.components.LayerIndexed', {
 				title: 'Land Capability Class',
+				hidden: true,
 				DSS_serverLayer: 'lcc', DSS_columns: 2,
 				DSS_indexConfig: [
 					{boxLabel: 'Cropland I (Best)', 	name: "lcc", indexValues: [1], checked: true},
@@ -306,9 +145,10 @@ Ext.define('DSS.components.AttributeBrowser', {
 			}));
 			
 			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerIndexed', {
+			me.addLayer(Ext.create('DSS.components.LayerIndexed', {
 				title: 'Land Capability Subclass',
-				DSS_serverLayer: 'lcs', DSS_columns: 1,
+				hidden: true,
+				DSS_serverLayer: 'lcs', DSS_columns: 2,
 				DSS_indexConfig: [
 					{boxLabel: 'Erosion Prone', 	name: "lcs", indexValues: [1], checked: true},
 					{boxLabel: 'Saturated Soils', 	name: "lcs", indexValues: [2]},
@@ -317,8 +157,9 @@ Ext.define('DSS.components.AttributeBrowser', {
 			}));
 			
 			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
+			me.addLayer(Ext.create('DSS.components.LayerFloat', {
 				title: 'Distance to Public Lands',
+				hidden: true,
 				DSS_shortTitle: 'Distance',
 				DSS_serverLayer: 'public_land',
 				DSS_lessThanValue: 180,
@@ -326,155 +167,391 @@ Ext.define('DSS.components.AttributeBrowser', {
 				DSS_stepSize: 30
 			}));
 			
-			DSS.Layers.add(Ext.create('DSS.components.LayerClickSelect', {
-				title: 'HUC-10 Watershed',
+			me.addLayer(Ext.create('DSS.components.LayerClickSelect', {
+				title: 'Watershed (HUC-10)',
+				hidden: true,
 				DSS_serverLayer: 'huc-10',
 				DSS_vectorLayer: watershed
 			}));
 			
-			DSS.Layers.add(Ext.create('DSS.components.LayerClickSelect', {
+			me.addLayer(Ext.create('DSS.components.LayerClickSelect', {
 				title: 'County',
+				hidden: true,
 				DSS_serverLayer: 'counties',
 				DSS_vectorLayer: county
 			}));
 			
-			DSS.Layers.add(Ext.create('DSS.components.LayerDrawShape'));
-			
-			//--------------------- ADVANCED ---------------------------
-			
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Soil Depth',
-				DSS_shortTitle: 'Depth',
-				DSS_serverLayer: 'depth',
-				DSS_layerUnit: ' (mm)',
-				DSS_greaterThanValue: 80,
-				DSS_maxValue: 205,
-				DSS_stepSize: 5,
-				DSS_advancedLayer: true,
+		/*	me.addLayer(Ext.create('DSS.components.LayerDrawShape', {
 				hidden: true
 			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Cation Exchange Capacity (CEC)',
-				DSS_shortTitle: 'CEC',
-				DSS_serverLayer: 'cec',
-				DSS_layerUnit: ' (cmol<sub>c </sub>/ kg)',
-				DSS_greaterThanValue: 60,
-				DSS_maxValue: 190,
-				DSS_stepSize: 5,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Soil Organic Carbon (SOC)',
-				DSS_shortTitle: 'SOC',
-				DSS_serverLayer: 'soc',
-				DSS_layerUnit: ' (? Mg / Ha)',
-				DSS_greaterThanValue: 250,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 25,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Rainfall Erosivity',
-				DSS_shortTitle: 'Erosivity',
-				DSS_serverLayer: 'rainfall_erosivity',
-				DSS_layerUnit: ' (?)',
-				DSS_greaterThanValue: 84,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 2,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Silt',
-				DSS_shortTitle: 'Silt',
-				DSS_serverLayer: 'silt',
-				DSS_layerUnit: ' (?)',
-				DSS_greaterThanValue: 10,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 5,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Corn Production (CP)',
-				DSS_shortTitle: 'CP',
-				DSS_serverLayer: 'corn_p',
-				DSS_layerUnit: ' (?tons?)',
-				DSS_greaterThanValue: 10,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 2,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Soy Production (SP)',
-				DSS_shortTitle: 'SP',
-				DSS_serverLayer: 'soy_p',
-				DSS_layerUnit: ' (?tons?)',
-				DSS_greaterThanValue: 10,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 2,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Alfalfa Production (AP)',
-				DSS_shortTitle: 'AP',
-				DSS_serverLayer: 'alfa_p',
-				DSS_layerUnit: ' (?tons?)',
-				DSS_greaterThanValue: 8,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 1,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-			
-			//----------------------------------------------------------
-			DSS.Layers.add(Ext.create('DSS.components.LayerFloat', {
-				title: 'Grass Production (GP)',
-				DSS_shortTitle: 'GP',
-				DSS_serverLayer: 'grass_p',
-				DSS_layerUnit: ' (?tons?)',
-				DSS_greaterThanValue: 6,
-				DSS_maxValue: 1275,
-				DSS_stepSize: 1,
-				DSS_advancedLayer: true,
-				hidden: true
-			}));
-			
+		*/	
 			//------------------------------------------------------------
 			Ext.resumeLayouts(true);
 			//------------------------------------------------------------
 			Ext.defer(function() {
-				lt.expand();
-			}, 250);
+				me.valueChanged();
+			}, 1500);
 		}
 	},
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
 		
+		me['DSS_layerMenu'] = Ext.create('Ext.menu.Menu', {
+			padding: 8,
+			style: 'border-radius: 8px; background: rgba(48,64,96,0.8); border: 1px solid #256; box-shadow: 0 8px 8px rgba(0,0,0,0.4)',
+			width: 320,
+			shadow: false,
+			header: {
+				style: 'color: #fff; font-weight: bold; text-shadow: 1px 1px 1px #000',
+				padding: '0 4 4 8',
+				title: 'Available Characteristics',
+			},
+			tools: [{
+				iconCls: 'inverted-close-icon',
+				callback: function(owner, tool) {
+					owner.hide();
+				}
+			}],
+			bodyStyle: 'border-radius: 4px; border: 1px solid #ddd',
+			plain: true,
+			defaults: {
+				hideOnClick: false,
+				padding: 2,
+				style: 'border-bottom: 1px solid #eee;',
+				handler: function(self,evt) {
+					self.setVisible(false);
+					self.DSS_menuLink.setVisible(true);
+					me.valueChanged();
+					var hide = true;
+					Ext.each(me.DSS_layerMenu.items.items, function(item) {
+						if (item.isVisible()) {
+							hide = false; return false;
+						}
+					});
+					if (hide) {
+						me.DSS_layerMenu.close()
+						me.getComponent('DSS-add-layer-tool').setVisible(false);
+					}
+				}
+			}
+		});
+		
 		Ext.applyIf(me, {
+			items:[{
+				xtype: 'component',
+				style: 'color: #fff; font-size: 1.1em; font-weight: bold; text-shadow: 1px 1px 1px #000',
+				html: 'Match Land by Characteristics',
+				width: '100%',
+				padding: '2 0 2 8'
+			},{
+				xtype: 'container',
+				itemId: 'DSS_findLandByAttr',
+				flex: 1,
+				width: 350,
+				layout: {
+					type: 'vbox',
+					align: 'stretch'
+				},
+				scrollable: 'vertical',
+			},{
+				xtype: 'tool',
+				itemId: 'DSS-add-layer-tool',
+				hidden: true,
+				iconCls: 'inverted-plus-icon',
+				tooltip: 'Choose other landscape characteristics to match on...',
+				callback: function(owner, self, evt) {
+					me.DSS_layerMenu.showBy(self, 'l-bl', [0,16]);
+				}
+				
+			}]
 		});
 		
 		me.callParent(arguments);
 	},
+	
+	addLayer: function(layer) {
+		var me = this;
+		me.DSS_Layers.push(layer);
+		layer.DSS_browser = me;
+		me.getComponent('DSS_findLandByAttr').add(layer);
+		
+		me['DSS_layerMenu'].add({
+			xtype: 'menuitem',
+			hidden: !layer.hidden,
+			text: '+ ' + layer.title,
+			DSS_menuLink: layer
+		})
+		if (layer.hidden) {
+			me.getComponent('DSS-add-layer-tool').setVisible(true);
+		}
+	},
+		
+	layerHidden: function(layer) {
+		var me = this;
+		Ext.each(me.DSS_layerMenu.items.items, function(item) {
+			if (item.DSS_menuLink == layer) {
+				item.setVisible(true);
+				me.getComponent('DSS-add-layer-tool').setVisible(true);
+				me.valueChanged();
+				return false;
+			}
+		})
+	},
+	
+	//------------------------------------------------------------
+	deferValueUpdates: function() {
+		var me = this;
+		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
+		me.processing = true;
+	},
+
+	//------------------------------------------------------------
+	flushValueUpdates: function() {
+		var me = this;
+		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
+		me.processing = false;
+		me.DSS_TimeoutId = setTimeout(me.valueChanged.bind(me), 10)
+	},
+	
+	//------------------------------------------------------------
+	valueChanged: function() {
+		var me = this;
+		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
+		//Ext.getCmp('yes-dss-selection-container').setLoading('. . .').addCls('x-selection-working-mask')
+		Ext.getCmp('dss-selection-loading').animate({
+			duration: 100,
+			to: {
+				opacity: 1
+			}
+		});
+		if (!me.processing) {
+			me.processing = true;
+			me.getSelectionParms();
+			return;
+		}
+		me.DSS_TimeoutId = setTimeout(me.valueChanged.bind(me), 300)
+	},
+		
+	//------------------------------------------------------------
+	getSelectionParms: function() {
+		var me = this;
+		var queryData = me.getCurrentQuery()
+		
+		var obj = Ext.Ajax.request({
+			url: location.href + '/createSelection',
+			jsonData: {
+				queryLayers: queryData,
+				first: {
+					queryLayers: [{
+						"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":120
+					}]
+				},
+				second: {
+					queryLayers: queryData
+				}
+			},
+			timeout: 25000, // in milliseconds
+			
+			success: function(response, opts) {
+				var obj = JSON.parse(response.responseText);
+				// TODO: server should pass this all back...
+				//-10062652.65061, -9878152.65061, 5278060.469521415, 5415259.640662575
+				obj['bounds']= [
+					-10062652.65061, 5278060.469521415,
+					-9878152.65061, 5415259.640662575
+				]
+				var area = (obj.selectedPixels * 30.0 * 30.0) / 1000000.0;
+				// then convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
+				area *= 247.105;
+		    
+				var totalAreaPerc = (obj.selectedPixels / obj.totalPixels) * 100.0;
+				
+				var area = Ext.util.Format.number(area, '0,000.#'), 
+					perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+					
+				Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+				Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
+			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
+				DSS_viewport.positionStatistics(true);
+				me.validateImageOL(obj);			
+			},
+			
+			failure: function(respose, opts) {
+				alert("Query failed, request timed out?");
+				me.processing = false;
+				//Ext.getCmp('yes-dss-selection-container').setLoading(false);
+				Ext.getCmp('dss-selection-loading').animate({
+					duration: 100,
+					to: {
+						opacity: 0
+					}
+				});
+			}
+		});
+	},
+	showOcclusion: function(firstQueries, secondQuery) {
+		var me = this;
+		Ext.getCmp('dss-selection-loading').animate({
+			duration: 100,
+			to: {
+				opacity: 1
+			}
+		});
+		
+		var obj = Ext.Ajax.request({
+			url: location.href + '/showOcclusion',
+			jsonData: {
+				first:  firstQueries,
+				second: secondQuery
+			},
+			timeout: 25000, // in milliseconds
+			
+			success: function(response, opts) {
+				var obj = JSON.parse(response.responseText);
+				// TODO: server should pass this all back...
+				obj['bounds']= [
+					-10062652.65061, 5278060.469521415,
+					-9878152.65061, 5415259.640662575
+				]
+				if (obj.selectedPixelsFirst) {
+					var diff = obj.selectedPixelsSecond - obj.occludedSecondPixels;
+					// convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
+					var area = ((diff * 30.0 * 30.0) / 1000000.0) * 247.105;
+					var totalAreaPerc = (diff / obj.totalPixels) * 100.0;
+					
+					var occArea = ((obj.occludedSecondPixels * 30.0 * 30.0) / 1000000.0) * 247.105;
+					var totalOccPerc = obj.occludedSecondPixels / obj.selectedPixelsSecond * 100.0;
+					
+					var area = Ext.util.Format.number(area, '0,000.#'), 
+						perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+					Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+					
+					area = Ext.util.Format.number(occArea, '0,000.#'), 
+					perc = Ext.util.Format.number(totalOccPerc, '0.###');
+					Ext.getCmp('yes-dss-selected-stats2').setHtml(area + ' acres<br/>' + perc + '%');
+				}
+				else {
+					// convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
+					var area = ((obj.selectedPixels * 30.0 * 30.0) / 1000000.0) * 247.105;
+					var totalAreaPerc = (obj.selectedPixels / obj.totalPixels) * 100.0;
+					var area = Ext.util.Format.number(area, '0,000.#'), 
+						perc = Ext.util.Format.number(totalAreaPerc, '0.###');
+					Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
+					Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
+				}
+			//	
+			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
+				me.validateImageOL(obj);			
+			},
+			
+			failure: function(respose, opts) {
+				alert("Query failed, request timed out?");
+				me.processing = false;
+			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
+				Ext.getCmp('dss-selection-loading').animate({
+					duration: 100,
+					to: {
+						opacity: 0
+					}
+				});
+			}
+		});
+	},
+	
+	//---------------------------------------------------------------------------------
+	validateImageOL: function(json) {
+		var me = this;
+		tryCount = (typeof tryCount !== 'undefined') ? tryCount : 0;
+		
+		Ext.defer(function() {
+				
+			var src = new ol.source.ImageStatic({
+				url: json.url,
+				crossOrigin: '',
+				imageExtent: json.bounds
+			});			
+			src.on('imageloadend', function() { // IMAGELOADEND: 'imageloadend',
+
+				selectionLayer.setSource(src);
+				me.processing = false;
+				Ext.getCmp('dss-selection-loading').animate({
+					duration: 250,
+					to: {
+						opacity: 0
+					}
+				});
+			});
+			src.on('imageloaderror', function() { // IMAGELOADERROR: 'imageloaderror'
+				tryCount++;
+				if (tryCount < 20) {
+					me.validateImageOL(json, tryCount);
+				}
+				else {
+					//failed
+					me.processing = false;
+					Ext.getCmp('dss-selection-loading').animate({
+						duration: 250,
+						to: {
+							opacity: 0
+						}
+					});
+				}
+			});
+			src.M.load(); // EVIL internal diggings...M is the secret internal ol.Image
+		}, 50 + tryCount * 50, me); //  
+	},
+	
+	//---------------------------------------------------------------------------------
+	cancelClickActionsForAllBut: function(layer) {
+		var me = this;
+		Ext.each(me.DSS_Layers, function(test) {
+			if (layer.getId() != test.getId()) {
+				if (test.cancelClickSelection) {
+					test.cancelClickSelection();
+				}
+			} 
+			else {
+			}
+		})
+	},
+	
+	//---------------------------------------------------------------------------------
+	getCurrentQuery: function() {
+		var me = this,
+			queryData = [];
+		Ext.each(me.DSS_Layers, function(layer) {
+			var result = layer.configureSelection();
+			if (result) queryData.push(result);
+		})
+		return queryData;
+	},
+	
+	//---------------------------------------------------------------------------------
+	configureFromQuery: function(query) {
+		var me = this;
+		
+		Ext.suspendLayouts();
+		me.deferValueUpdates();
+
+		// hide all
+		Ext.each(me.DSS_Layers, function(layer) {
+			layer.setVisible(false);
+			me.layerHidden(layer);
+		});
+		
+		// show needed
+		Ext.each(query, function(queryStep) {
+			Ext.each(me.DSS_Layers, function(layer) {
+				if (queryStep.name == layer.DSS_serverLayer) {
+					layer.setVisible(true);
+					layer.fromQuery(queryStep);
+					return false;
+				}
+			})
+		})
+		Ext.resumeLayouts(true);
+		me.flushValueUpdates();
+	}
 	
 });

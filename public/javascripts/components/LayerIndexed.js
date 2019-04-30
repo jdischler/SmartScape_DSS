@@ -23,7 +23,7 @@ Ext.define('DSS.components.LayerIndexed', {
 		Ext.applyIf(me, {
 			items: [{
 				xtype: 'container',
-				padding: '0 4 0 32',
+				padding: '0 0 0 24',
 				layout: 'fit',
 				items: [{
 					xtype: 'checkboxgroup',
@@ -32,7 +32,7 @@ Ext.define('DSS.components.LayerIndexed', {
 					columns: me.DSS_columns,
 					listeners: {
 						change: function(self, newVal, oldVal) {
-							DSS.Layers.valueChanged();
+							me.DSS_browser.valueChanged();
 						}
 					},
 					items: me.DSS_indexConfig
@@ -47,7 +47,7 @@ Ext.define('DSS.components.LayerIndexed', {
 	configureSelection: function() {
 		
 		var me = this;
-		if (me.getCollapsed() || me.isHidden()) return false;
+		if (me.isHidden()) return false;
 		
 		var selectionDef = { 
 				name: me.DSS_serverLayer,
@@ -67,8 +67,27 @@ Ext.define('DSS.components.LayerIndexed', {
         }
         
         if (!addedElement) return false;
-        
+        console.log(selectionDef)
         return selectionDef;		
+	},
+	
+	//--------------------------------------------------------------------------
+	fromQuery: function(queryStep) {
+		var me = this,
+			cont = me.down('#options');
+		
+        for (var i = 0; i < cont.items.length; i++) {
+        	var item = cont.items.items[i];
+        	item.setValue(false);
+        	
+    		for (var t = 0; t < item.indexValues.length; t++) {
+    			Ext.each(queryStep.matchValues, function(val) {
+        			if (item.indexValues[t] == val) {
+        				item.setValue(true);
+        			}
+        		})
+        	} 
+        }
 	}
 
 });

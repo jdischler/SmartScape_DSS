@@ -48,11 +48,6 @@ Ext.define('DSS.components.TransformPopup', {
     resizable: false,
 	constrainHeader: true, // keep the header from being dragged out of the app body...otherwise may not be able to close it!
     title: 'Transform and Management Options',
-    listeners: {
-    	close: function(panel) {
-    		panel.doClose(false); // don't save
-    	}
-    },
     
     //--------------------------------------------------------------------------
     initComponent: function() {
@@ -89,6 +84,7 @@ Ext.define('DSS.components.TransformPopup', {
 				style: 'font-size: 16px'
 			},{
 		        xtype: 'container',
+		        hidden: true,
 		        padding: '8 0 0 48',
 		        layout: {
 		        	type: 'table',
@@ -143,8 +139,8 @@ Ext.define('DSS.components.TransformPopup', {
         me.callParent(arguments);
         
 		var combo = this.getComponent('DSS_transformTypes');
-		if (this.DSS_TransformIn && this.DSS_TransformIn.LandUse) {
-			combo.setValue(this.DSS_TransformIn.LandUse);
+		if (this.DSS_TransformIn && this.DSS_TransformIn.land_use) {
+			combo.setValue(this.DSS_TransformIn.land_use);
 		}
 
         this.displayCorrectManagementOptions();
@@ -153,37 +149,37 @@ Ext.define('DSS.components.TransformPopup', {
     //--------------------------------------------------------------------------
     closeWindow: function(applyChanges) {
     	
- /*   	if (applyChanges) {
-    		if (this.DSS_Transform == null) {
-    			this.DSS_Transform = {};
+    	var me = this;
+    	if (applyChanges) {
+    		if (me.DSS_Transform == null) {
+    			me.DSS_Transform = {};
     		}
-    		var combo = this.getComponent('DSS_transformTypes');
-    		this.DSS_Transform.Config = {LandUse: combo.getValue(), Options: {}};
-    		this.DSS_Transform.Text = 'To ' + combo.getRawValue();
-    		this.DSS_Transform.Management = '<b><i>Management Options:</i></b></br>';
+    		var combo = me.getComponent('DSS_transformTypes');
+    		me.DSS_Transform['config'] = {
+    				land_use: combo.getValue() 
+    		};
+    		me.DSS_Transform['text'] = combo.getRawValue();
     		
-    		var managementOptionsText = '';
-    		var container = this.getComponent('DSS_managementContainer');
+    		var managementOptionsText = '<ul>';
+    		var m_options = [];
+    		
+    		var container = me.getComponent('DSS_managementContainer');
+    		
     		var len = container.items.length;
     		for (var idx = 0; idx < len; idx++) {
-    			var child = container.items.items[idx];
-    			var managementOptions = child.collectChanges(this.DSS_Transform.Config.Options);
-    			managementOptionsText += managementOptions.text;
-    			if (idx < len - 1) {
-    				managementOptionsText += '</br>';
-    			}
+    			var res = container.items.items[idx].collectChanges();
+    			m_options.push(res);
+    			managementOptionsText += res.text;
     		}
-    		if (managementOptionsText == '') {
-    			managementOptionsText = 'None';
-    		}
-    		this.DSS_Transform.Management += managementOptionsText;
-//    		console.log(this.DSS_Transform.Management);
+			managementOptionsText += '</ul>';
+			me.DSS_Transform['m_text'] = managementOptionsText;
+			me.DSS_Transform.config['options'] = m_options
     	}
     	else {
-    		this.DSS_Transform = null;
+    		me.DSS_Transform = null;
     	}
-    	console.log(this.DSS_Transform);*/
-    	this.doClose()
+    	console.log(me.DSS_Transform);
+    	me.doClose()
     },
     
     //--------------------------------------------------------------------------

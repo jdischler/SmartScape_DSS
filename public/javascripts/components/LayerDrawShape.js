@@ -17,7 +17,7 @@ Ext.define('DSS.components.LayerDrawShape', {
 		Ext.applyIf(me, {
 			items: [{
 				xtype: 'container',
-				padding: '0 32 4 32',
+				padding: '8 32 4 32',
 				html: 'TODO'
 			}]
 		});
@@ -29,7 +29,7 @@ Ext.define('DSS.components.LayerDrawShape', {
 	configureSelection: function() {
 
 		var me = this;
-		if (me.getCollapsed() || me.isHidden() || true) {
+		if (me.isHidden() || true) {
 			return false;
 		}
 	},

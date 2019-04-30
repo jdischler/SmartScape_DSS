@@ -14,11 +14,6 @@ Ext.define('DSS.components.LayerFloat', {
 	DSS_maxValue: 100,
 	DSS_layerUnit: ' (meters)',
 	
-	bodyPadding: '0 8 6 0',
-	layout: {
-		type: 'vbox',
-		align: 'middle'
-	},
 	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -27,96 +22,104 @@ Ext.define('DSS.components.LayerFloat', {
 		Ext.applyIf(me, {
 			items: [{
 				xtype: 'container',
-				padding: '2 0',
 				layout: {
-					type: 'hbox',
-					align: 'stretch',
-					pack: 'start'
+					type: 'vbox',
+					align: 'middle'
 				},
+				padding: '0 8 6 0',
 				items: [{
 					xtype: 'container',
-					style: 'text-align: right',
-					html: me.DSS_shortTitle,
-					width: 80,
-					padding: '3 4',
+					padding: '2 0',
+					layout: {
+						type: 'hbox',
+						align: 'stretch',
+						pack: 'start'
+					},
+					items: [{
+						xtype: 'component',
+						style: 'text-align: right',
+						html: me.DSS_shortTitle,
+						width: 70,
+						padding: '3 4',
+					},{
+						xtype: 'button',
+						itemId: 'greaterThanTest',
+						width: 34, // would be nice to not have to set a width but changing the button text causes a resize
+						text: '>=',
+						tooltip: 'Change comparison function',
+						handler: function(self) {
+							if (self.getText() === '>=') {
+								self.setText('>')
+							}
+							else {
+								self.setText('>=')
+							}
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},{
+						xtype: 'numberfield',
+						itemId: 'greaterThan',
+						hideEmptyLabel: true,
+						value: me.DSS_greaterThanValue,
+						width: 70,
+						step: me.DSS_stepSize,
+						minValue: 0,
+						maxValue: me.DSS_maxValue,
+						listeners: {
+							change: function(self, newVal, oldVal) {
+								Ext.getCmp('DSS_attributeFixMe').valueChanged();
+							}
+						}
+					},{
+						xtype: 'button',
+						iconCls: 'swap-icon',
+						text: '',
+						tooltip: 'Swap values',
+						margin: '0 10',
+						handler: function(self) {
+							var gt = me.down('#greaterThan');
+							var lt = me.down('#lessThan');
+							var ltv = lt.getValue();
+							lt.setRawValue(gt.getValue()); // skip change detection here
+							gt.setValue(ltv);			// but do it here to auto trigger a refresh
+						}
+					},{
+						xtype: 'button',
+						itemId: 'lessThanTest',
+						width: 34,
+						text: '<=',
+						tooltip: 'Change comparison function',
+						handler: function(self) {
+							if (self.getText() === '<=') {
+								self.setText('<')
+							}
+							else {
+								self.setText('<=')
+							}
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},{
+						xtype: 'numberfield',
+						itemId: 'lessThan',
+						hideEmptyLabel: true,
+						width: 70,
+						step: me.DSS_stepSize,
+						value: me.DSS_lessThanValue,
+						minValue: 0,
+						maxValue: me.DSS_maxValue,
+						listeners: {
+							change: function(self, newVal, oldVal) {
+								Ext.getCmp('DSS_attributeFixMe').valueChanged();
+							}
+						}
+					}]
 				},{
-					xtype: 'button',
-					itemId: 'greaterThanTest',
-					width: 34, // would be nice to not have to set a width but changing the button text causes a resize
-					text: '>=',
-					tooltip: 'Change comparison function',
-					handler: function(self) {
-						if (self.getText() === '>=') {
-							self.setText('>')
-						}
-						else {
-							self.setText('>=')
-						}
-						DSS.Layers.valueChanged();
-					}
-				},{
-					xtype: 'numberfield',
-					itemId: 'greaterThan',
-					hideEmptyLabel: true,
-					value: me.DSS_greaterThanValue,
-					width: 70,
-					step: me.DSS_stepSize,
-					minValue: 0,
-					maxValue: me.DSS_maxValue,
-					listeners: {
-						change: function(self, newVal, oldVal) {
-							DSS.Layers.valueChanged();
-						}
-					}
-				},{
-					xtype: 'button',
-					iconCls: 'swap-icon',
-					text: '',
-					tooltip: 'Swap values',
-					margin: '0 12',
-					handler: function(self) {
-						var gt = me.down('#greaterThan');
-						var lt = me.down('#lessThan');
-						var ltv = lt.getValue();
-						lt.setRawValue(gt.getValue()); // skip change detection here
-						gt.setValue(ltv);			// but do it here to auto trigger a refresh
-					}
-				},{
-					xtype: 'button',
-					itemId: 'lessThanTest',
-					width: 34,
-					text: '<=',
-					tooltip: 'Change comparison function',
-					handler: function(self) {
-						if (self.getText() === '<=') {
-							self.setText('<')
-						}
-						else {
-							self.setText('<=')
-						}
-						DSS.Layers.valueChanged();
-					}
-				},{
-					xtype: 'numberfield',
-					itemId: 'lessThan',
-					hideEmptyLabel: true,
-					width: 70,
-					step: me.DSS_stepSize,
-					value: me.DSS_lessThanValue,
-					minValue: 0,
-					maxValue: me.DSS_maxValue,
-					listeners: {
-						change: function(self, newVal, oldVal) {
-							DSS.Layers.valueChanged();
-						}
-					}
+					xtype: 'component',
+					itemId: 'dss-value-range',
+					html: 'Value range: -- to -- degrees',
+					style: 'color: #777; font-style: italic',
+					padding: '2 4 0 60', // to auto center on inputs and not the label in front of those
 				}]
-			},{
-				xtype: 'container',
-				itemId: 'dss-value-range',
-				html: 'Value range: -- to -- degrees',
-				style: 'color: #777; font-style: italic',
-				padding: '2 4 0 60', // to auto center on inputs and not the label in front of those
 			}]
 		});
 		
@@ -128,7 +131,7 @@ Ext.define('DSS.components.LayerFloat', {
 	configureSelection: function() {
 		
 		var me = this;
-		if (me.getCollapsed() || me.isHidden()) return false;
+		if (me.isHidden()) return false;
 		
 		var selectionDef = { 
 				name: me.DSS_serverLayer,
@@ -196,5 +199,15 @@ Ext.define('DSS.components.LayerFloat', {
 			}
 		});
 	},
+
+	//--------------------------------------------------------------------------
+	fromQuery: function(queryStep) {
+		var me = this;
+
+		me.down('#greaterThan').setValue(queryStep.greaterThanValue);
+		me.down('#lessThan').setValue(queryStep.lessThanValue);
+		me.down('#greaterThanTest').setText(queryStep.greaterThanTest);
+		me.down('#lessThanTest').setText(queryStep.lessThanTest);
+	}
 
 });

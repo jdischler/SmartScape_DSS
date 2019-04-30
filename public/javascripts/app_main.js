@@ -13,7 +13,6 @@ Ext.application({
         'AppViewport'
     ],
     mainView: 'DSS.view.AppViewport',
-    
 	init: function() {
 		Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 	},	

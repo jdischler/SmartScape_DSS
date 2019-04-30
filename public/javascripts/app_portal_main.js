@@ -29,11 +29,11 @@ Ext.define('Ext.chart.theme.Custom', {
 });		
 
 var emText = '          Emissions';
-var niText = 'Net Income';
+var niText = 'Phosphorus Retention';
 var scText = 'Soil Carbon';
 var bhText = 'Bird   \nHabitat';
-var srText = '  Soil\nRetention  ';
-var gbText = 'Gross\n       Biofuel';
+var srText = 'Soil\n          Retention';
+var gbText = 'Nitrogen\n            Retention';
 var psText = 'Pest\nSupression       ';
 var plText = 'Pollinators';
 
@@ -41,8 +41,8 @@ Ext.create('Ext.data.Store', {
 	storeId: 'dss-values',
 	fields: ['type','name', 'data1', 'location'],
 	data: [
-	{type:'em',name: emText, data1: 90.7, dataBak: 90.7, data2: 100,location: 'uc',base:0.000828},
 	{type:'sr',name: srText ,data1: 30.1, dataBak: 30.1, data2: 100,location: 'uc', base:0.10442078},
+	{type:'em',name: emText, data1: 90.7, dataBak: 90.7, data2: 100,location: 'uc',base:0.000828},
 	{type:'sc',name: scText, data1: 20.1, dataBak: 30.1, data2: 100,location: 'uc',base:11.103638},
 	{type:'bh',name: bhText, data1: 10.9, dataBak: 10.9, data2: 100,location: 'uc',base:0.3476668},
 	{type:'ps',name: psText, data1: 15.6, dataBak: 15.6, data2: 100,location: 'uc',base:0.428911},
@@ -50,8 +50,8 @@ Ext.create('Ext.data.Store', {
 	{type:'ni',name: niText, data1: 91.8, dataBak: 91.8, data2: 100,location: 'uc', base:-31.1382},
 	{type:'gb',name: gbText, data1: 80.5, dataBak: 80.5, data2: 100,location: 'uc', base:310.64678},
 	
-	{type:'em',name: emText, data1: 60.7, data2:100,location: 'cs'},
 	{type:'sr',name: srText, data1: 100,  data2:90,location: 'cs'},
+	{type:'em',name: emText, data1: 60.7, data2:100,location: 'cs'},
 	{type:'sc',name: scText, data1: 17.1, data2:100,location: 'cs'},
 	{type:'bh',name: bhText, data1: 48.9, data2:100,location: 'cs'},
 	{type:'ps',name: psText, data1: 39.6, data2:100,location: 'cs'},
@@ -59,8 +59,8 @@ Ext.create('Ext.data.Store', {
 	{type:'ni',name: niText, data1: 25.1, data2: 100, location: 'cs'},
 	{type:'gb',name: gbText, data1: 70.5, data2:100,location: 'cs'},
 	
-	{type:'em',name: emText, data1: 30.7, data2:100,location: 'd'},
 	{type:'sr',name: srText, data1: 20.1, data2:100,location: 'd'},
+	{type:'em',name: emText, data1: 30.7, data2:100,location: 'd'},
 	{type:'sc',name: scText, data1: 80.0, data2:100,location: 'd'},
 	{type:'bh',name: bhText, data1: 100.0, data2:78,location: 'd'},
 	{type:'ps',name: psText, data1: 100.0, data2:64, location: 'd'},
@@ -68,8 +68,8 @@ Ext.create('Ext.data.Store', {
 	{type:'ni',name: niText, data1: 35.1, data2:100,location: 'd'},
 	{type:'gb',name: gbText, data1: 20.5, data2:100,location: 'd'},
 	
-	{type:'em',name: emText, data1: 100.0, data2:78.0, location: 'frv'},
 	{type:'sr',name: srText, data1: 40.1, data2:100,location: 'frv'},
+	{type:'em',name: emText, data1: 100.0, data2:78.0, location: 'frv'},
 	{type:'sc',name: scText, data1: 32.1, data2:100, location: 'frv'},
 	{type:'bh',name: bhText, data1: 34.9, data2:100,location: 'frv'},
 	{type:'ps',name: psText, data1: 30.6, data2:100, location: 'frv'},
