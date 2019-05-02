@@ -94,7 +94,7 @@ Ext.define('DSS.components.SelectionStatistics', {
     alias: 'widget.selectionStatistics',
  
     padding: 6,
-    width: 364, height: 100, 
+    width: 380, height: 100, 
 	style: 'background: rgba(48,64,96,0.8); border: 1px solid #256;border-radius: 16px; box-shadow: 0 10px 10px rgba(0,0,0,0.4)' ,
 	layout: 'fit',
 	
@@ -105,44 +105,33 @@ Ext.define('DSS.components.SelectionStatistics', {
 		Ext.applyIf(me, {
 			items:[{
 				xtype: 'container',
-				flex: 1,
-				width: 320, height: 140,
 				style: 'background: #f5f5f5; border-radius: 12px; border: 1px solid #ccc',
 				layout: {
-					type: 'vbox',
-					align: 'stretch'
+					type: 'table',
+					columns: 2
 				},
-				items: [{
+				items: [
+					getLegendChip('#5a79ee','Matched Land', {
+						element: 'el',
+			            click: function(self) {
+							Ext.create('DSS.components.OpacitySlider', {
+								OL_Layer: selectionLayer
+							}).showBy(self.target, 'bl-tr?', [-4,4])
+			            }
+					})
+				,{
 					xtype: 'container',
-					layout: 'hbox',/*{
-						type: 'hbox',
-						align: 'stretch'
-					}*/
+					layout: 'vbox',
+					itemId: 'dss-conflict-statistics',
 					items: [
-						getLegendChip('#5a79ee','Matched Land', {
-							element: 'el',
-				            click: function(self) {
-								Ext.create('DSS.components.OpacitySlider', {
-									OL_Layer: selectionLayer
-								}).showBy(self.target, 'bl-tr?', [-4,4])
-				            }
-						}),
-						{
-							xtype: 'container',
-							layout: 'vbox',
-							items: [
-								getLegendChip('#d73171','Match Conflicts'),
-								getLegendChip('#40495a','Matched in Other')
-							]
-						}
+						getLegendChip('#d73171','Match Conflicts'),
+						getLegendChip('#40495a','Matched in Other')
 					]
 				},{
 					xtype: 'container',
-					id: 'yes-dss-selection-container',
 					layout: 'hbox',
+					width: 180,
 					padding: '0 4',
-					//margin: '0 -10',
-					flex: 1,
 					items: [{
 						xtype: 'container',
 						html: '<b>Matched:<br/>% Area:</b>',
@@ -154,7 +143,13 @@ Ext.define('DSS.components.SelectionStatistics', {
 						width: 112,
 						padding: '0 0 0 4',
 						html: '--<br/>--'
-					},{
+					}]
+				},{
+					xtype: 'container',
+					layout: 'hbox',
+					width: 180,
+					padding: '0 4',
+					items: [{
 						xtype: 'container',
 						html: '<b>Conflicting:<br/>% Area:</b>',
 						width: 70,
@@ -166,41 +161,7 @@ Ext.define('DSS.components.SelectionStatistics', {
 						padding: '0 0 0 4',
 						html: '--<br/>--'
 					}]
-				}/*,{
-					xtype: 'container',
-					padding: '4 8',
-					items: [{
-						xtype: 'button',
-						width: 100,
-						scale: 'small',
-						textAlign: 'left',
-						text: 'Subset',
-						iconCls: 'transparency-icon',
-						tooltip: DSS.utils.tooltip('Adjust layer transparency'),
-						arrowAlign: 'right',
-						menuAlign: 'l-r?',
-						menu: Ext.create('DSS.components.OpacitySlider', {
-							OL_Layer: maskLayer
-						})
-					}]
-				},{
-					xtype: 'button',
-					width: 100,
-					scale: 'small',
-					textAlign: 'left',
-					text: 'Selection',
-					iconCls: 'transparency-icon',
-					tooltip: DSS.utils.tooltip('Adjust layer transparency'),
-					arrowAlign: 'right',
-					menuAlign: 'l-r?',
-					menu: Ext.create('DSS.components.OpacitySlider', {
-						OL_Layer: selectionLayer
-					})
-				},
-				getLegendChip('#5a79ee','Matching selection'),
-				getLegendChip('#d73171','Matched but conflicting selection'),
-				getLegendChip('#40495a','Not selected but already trxformed')
-				*/]
+				}]
 			}]
 		});
 		

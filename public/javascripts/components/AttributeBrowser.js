@@ -318,7 +318,6 @@ Ext.define('DSS.components.AttributeBrowser', {
 	valueChanged: function() {
 		var me = this;
 		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
-		//Ext.getCmp('yes-dss-selection-container').setLoading('. . .').addCls('x-selection-working-mask')
 		Ext.getCmp('dss-selection-loading').animate({
 			duration: 100,
 			to: {
@@ -372,7 +371,6 @@ Ext.define('DSS.components.AttributeBrowser', {
 					
 				Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
 				Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
-			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
 				DSS_viewport.positionStatistics(true);
 				me.validateImageOL(obj);			
 			},
@@ -380,7 +378,6 @@ Ext.define('DSS.components.AttributeBrowser', {
 			failure: function(respose, opts) {
 				alert("Query failed, request timed out?");
 				me.processing = false;
-				//Ext.getCmp('yes-dss-selection-container').setLoading(false);
 				Ext.getCmp('dss-selection-loading').animate({
 					duration: 100,
 					to: {
@@ -440,15 +437,12 @@ Ext.define('DSS.components.AttributeBrowser', {
 					Ext.getCmp('yes-dss-selected-stats').setHtml(area + ' acres<br/>' + perc + '%');
 					Ext.getCmp('yes-dss-selected-stats2').setHtml('---<br/>--');
 				}
-			//	
-			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
 				me.validateImageOL(obj);			
 			},
 			
 			failure: function(respose, opts) {
 				alert("Query failed, request timed out?");
 				me.processing = false;
-			//	Ext.getCmp('yes-dss-selection-container').setLoading(false);
 				Ext.getCmp('dss-selection-loading').animate({
 					duration: 100,
 					to: {

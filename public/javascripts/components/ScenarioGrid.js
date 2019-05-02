@@ -7,11 +7,13 @@ var DSS_DefaultScenarioSetup = {
 	transform_text: null,//'Double Click to Set Crop',
 	management_text: '',
 	transform: { land_use: 1, options: undefined },
-	query: {}
+	query: [{
+		"name":"wisc_land","type":"indexed","matchValues":[1]
+	}]
 };
 
 var occlusionExample = [{
-	selection_name: 'Row crops near open water', transform_text: 'Mixed Grass(C3 / C4)',
+	selection_name: 'Row crops near open water', transform_text: 'Mixed Grass (C3 / C4)',
 	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
 	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
 	query: [{
@@ -20,7 +22,7 @@ var occlusionExample = [{
 		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
 	}]
 },{
-	selection_name: 'Row crops on marginal soils', transform_text: 'Mixed Grass(C3 / C4)',
+	selection_name: 'Row crops on marginal soils', transform_text: 'Mixed Grass (C3 / C4)',
 	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
 	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
 	query: [{
@@ -29,7 +31,7 @@ var occlusionExample = [{
 		"name":"lcc","type":"indexed","matchValues":[5,6,7,8]
 	}]
 },{
-	selection_name: 'Row crops near public lands', transform_text: 'Mixed Grass(C3 / C4)',
+	selection_name: 'Row crops near public lands', transform_text: 'Mixed Grass (C3 / C4)',
 	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
 	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
 	query: [{
@@ -79,7 +81,16 @@ Ext.create('Ext.data.Store', {
 	
 	storeId: 'dss-scenario-store',
     fields: ['selection_name', 'transform_text', 'management_text', 'transform', 'query'],
-    data: occlusionExample,
+    data: {
+    	items: occlusionExample,
+    },autoLoad: true,
+    proxy: {
+        type: 'memory',
+        reader: {
+            type: 'json',
+            root: 'items'
+        }
+    },    
     listeners: {
     	// blah, just force the commit to happen, no reason not to save it right away IMHO
     	update: function(store, record, operation, eOps) {
@@ -123,7 +134,8 @@ Ext.define('DSS.components.ScenarioGrid', {
 				    icon: Ext.Msg.QUESTION,
 				    fn: function(btn) {
 				        if (btn === 'yes') {
-							Ext.data.StoreManager.lookup('dss-scenario-store').loadRawData([{Active:true}], false);
+							Ext.data.StoreManager.lookup('dss-scenario-store').loadRawData([{items: DSS_DefaultScenarioSetup}], false);
+							Ext.data.StoreManager.lookup('dss-scenario-store').commitChanges();
 				        }
 				    }
 				});
@@ -138,7 +150,8 @@ Ext.define('DSS.components.ScenarioGrid', {
 			width: 28, height: 28,
 			tooltip: 'Add another step to my landscape transformation',
 			callback: function(toolOwner, tool) {
-				Ext.data.StoreManager.lookup('dss-scenario-store').loadRawData([{Active:true}], true);
+				Ext.data.StoreManager.lookup('dss-scenario-store').add({items: DSS_DefaultScenarioSetup});
+				Ext.data.StoreManager.lookup('dss-scenario-store').commitChanges();
 			}
 		},' ',' ',{
 			xtype: 'tool',

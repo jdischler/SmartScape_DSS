@@ -254,6 +254,24 @@
     background-size: cover
 }
 
+.d3-wedge:hover {
+	stroke: #333;
+	stroke-width: 2;
+}
+
+.d3-wedge-container:hover {
+}
+.d3-wedge-container:hover .d3-wedge {
+	stroke: #000;	
+	stroke-width: 2;
+}
+
+.d3-wedge-container:hover text {
+	fill: #000;	
+	stroke: #000;
+	stroke-width: 0.5;
+}
+
 .sankey-chart {
   width: 100%;
   height: 100%;

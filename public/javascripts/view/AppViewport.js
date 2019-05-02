@@ -12,7 +12,9 @@ Ext.define('DSS.view.AppViewport', {
 	    'DSS.components.AttributeBrowser',
 	    'DSS.components.ScenarioManager',
 	    'DSS.components.SelectionStatistics',
-	    'DSS.components.AnalyzeResults'
+	    'DSS.components.AnalyzeResults',
+	    'DSS.components.d3_gradedRadar',
+	    'DSS.components.d3_pie',
 	],
 
 	minWidth: 640,
@@ -188,7 +190,14 @@ Ext.define('DSS.view.AppViewport', {
 			floating: true,
 			shadow: false,
 		}).show().anchorTo(me, 'l-r', [1024,0]);
-				
+		
+		Ext.create('DSS.components.d3_gradedRadar', {
+			floating: true, shadow: false
+		}).show().anchorTo(me, 'c-c');
+		
+		Ext.create('DSS.components.d3_pie', {
+			floating: true, shadow: false
+		}).show().anchorTo(me, 'c-c');
 	},
 	
 });
