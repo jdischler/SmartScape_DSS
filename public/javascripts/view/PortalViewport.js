@@ -16,7 +16,8 @@ Ext.define('DSS.view.PortalViewport', {
 		//'DSS.app_portal.Assumptions',
 		'DSS.components.TriangleMixer',
 		'DSS.app_portal.ValuesAssessment',
-		'DSS.components.d3_nav'
+		'DSS.components.d3_nav',
+		'DSS.components.d3_portalStatistics'		
 	],
 
 	// most desktops/tablets support 1024x768 but Nexus 7 (2013) is a bit smaller so target that if at all possible
@@ -354,7 +355,9 @@ Ext.define('DSS.view.PortalViewport', {
 						id: 'dss-selected-info',
 						style: 'color: #333',
 						margin: '4 8 4 8',
-						minHeight: 56
+						minHeight: 100
+					},{
+						xtype: 'portal_statistics'
 					},
 						pieDef, 
 						radarDef,

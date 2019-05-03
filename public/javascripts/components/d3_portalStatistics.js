@@ -1,4 +1,10 @@
 
+var pi = Math.PI,
+	halfPi = pi / 2,
+	tau = 2 * pi,
+	epsilon = 1e-6,
+	tauEpsilon = tau - epsilon;
+
 function polarToCartesian(centerX, centerY, radius, angleInRadians) {
 
   return {
@@ -7,21 +13,19 @@ function polarToCartesian(centerX, centerY, radius, angleInRadians) {
   };
 }
 
-function describeArc(x, y, radius, startAngle, endAngle){
+function describeArc(x, y, r, startAngle, endAngle){
 
-	startAngle -= (Math.PI / 2);
-	endAngle -= (Math.PI / 2);
-    var start = polarToCartesian(x, y, radius, endAngle);
-    var end = polarToCartesian(x, y, radius, startAngle);
+	startAngle -= (halfPi);
+	endAngle -= (halfPi);
+    var start = polarToCartesian(x, y, r, endAngle);
+    var end = polarToCartesian(x, y, r, startAngle);
 
     var sweepFlag = endAngle > startAngle ? "0" : "1"
-    var largeArcFlag = endAngle > startAngle 
-    	? endAngle - startAngle <= Math.PI ? "0" : "1" 
-    	: startAngle - endAngle <= Math.PI ? "0" : "1";
-    
+    var largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1"
+    	
     var d = [
         "M", start.x, start.y, 
-        "A", radius, radius, 0, largeArcFlag, sweepFlag, end.x, end.y
+        "A", r, r, 0, largeArcFlag, sweepFlag, end.x, end.y
     ].join(" ");
 
     return d;       
@@ -55,11 +59,11 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	],
 
 	DSS_pieValues: [
-		{v:2, t:'Developed', c:'#8c8895'},
-		{v:54, t:'Row Crops', c:'#f2e75e'},
-		{v:3, t:'Wetlands / Water', c:'#819fda'},
-		{v:22, t:'Grasses',c:'#98bf63'},
-		{v:19, t:'Woodland', c:'#dc8f50'},
+		{v:8, t:'Developed', c:'#948f9f'},
+		{v:39, t:'Row Crops', c: d3.color('#e7ed55').darker(0.5).hex()},
+		{v:13, t:'Wetlands / Water', c:'#819ad7'},
+		{v:22, t:'Grasses',c: d3.color('#98bf63').darker(0.5).hex()},
+		{v:19, t:'Woodland', c: d3.color('#dc8f5f').darker(0.7).hex()},
 	],
 
 	DSS_valueWorst: '#d53e4f',
@@ -86,7 +90,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			});
 			me.updateRadarTo(res);
 			tt += 0.5;
-		}, 4000)
+		}, 8000)
 		
 		setInterval(function() {
 			var res = [];
@@ -98,7 +102,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				})
 			});
 			me.updatePieTo(res);
-		}, 5193)
+		}, 8193)
 
 	},
 
@@ -444,7 +448,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	
 	arcGenerator
 		.innerRadius(padded_hw + 10)
-		.outerRadius(padded_hw + 30);
+		.outerRadius(padded_hw + 10);
 
 	wedges
 		.append("path")
@@ -453,29 +457,31 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			return "pie-arc-" + i
 		})
 		.attr("d", function(d) {
-			var testAng = (d.startAngle + d.endAngle) / 2 - Math.PI / 2;
-			var test = 0;//Math.cos(testAng) // check center
-
+			var cen = (d.startAngle + d.endAngle) / 2;
+			
+			var test = cen - halfPi;
+			while (test > pi) test -= tau;
 			// flip start/end when we go around the bottom half. This will reorder the text placement
-			var a1 = (test < 0) ? d.endAngle + 1 : d.startAngle - 1,
-				a2 = (test < 0) ? d.startAngle - 1 : d.endAngle + 1;
+			var a1 = (test < 0) ? cen + 1 : cen - 1,
+				a2 = (test < 0) ? cen - 1 : cen + 1;
 			
 			var path = describeArc(0,0,padded_hw + 10, a1, a2);
-			return path
+			return path;
 		})
 		.attr("fill", "none")
 		.each(function(d) {
 			this._current = d
 		})
-		
 	
 		wedges.append("text")
 			.attr("class","d3-pie-text")
 			.attr("opacity", 0.8)
 			.style('font-size', '14px')
 			.attr("dy", function(d) {
-				var testAng = (d.startAngle + d.endAngle) / 2 - Math.PI / 2;
-				var test = 0;//Math.cos(testAng) // check center
+				var cen = (d.startAngle + d.endAngle) / 2;
+				
+				var test = cen - halfPi;
+				while (test > pi) test -= tau;
 				return test < 0 ? -8 : 16
 			})
 			.append("textPath")
@@ -510,7 +516,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		var arc = d3.arc()
 			.innerRadius(padded_hw - 14)
 			.outerRadius(padded_hw+14)
-			.cornerRadius(2)
+			.cornerRadius(2);
 		function arcTween(a) {
 			var iInterp =  d3.interpolate(this._current, a);
 			this._current = iInterp(0);
@@ -535,13 +541,31 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			this._current = iInterp(0);
 			return function(t) {
 				var res = iInterp(t);
-				var testAng = (res.startAngle + res.endAngle) / 2 - Math.PI / 2;
-				var test = 0;//Math.cos(testAng) // check center
+				var cen = (res.startAngle + res.endAngle) / 2;
+				
+				var test = cen - halfPi;
+				while (test > pi) test -= tau;
 
 				// flip start/end when we go around the bottom half. This will reorder the text placement
-				var a1 = (test < 0) ? res.endAngle + 1 : res.startAngle - 1,
-					a2 = (test < 0) ? res.startAngle - 1 : res.endAngle + 1;
+				var a1 = (test < 0) ? cen + 1 : cen - 1,
+					a2 = (test < 0) ? cen - 1 : cen + 1;
+				
 				return describeArc(0,0,padded_hw + 10, a1, a2);
+			}
+		}
+
+		function dyTween(a) {
+			var iInterp =  d3.interpolate(this._current, a);
+			this._current = iInterp(0);
+			return function(t) {
+				var res = iInterp(t);
+				var cen = (res.startAngle + res.endAngle) / 2;
+				
+				var test = cen - halfPi;
+				while (test > pi) test -= tau;
+				
+				// flip start/end when we go around the bottom half. This will reorder the text placement
+				return test < 0 ? -8 : 16
 			}
 		}
 		
@@ -571,16 +595,12 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				.attrTween("d", pathTween);
 
 		me.DSS_svg
-			.selectAll("d3-pie-text")
+			.selectAll(".d3-pie-text")
 			.data(pie)
 			.transition()
 				.duration(1000)
 				.ease(d3.easeBounce)
-				.attr("dy", function(d) {
-					var testAng = (d.startAngle + d.endAngle) / 2 - Math.PI / 2;
-					var test = 0;//Math.cos(testAng) // check center
-					return test < 0 ? -8 : 16
-				})
+				.attrTween("dy", dyTween);
 		
 	},
 	

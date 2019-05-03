@@ -141,6 +141,7 @@ var pieDef = {
 	bodyStyle: 'background: transparent',
 	background: 'transparent',
 	height: 180,
+	hidden: true,
 	header: false,
 	border: false,
 	insetPadding: {
@@ -212,6 +213,7 @@ var radarDef = {
 	itemId: 'DSS-gurf',
 	theme: 'custom',
 	border: false,
+	hidden: true,
 //	height: 250,
 	flex: 1,
 	bodyStyle: 'background: transparent',

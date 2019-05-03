@@ -6,9 +6,9 @@ Ext.define('DSS.components.d3_gradedRadar', {
 	alias: 'widget.graded_radar',
 	
 	id: 'd3-graded-radar',
-	width: 260,
-	height: 260,
-	style: 'background: #fff',
+	width: 340,
+	height: 340,
+	//style: 'background: #fff',
 	listeners: {
 		afterrender: function(self) {
 			self.createD3_Elements();
@@ -49,7 +49,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
 			});
 			me.animateTo(res);
 			tt += 0.5;
-		}, 4000)
+		}, 6000)
 	},
 
 	//--------------------------------------------------------------------------
@@ -69,6 +69,10 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		
 		var root = me.DSS_svg.append('g')
 			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')');
+		
+		root.append("circle")
+			.attr('r', padded_hw + 10)
+			.attr('fill', '#fff')
 		
 		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
 		var colorGrade = d3.scaleLinear()
@@ -103,14 +107,14 @@ Ext.define('DSS.components.d3_gradedRadar', {
 			.attr("class", 'd3-wedge')
 			.attr("d", function(d,i) {
 				var sAngle = (i - 0.5) * wedgeSize,
-					outer = Math.pow(d.v,circlePow) * padded_hw + 10,
+					outer = Math.pow(d.v,circlePow) * padded_hw,
 					inner = outer - 10;
-		
+				outer = outer > 2 ? outer : 2;
 				var path = arcGenerator
 					//.innerRadius(inner > 10 ? inner : 10)
 					.startAngle(sAngle)
 					.endAngle(sAngle + wedgeSize)
-					.outerRadius(outer);
+					.outerRadius(outer + 10);
 				return path();
 			})
 			.attr("fill", function(d) {
@@ -167,7 +171,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		wedges.append("text")
 			.attr("class","d3-wedge-text")
 			.attr("opacity", 0.8)
-			.style('font-size', '13px')
+			.style('font-size', '14px')
 			.attr("dy", function(d,i) {
 				var test = Math.cos((i/count) * Math.PI * 2);
 				return test < 0 ? -5 : 13
@@ -271,14 +275,13 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		.ease(d3.easeBounce)
 		.attr("d", function(d,i) {
 			var sAngle = (i - 0.5) * wedgeSize,
-				outer = Math.pow(d.v,0.8) * padded_hw + 10,
-				inner = outer - 10;
-	
+				outer = Math.pow(d.v,0.8) * padded_hw;
+			outer = outer > 2 ? outer : 2;
+
 			var path = arcGenerator
-				//.innerRadius(inner > 10 ? inner : 10)
 				.startAngle(sAngle)
 				.endAngle(sAngle + wedgeSize)
-				.outerRadius(outer);
+				.outerRadius(outer + 10);
 			return path();
 		})
 		.attr("fill", function(d) {

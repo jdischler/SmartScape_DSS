@@ -130,10 +130,10 @@ Ext.define('DSS.view.AppViewport', {
 					x: DSS_viewport.getWidth()
 				},
 				to: {
-					x: (DSS_viewport.getWidth() - win.getWidth()) * 0.5
+					x: (DSS_viewport.getWidth() - win.getWidth()) - 8
 				},
 				callback: function() {
-					win.anchorTo(DSS_viewport, 'c-c');
+				//	win.anchorTo(DSS_viewport, 'tr-tr'[-8,80]);
 				}
 			})
 		}
@@ -145,7 +145,7 @@ Ext.define('DSS.view.AppViewport', {
 					x: DSS_viewport.getWidth()
 				},
 				callback: function() {
-					win.anchorTo(DSS_viewport, 'l-r', [1024,0]);
+					win.anchorTo(DSS_viewport, 'tl-tr', [1024,80]);
 				}
 			})
 		}
@@ -190,16 +190,8 @@ Ext.define('DSS.view.AppViewport', {
 		me['DSS-analyze-results'] = Ext.create('DSS.components.AnalyzeResults', {
 			floating: true,
 			shadow: false,
-		}).show().anchorTo(me, 'l-r', [1024,0]);
-		
-		Ext.create('DSS.components.d3_portalStatistics', {
-			floating: true, shadow: false
-		}).show().anchorTo(me, 'c-c');
-		
-/*		Ext.create('DSS.components.d3_pie', {
-			floating: true, shadow: false
-		}).show().anchorTo(me, 'c-c');*/
+		}).show().anchorTo(me, 'tl-tr', [1024,80]);
 	},
-	
+		
 });
 

@@ -1,3 +1,25 @@
+
+.d3-pie-container:hover .d3-pie {
+	stroke-width: 3;
+}
+
+.d3-pie-container:hover text {
+	fill: #000;	
+	stroke: #000;
+	stroke-width: 0.5;
+}
+
+.d3-wedge-container:hover .d3-wedge {
+	stroke-width: 3;
+}
+
+.d3-wedge-container:hover text {
+	fill: #000;	
+	stroke: #000;
+	stroke-width: 0.5;
+}
+
+
 .d3-nav-bg {
 	stroke: #aaa;
 	stroke-width: 1;
