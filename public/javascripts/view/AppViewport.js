@@ -15,6 +15,7 @@ Ext.define('DSS.view.AppViewport', {
 	    'DSS.components.AnalyzeResults',
 	    'DSS.components.d3_gradedRadar',
 	    'DSS.components.d3_pie',
+	    'DSS.components.d3_portalStatistics'
 	],
 
 	minWidth: 640,
@@ -191,13 +192,13 @@ Ext.define('DSS.view.AppViewport', {
 			shadow: false,
 		}).show().anchorTo(me, 'l-r', [1024,0]);
 		
-		Ext.create('DSS.components.d3_gradedRadar', {
+		Ext.create('DSS.components.d3_portalStatistics', {
 			floating: true, shadow: false
 		}).show().anchorTo(me, 'c-c');
 		
-		Ext.create('DSS.components.d3_pie', {
+/*		Ext.create('DSS.components.d3_pie', {
 			floating: true, shadow: false
-		}).show().anchorTo(me, 'c-c');
+		}).show().anchorTo(me, 'c-c');*/
 	},
 	
 });
