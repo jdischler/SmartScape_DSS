@@ -41,12 +41,12 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	width: 364, // 260
 	height: 364, // 260
 	//style: 'background: #fff',
-	listeners: {
+	/*listeners: {
 		afterrender: function(self) {
 			self.createD3_Radar();
 			self.createD3_Pie();
 		}
-	},
+	},*/
 	DSS_values: [
 		{v:0.8, t:'Bird Habitat'},
 		{v:0.76, t:'Pest Suppression'},
@@ -71,6 +71,8 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	DSS_valueAccetable: '#f6e851',
 	DSS_valueBest: '#98bf63',
 	
+	DSS_pieAngle: 0,
+	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
@@ -78,45 +80,53 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		Ext.applyIf(me, {
 		});
 		
-		var tt = 0;
 		me.callParent(arguments);
-		setInterval(function() {
-			var res = [];
-			Ext.each(me.DSS_values, function(d,i) {
-				res.push({
-					v: Math.random() * 0.5 + (Math.cos(tt + i * 0.4) + 1) * 0.25,
-					t: d.t
-				})
-			});
-			me.updateRadarTo(res);
-			tt += 0.5;
-		}, 8000)
+	},
+
+	//--------------------------------------------------------------------------
+	reveal: function() {
+		var me = this;
 		
-		setInterval(function() {
-			var res = [];
-			Ext.each(me.DSS_pieValues, function(d,i) {
-				res.push({
-					v: d.v + (Math.random() * 30),
+		Ext.defer(function() {
+			me.createD3_Pie();
+			me.rotatePie(0.02);
+			d3.interval(function(elapsed) {
+				me.DSS_pieAngle = (elapsed / 14000.0)
+				me.rotatePie(me.DSS_pieAngle);
+			}, 650);
+		}, 20);
+
+		d3.interval(function() {
+			var newData = [];
+			me.DSS_pieValues.forEach(function(d) {
+				newData.push({
+					v: d.v + Math.random() * 20,
 					t: d.t,
 					c: d.c
 				})
-			});
-			me.updatePieTo(res);
-		}, 8193)
+			})
+			me.updatePieTo(newData);//, last * (tau / 90000));
+		}, 3000);
 
+		
+		Ext.defer(function() {
+			me.createD3_Radar();
+		}, 6000);
 	},
-
+	
 	//--------------------------------------------------------------------------
 	createD3_Radar: function() {
 		var me = this;
 		var w = me.getWidth(), h = me.getHeight();
 		const circlePow = 0.8;
 		const count = me.DSS_values.length;
-		
-		me['DSS_svg'] = d3.select("#d3-portal-stats")
-			.append("svg")
-				.attr("width", w)
-				.attr("height",h)
+
+		if (!me.DSS_svg) {
+			me['DSS_svg'] = d3.select("#d3-portal-stats")
+				.append("svg")
+					.attr("width", w)
+					.attr("height",h)
+		}
 
 		var root = me.DSS_svg.append('g')
 			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')');
@@ -349,50 +359,50 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	createD3_Pie: function() {
 		var me = this;
 		var w = me.getWidth(), h = me.getHeight();
+	
+		if (!me.DSS_svg) {
+			me['DSS_svg'] = d3.select("#d3-portal-stats")
+				.append("svg")
+					.attr("width", w)
+					.attr("height",h)
+		}
 		
-		var pie = d3.pie()
+		const padded_hw = (w * 0.5) - 30,
+		padded_hh = (h * 0.5) - 30;
+		var inner = padded_hw - 14;
+
+		var pie = me['DSS_d3_pie'] = d3.pie()
 			.padAngle(0.015)
 			.sortValues(null)
 			.value(function(d) {
 				return d.v; 
 			})(me.DSS_pieValues);
 		
-		console.log(pie);
-		const total = d3.sum(me.DSS_pieValues, function(d) {return d.v});
-		
-		const padded_hw = (w * 0.5) - 30,
-			padded_hh = (h * 0.5) - 30;
-		
+		pie.forEach(function(d) {
+			d.innerRadius = inner
+		});
+
+		var center = 'translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')';
 		var root = me.DSS_svg.append('g')
-			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')');
+			.attr('transform',center)
+			.append('g')
+			.attr('class', 'd3-pie-root');
 		
 		var wedges = root.selectAll('.d3-pie-container')
 			.data(pie)
 			.enter()
 			.append("g")
-			.attr('class','d3-pie-container');
-	
-		root.selectAll('.d3-pie-container')
+			.attr('class','d3-pie-container')
+			.attr("opacity", 0);
+		
+		wedges
 			.transition()
-			.on("start",function repeat() {
-				d3.active(this)
-					.transition()
-						.duration(50000)
-						.ease(d3.easeLinear)
-						.attr('transform', 'rotate(120)')
-					.transition()
-						.duration(50000)
-						.ease(d3.easeLinear)
-						.attr('transform', 'rotate(240)')
-					.transition()
-						.duration(50000)
-						.ease(d3.easeLinear)
-						.attr('transform', 'rotate(360)')
-						.on("end", repeat)
-			})
+				.duration(1000)
+				.ease(d3.easeQuadOut)
+				.delay(function(d,i){return i * 100})
+				.attr("opacity", 1);			
 		
 		var arcGenerator = d3.arc()
-			.innerRadius(padded_hw - 14)
 			.outerRadius(padded_hw+14)
 			.cornerRadius(2)
 		
@@ -412,7 +422,6 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			})
 			
 		arcGenerator
-			.innerRadius(padded_hw - 14)
 			.outerRadius(padded_hw + 30)
 			.padAngle(0)
 			.cornerRadius(0)
@@ -502,19 +511,28 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	updatePieTo: function(newData) {
 		var me = this;
 		var w = me.getWidth(), h = me.getHeight();
+		duration = 1000;
+		ease = d3.easeBounce;
 		
-		var pie = d3.pie()
+		const padded_hw = (w * 0.5) - 30,
+		padded_hh = (h * 0.5) - 30;
+	
+		inner = padded_hw - 14;
+		
+		var pie = me['DSS_d3_pie'] = d3.pie()
 			.padAngle(0.015)
 			.sortValues(null)
 			.value(function(d) {
 				return d.v; 
 			})(newData);
-	
-		const padded_hw = (w * 0.5) - 30,
-			padded_hh = (h * 0.5) - 30;
+		
+		pie.forEach(function(d) {
+			d.innerRadius = inner
+//			d.startAngle += offset;
+//			d.endAngle += offset;
+		});
 		
 		var arc = d3.arc()
-			.innerRadius(padded_hw - 14)
 			.outerRadius(padded_hw+14)
 			.cornerRadius(2);
 		function arcTween(a) {
@@ -526,7 +544,6 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		}
 		
 		var containerArc = d3.arc()
-			.innerRadius(padded_hw - 14)
 			.outerRadius(padded_hw+30);
 		function containerArcTween(a) {
 			var iInterp =  d3.interpolate(this._current, a);
@@ -543,7 +560,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				var res = iInterp(t);
 				var cen = (res.startAngle + res.endAngle) / 2;
 				
-				var test = cen - halfPi;
+				var test = cen - halfPi + me.DSS_pieAngle;
 				while (test > pi) test -= tau;
 
 				// flip start/end when we go around the bottom half. This will reorder the text placement
@@ -561,7 +578,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				var res = iInterp(t);
 				var cen = (res.startAngle + res.endAngle) / 2;
 				
-				var test = cen - halfPi;
+				var test = cen - halfPi + me.DSS_pieAngle;
 				while (test > pi) test -= tau;
 				
 				// flip start/end when we go around the bottom half. This will reorder the text placement
@@ -573,8 +590,8 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.selectAll('.d3-pie')
 			.data(pie)
 			.transition()
-				.duration(1000)
-				.ease(d3.easeBounce)
+				.duration(duration)
+				.ease(ease)
 				.attrTween("d", arcTween);
 	
 		// mouse tooltips are bound here so must be updated
@@ -582,26 +599,103 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.selectAll('.d3-text-pie')
 			.data(pie)
 			.transition()
-				.duration(1000)
-				.ease(d3.easeBounce)
+				.duration(duration)
+				.ease(ease)
 				.attrTween("d", containerArcTween);
 
 		me.DSS_svg
 			.selectAll(".d3-pie-arc")
 			.data(pie)
 			.transition()
-				.duration(1000)
-				.ease(d3.easeBounce)
+				.duration(duration)
+				.ease(ease)
 				.attrTween("d", pathTween);
 
 		me.DSS_svg
 			.selectAll(".d3-pie-text")
 			.data(pie)
 			.transition()
-				.duration(1000)
-				.ease(d3.easeBounce)
+				.duration(duration)
+				.ease(ease)
 				.attrTween("dy", dyTween);
 		
 	},
+
+	//-------------------------------------------------------------
+	rotatePie: function(ang) {
+		var me = this;
+		var w = me.getWidth(), h = me.getHeight();
 	
+		const padded_hw = (w * 0.5) - 30,
+		padded_hh = (h * 0.5) - 30;
+	
+		var duration = 650;
+		var ease = d3.easeLinear;
+		
+		me.DSS_svg
+			.selectAll(".d3-pie-root")
+			.transition()
+			.duration(duration)
+			.ease(ease)
+			.attr("transform", "rotate(" + (ang * (360.0/tau)) + ")")
+		
+		var containerArc = d3.arc()
+			.outerRadius(padded_hw+30);
+		function containerArcTween(a) {
+			var iInterp =  d3.interpolate(this._current, a);
+			this._current = iInterp(0);
+			return function(t) {
+				return containerArc(iInterp(t));
+			}
+		}
+		
+		function pathTween(a) {
+			var iInterp =  d3.interpolate(this._current, a);
+			this._current = iInterp(0);
+			return function(t) {
+				var res = iInterp(t);
+				var cen = (res.startAngle + res.endAngle) / 2;
+				
+				var test = cen - halfPi + me.DSS_pieAngle;
+				while (test > pi) test -= tau;
+
+				// flip start/end when we go around the bottom half. This will reorder the text placement
+				var a1 = (test < 0) ? cen + 1 : cen - 1,
+					a2 = (test < 0) ? cen - 1 : cen + 1;
+				
+				return describeArc(0,0,padded_hw + 10, a1, a2);
+			}
+		}
+
+		function dyTween(a) {
+			var iInterp =  d3.interpolate(this._current, a);
+			this._current = iInterp(0);
+			return function(t) {
+				var res = iInterp(t);
+				var cen = (res.startAngle + res.endAngle) / 2;
+				
+				var test = cen - halfPi  + me.DSS_pieAngle;
+				while (test > pi) test -= tau;
+				
+				// flip start/end when we go around the bottom half. This will reorder the text placement
+				return test < 0 ? -8 : 16
+			}
+		}
+		
+		me.DSS_svg
+			.selectAll(".d3-pie-arc")
+			.transition()
+				.duration(duration)
+				.ease(ease)
+				.attrTween("d", pathTween);
+
+		me.DSS_svg
+			.selectAll(".d3-pie-text")
+			.transition()
+				.duration(duration)
+				.ease(ease)
+				.attrTween("dy", dyTween);
+		
+	},
+
 });

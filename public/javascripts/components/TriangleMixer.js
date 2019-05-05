@@ -350,9 +350,9 @@ Ext.define('DSS.components.TriangleMixer', {
 			d.y = d.dy;
 		}
 
-		me.outlineText(overlayRoot, 'middle', 'rgba(240,240,230,0.5)', 5, '#333', "Economics", 0, -h * 0.65, 0, '.35em');
-		me.outlineText(overlayRoot, 'start', 'rgba(240,240,230,0.5)', 5, '#333', "Ecology", -w * 0.5, h * 0.38, '.35em', 0);
-		me.outlineText(overlayRoot, 'end', 'rgba(240,240,230,0.5)', 5, '#333', "Emissions", w * 0.5, h * 0.38, '-.35em', 0);
+		me.outlineText(overlayRoot, 'middle', 'rgba(240,240,230,0.5)', 5, '#333', "Air", 0, -h * 0.65, 0, '.35em');
+		me.outlineText(overlayRoot, 'start', 'rgba(240,240,230,0.5)', 5, '#333', "Water", -w * 0.5, h * 0.38, '.35em', 0);
+		me.outlineText(overlayRoot, 'end', 'rgba(240,240,230,0.5)', 5, '#333', "Soil", w * 0.5, h * 0.38, '-.35em', 0);
 	}
 	
 });

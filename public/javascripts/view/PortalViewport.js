@@ -104,20 +104,8 @@ Ext.define('DSS.view.PortalViewport', {
 								//}).show().anchorTo(me.down('#dss-navigator'), 'tc-bc', [0,8])
 								}).show().anchorTo(me.down('#dss-action-side'), 'tl-tl', [0,0])
 							}, 50);
-							var pie = me.down('#dss-pie');
-							me.down('#dss-pie').animate({
-								dynamic: true,
-								to: {
-									height: 80,
-									opacity: 0
-								}
-							})
-							Ext.getCmp('dss-hidden-pad').animate({
-								dynamic: true,
-								to: {
-									height: 80
-								}
-							})
+							var pie = me.down('#dss-radar').setVisible(true);
+							Ext.getCmp('d3-portal-stats').setHidden(true);
 							Ext.getCmp('dss-selected-info').setHidden(true);
 						}
 						else {
@@ -134,22 +122,8 @@ Ext.define('DSS.view.PortalViewport', {
 								})
 							}
 							Ext.getCmp('dss-selected-info').setVisible(true);
-							Ext.getCmp('dss-hidden-pad').animate({
-								dynamic: true,
-								to: {
-									height: 1
-								}
-							})
-							var pie = me.down('#dss-pie');
-							if (pie.height < 180) {
-								pie.animate({
-									dynamic: true,
-									to: {
-										opacity: 1,
-										height: 180
-									}
-								})
-							}
+							Ext.getCmp('d3-portal-stats').setVisible(true);
+							var pie = me.down('#dss-radar').setVisible(false);
 						}
 					}
 				},{
@@ -253,7 +227,7 @@ Ext.define('DSS.view.PortalViewport', {
 									var stats = me.down('#dss-stats');
 									if (stats.isHidden()) {
 										var pie = me.down('#dss-pie');
-										var radar = me.down('#DSS-gurf');
+										var radar = me.down('#dss-radar');
 										
 										stats.setX(me.getWidth() + 1);
 										stats.setVisible(true);
@@ -264,36 +238,6 @@ Ext.define('DSS.view.PortalViewport', {
 												x: me.down('#dss-action-side').getX() + 388
 											}
 										})
-										pie.animate({
-											duration: 1,
-											to: {
-												opacity: 0
-											},
-											callback:function() {
-												pie.animate({
-													delay: 600,
-													duration: 1000,
-													to: {
-														opacity: 1
-													}
-												})
-											}
-										})
-										radar.animate({
-											duration: 1,
-											to: {
-												opacity: 0
-											},
-											callback:function() {
-												radar.animate({
-													delay: 1000,
-													duration: 1000,
-													to: {
-														opacity: 1
-													}
-												})
-											}
-										})
 										me.down('#dss-action-widget').animate({
 											duration: 750,
 											to: {
@@ -301,6 +245,15 @@ Ext.define('DSS.view.PortalViewport', {
 											}
 										});
 										me.down('#dss-navigator').enableAll();
+										Ext.defer(function() {
+										/*	Ext.getCmp('d3-portal-stats').animate({
+												duration: 2000,
+												from: {opacity: 0},
+												to: {opacity: 1}
+											})*/
+											Ext.getCmp('d3-portal-stats').reveal();
+										},1000);
+										
 									}
 								},
 								maxWidth: 380,
@@ -355,9 +308,10 @@ Ext.define('DSS.view.PortalViewport', {
 						id: 'dss-selected-info',
 						style: 'color: #333',
 						margin: '4 8 4 8',
-						minHeight: 100
+						minHeight: 100//4//
 					},{
-						xtype: 'portal_statistics'
+						xtype: 'portal_statistics',
+					//	hidden: true
 					},
 						pieDef, 
 						radarDef,

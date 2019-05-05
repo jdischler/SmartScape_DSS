@@ -210,7 +210,7 @@ var pieDef = {
 //Sample Radar
 var radarDef = {
 	xtype: 'polar',
-	itemId: 'DSS-gurf',
+	itemId: 'dss-radar',
 	theme: 'custom',
 	border: false,
 	hidden: true,
