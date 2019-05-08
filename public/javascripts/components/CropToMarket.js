@@ -40,6 +40,7 @@ Ext.define('DSS.components.CropToMarket', {
 				},{
 					xtype: 'container',
 					height: ht,
+					hidden: true,
 					items: [{
 						xtype: 'slider',
 						itemId: 'stover',
@@ -61,7 +62,7 @@ Ext.define('DSS.components.CropToMarket', {
 						xtype: 'slider',
 						itemId: 'soy',
 						maxValue: 150,
-						fieldLabel: 'Soybean',
+						fieldLabel: 'Soybeans',
 						labelAlign: 'right',
 						labelWidth: labelWidth,
 						width: width,
@@ -74,6 +75,7 @@ Ext.define('DSS.components.CropToMarket', {
 				},{
 					xtype: 'container',
 					height: ht,
+					hidden: true,
 					items: [{
 						xtype: 'slider',
 						itemId: 'residue',

@@ -53,7 +53,7 @@ Ext.define('DSS.components.LogoBar', {
 	},{
 		xtype: 'd3_nav',
 		itemId: 'd3-nav-bar',
-		width: 660, 
+		width: 960, 
 		height: 66,
 		padding: '10 0 0 32',
 		DSS_tooltipOffset: [-64,-18],
@@ -94,6 +94,17 @@ Ext.define('DSS.components.LogoBar', {
 			DSS_selectionChanged: function(selected) {
 				if (selected) {
 					Ext.create('DSS.components.Step4').show().center();
+				}
+			}
+		},{
+			text: 'Summary',
+			activeText: 'Summarize Results',
+			tooltip: 'Prepare a summary of my results',
+			disabledTooltip: 'Transform the landscape to proceed',
+			disabled: true,
+			DSS_selectionChanged: function(selected) {
+				if (selected) {
+					Ext.Msg.alert("Summarize Results", "To be continued....")
 				}
 			}
 		}]

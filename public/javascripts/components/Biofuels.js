@@ -55,6 +55,7 @@ Ext.define('DSS.components.Biofuels', {
 				},{
 					xtype: 'container',
 					height: ht,
+					hidden: true,
 					items: [{
 						xtype: 'slider',
 						itemId: 'stover',
@@ -75,7 +76,7 @@ Ext.define('DSS.components.Biofuels', {
 					items: [{
 						xtype: 'slider',
 						itemId: 'soy',
-						fieldLabel: 'Soybean',
+						fieldLabel: 'Soybeans',
 						maxValue: 150,
 						labelAlign: 'right',
 						labelWidth: labelWidth,
@@ -88,6 +89,7 @@ Ext.define('DSS.components.Biofuels', {
 					}]
 				},{
 					xtype: 'container',
+					hidden: true,
 					height: ht,
 					items: [{
 						xtype: 'slider',
