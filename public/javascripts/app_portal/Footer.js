@@ -23,7 +23,7 @@ Ext.define('DSS.app_portal.Footer', {
 				width: 480, 
 				height: 90,
 				margin: -12,
-				html: '<a href="https://energy.wisc.edu"><img src="assets/images/wei-logo.png" style="width: 60%"></a>' + 
+				html: '<a href="https://energy.wisc.edu"><img src="assets/images/grassland-logo.png" style="width: 60%"></a>' + 
 				'<a href="http://gratton.entomology.wisc.edu"><img src="assets/images/gratton-logo.png" style="width: 40%"></a>',
 			},{
 				xtype: 'component',

@@ -76,6 +76,7 @@ Ext.define('DSS.components.LogoBar', {
 				DSS_viewport.updateScenarioManager(selected)
 			}
 		},{
+			id: 'dss-analyze-button',
 			text: 'Analyze',
 			activeText: 'Analyze Results',
 			tooltip: 'Analyze the modeled outcomes from the user-chosen landscape changes',
@@ -102,6 +103,12 @@ Ext.define('DSS.components.LogoBar', {
 	enableNavBar: function() {
 		var me = this;
 		me.getComponent('d3-nav-bar').enableAll();
+	},
+	
+	//--------------------------------------------------------------------------
+	clickAnalyze: function() {
+		var me = this;
+		me.getComponent('d3-nav-bar').clickElement('#dss-analyze-button');		
 	}
 	
 });

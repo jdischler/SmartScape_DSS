@@ -54,15 +54,15 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		{v:0.5, t:'Soil Retention'},
 		{v:0.29, t:'P Retention'},
 		{v:0.2, t:'Soil Carbon'},
-		{v:0.25, t:'Emissions'},
+		{v:0.25, t:'Climate Mitigation'},
 		{v:0.92, t:'Pollinators'},
 	],
 
 	DSS_pieValues: [
-		{v:8, t:'Developed', c:'#948f9f'},
-		{v:39, t:'Row Crops', c: d3.color('#e7ed55').darker(0.5).hex()},
-		{v:13, t:'Wetlands / Water', c:'#819ad7'},
 		{v:22, t:'Grasses',c: d3.color('#98bf63').darker(0.5).hex()},
+		{v:39, t:'Row Crops', c: d3.color('#e7ed55').darker(0.5).hex()},
+		{v:8, t:'Developed', c:'#948f9f'},
+		{v:13, t:'Water', c:'#819ad7'},
 		{v:19, t:'Woodland', c: d3.color('#dc8f5f').darker(0.7).hex()},
 	],
 
@@ -72,6 +72,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	DSS_valueBest: '#98bf63',
 	
 	DSS_pieAngle: 0,
+	DSS_colorGrade: null,
 	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -81,6 +82,17 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		});
 		
 		me.callParent(arguments);
+		me.DSS_colorGrade = me.createColorGrade();
+	},
+
+	//--------------------------------------------------------------------------
+	createColorGrade: function() {
+		var me = this;
+		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
+		
+		return d3.scaleLinear()
+			.domain([0,0.25, 0.26,0.5, 0.51,0.75, 0.76,1])
+			.range([c1,c1, c2,c2, c3,c3, c4,c4])
 	},
 
 	//--------------------------------------------------------------------------
@@ -89,29 +101,19 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		
 		Ext.defer(function() {
 			me.createD3_Pie();
-			me.rotatePie(0.02);
+			me.rotatePie(0.03);
 			d3.interval(function(elapsed) {
 				me.DSS_pieAngle = (elapsed / 14000.0)
 				me.rotatePie(me.DSS_pieAngle);
 			}, 650);
+			Ext.getCmp('dss-main-view').getProportions(undefined, true);
 		}, 20);
 
-		d3.interval(function() {
-			var newData = [];
-			me.DSS_pieValues.forEach(function(d) {
-				newData.push({
-					v: d.v + Math.random() * 20,
-					t: d.t,
-					c: d.c
-				})
-			})
-			me.updatePieTo(newData);//, last * (tau / 90000));
-		}, 3000);
-
-		
 		Ext.defer(function() {
 			me.createD3_Radar();
-		}, 6000);
+			Ext.getCmp('dss-main-view').getRadar();
+		}, 1200);
+		
 	},
 	
 	//--------------------------------------------------------------------------
@@ -132,12 +134,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')');
 
 		const radar_size = 100;
-
-		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
-		var colorGrade = d3.scaleLinear()
-			.domain([0,0.24, 0.26, 0.49, 0.51, 0.74, 0.76,1])
-			.range([c1,c1, c2,c2, c3,c3, c4,c4])
-			.interpolate(d3.interpolateHcl);
+		var colorGrade = me.DSS_colorGrade;
 		
 		var circularGrid = [];
 		for (var i = 0; i <= 8; i++) {
@@ -150,14 +147,26 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		}
 		
 		root.append("circle")
-			.attr('r', radar_size + 10)
+			.attr('r', 1)//radar_size + 10)
 			.attr('fill', '#fff')
+			.transition()
+				.duration(1200)
+				.attr('r',radar_size + 10)
 			
 		const wedgeSize = Math.PI * 2 / count;
 		var wedges = root.selectAll('.d3-wedge-container')
 			.data(me.DSS_values)
 			.enter()
 			.append("g").attr('class','d3-wedge-container')
+				.attr("opacity", 0);
+		
+		wedges
+			.transition()
+			.delay(function(d,i) {
+				return 2000 + i * 250
+			})
+			.duration(500)
+			.attr("opacity", 1)
 		
 		var arcGenerator = d3.arc()
 			.innerRadius(10)
@@ -201,7 +210,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.attr("class", 'd3-text-wedge')
 			.attr("d", function(d,i) {
 				var sAngle = (i - 0.5) * wedgeSize;
-				var test = Math.cos((i/count) * Math.PI * 2)
+				var test = Math.cos(i * wedgeSize)
 
 				// flip start/end when we go around the bottom half. This will reorder the text placement
 				var path = arcGenerator
@@ -236,7 +245,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.attr("opacity", 0.8)
 			.style('font-size', '13px')
 			.attr("dy", function(d,i) {
-				var test = Math.cos((i/count) * Math.PI * 2);
+				var test = Math.cos(i * wedgeSize);
 				return test < 0 ? -5 : 13
 			})
 			.append("textPath")
@@ -260,24 +269,40 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.attr("class", 'd3-radial-grid')
 			.attr("x1", function(d,i) {
 				i -= 0.5;
-				var sAngle = ((i/count) * Math.PI * 2) - (Math.PI / 0.2);
-				return Math.sin(sAngle) * 10;
+				var sAngle = i * wedgeSize - halfPi;
+				return Math.cos(sAngle) * 10;
 			})
 			.attr("y1", function(d,i) {
 				i -= 0.5;
-				var sAngle = ((i/count) * Math.PI * 2) - (Math.PI / 0.2);
-				return Math.cos(sAngle) * 10;
+				var sAngle = i * wedgeSize - halfPi;
+				return Math.sin(sAngle) * 10;
 			})
 			.attr("x2", function(d,i) {
 				i -= 0.5;
-				var sAngle = ((i/count) * Math.PI * 2) - (Math.PI / 0.2);
-				return Math.sin(sAngle) * (radar_size + 10);
+				var sAngle = i * wedgeSize - halfPi;
+				return Math.cos(sAngle) * 10;// * (radar_size + 10);
 			})
 			.attr("y2", function(d,i) {
 				i -= 0.5;
-				var sAngle = ((i/count) * Math.PI * 2) - (Math.PI / 0.2);
+				var sAngle = i * wedgeSize - halfPi;
+				return Math.sin(sAngle) * 10;//(radar_size + 10);
+			})
+			.transition()
+			.delay(function(d,i) {
+				return i * 200 + 600;
+			})
+			.duration(500)
+			.attr("x2", function(d,i) {
+				i -= 0.5;
+				var sAngle = i * wedgeSize - halfPi;
 				return Math.cos(sAngle) * (radar_size + 10);
-			});
+			})
+			.attr("y2", function(d,i) {
+				i -= 0.5;
+				var sAngle = i * wedgeSize - halfPi;
+				return Math.sin(sAngle) * (radar_size + 10);
+			})
+
 			
 		root.append("g")
 			.style("pointer-events","none")
@@ -294,6 +319,14 @@ Ext.define('DSS.components.d3_portalStatistics', {
 			.attr("stroke-width", function(d) {
 				return d.o * 0.5 + 0.6;
 			})
+			.attr("opacity", function(d) {
+				return 0;
+			})
+			.transition()
+			.delay(function(d,i) {
+				return i * 50 + 900;
+			})
+			.duration(250)
 			.attr("opacity", function(d) {
 				return d.o;
 			})
@@ -312,12 +345,7 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		const circlePow = 0.8;
 		const radar_size = 100;//(w * 0.5) - 30,
 		
-		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
-		
-		var colorGrade = d3.scaleLinear()
-			.domain([0,0.25, 0.26,0.5, 0.51,0.75, 0.76,1])
-			.range([c1,c1, c2,c2, c3,c3, c4,c4])
-		
+		var colorGrade = me.DSS_colorGrade;
 		const wedgeSize = Math.PI * 2 / count;
 		var arcGenerator = d3.arc()
 			.cornerRadius(2)
@@ -340,7 +368,6 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				inner = outer - 10;
 	
 			var path = arcGenerator
-				//.innerRadius(inner > 10 ? inner : 10)
 				.startAngle(sAngle)
 				.endAngle(sAngle + wedgeSize)
 				.outerRadius(outer);
@@ -397,9 +424,9 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		
 		wedges
 			.transition()
-				.duration(1000)
+				.duration(800)
 				.ease(d3.easeQuadOut)
-				.delay(function(d,i){return i * 100})
+				.delay(function(d,i){return i * 200})
 				.attr("opacity", 1);			
 		
 		var arcGenerator = d3.arc()
@@ -454,11 +481,6 @@ Ext.define('DSS.components.d3_portalStatistics', {
 				this._current = d
 			})
 
-	
-	arcGenerator
-		.innerRadius(padded_hw + 10)
-		.outerRadius(padded_hw + 10);
-
 	wedges
 		.append("path")
 		.attr("class", 'd3-pie-arc')
@@ -508,10 +530,10 @@ Ext.define('DSS.components.d3_portalStatistics', {
 	},
 	
 	//-------------------------------------------------------------
-	updatePieTo: function(newData) {
+	updatePieTo: function(newData, fast) {
 		var me = this;
 		var w = me.getWidth(), h = me.getHeight();
-		duration = 1000;
+		duration = fast ? 10 : 1000;
 		ease = d3.easeBounce;
 		
 		const padded_hw = (w * 0.5) - 30,
@@ -685,14 +707,14 @@ Ext.define('DSS.components.d3_portalStatistics', {
 		me.DSS_svg
 			.selectAll(".d3-pie-arc")
 			.transition()
-				.duration(duration)
+				.duration(250)
 				.ease(ease)
 				.attrTween("d", pathTween);
 
 		me.DSS_svg
 			.selectAll(".d3-pie-text")
 			.transition()
-				.duration(duration)
+				.duration(250)
 				.ease(ease)
 				.attrTween("dy", dyTween);
 		

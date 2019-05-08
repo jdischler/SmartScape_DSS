@@ -326,7 +326,7 @@ Ext.define('DSS.components.TriangleMixer', {
 			if (rec) rec.set('data1', rec.get('dataBak') * V)
 			
 			rec = radarData.findRecord("type", 'ni');
-			if (rec) rec.set('data1', rec.get('dataBak') * U)
+			if (rec) rec.set('data1', rec.get('dataBak') * W)
 			
 			rec = radarData.findRecord("type", 'sr');
 			if (rec) rec.set('data1', rec.get('dataBak') * W)
@@ -335,10 +335,10 @@ Ext.define('DSS.components.TriangleMixer', {
 			if (rec) rec.set('data1', rec.get('dataBak') * W)
 
 			rec = radarData.findRecord("type", 'gb');
-			if (rec) rec.set('data1', rec.get('dataBak') * U)
+			if (rec) rec.set('data1', rec.get('dataBak') * W)
 			
 			rec = radarData.findRecord("type", 'em');
-			if (rec) rec.set('data1', rec.get('dataBak') * W)
+			if (rec) rec.set('data1', rec.get('dataBak') * U)
 		  }
 		  
 		function dragend(d) { 

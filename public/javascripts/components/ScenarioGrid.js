@@ -73,6 +73,48 @@ var occlusionExample = [{
 	}]
 }];
 
+var baseExample = [{
+	selection_name: 'Row crops near open water',// transform_text: 'Mixed Grass (C3 / C4)',
+//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	//transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
+		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
+	},{
+		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
+	}]
+},{
+	selection_name: 'Row crops on marginal soils', //transform_text: 'Mixed Grass (C3 / C4)',
+//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+//	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
+		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
+	},{
+		"name":"lcc","type":"indexed","matchValues":[5,6,7,8]
+	}]
+},{
+	selection_name: 'Grasses on prime soils', //transform_text: 'Cash Grain (50% corn, 50% soy)',
+//	management_text: '<ul><li>Fertilizer: Manure (not winter)</li><li>Tillage: no-till</li><li>Cover crop: small grain</li><li>Contouring: none</li></ul>',
+//	transform: { land_use: 2, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
+		"name":"wisc_land","type":"indexed","matchValues":[2,3,4,5]
+	},{
+		"name":"lcc","type":"indexed","matchValues":[1,2,3,4]
+	},{
+		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","greaterThanValue":200
+	},{
+		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":5
+	}]
+},{
+	selection_name: 'Row crops on steeper slopes',// transform_text: 'C3 Grass',
+//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+//	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	query: [{
+		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
+	},{
+		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","greaterThanValue":10,"lessThanValue":15
+	}]
+}];
+
 var DSS_EmptySelectionName = 'Double Click to Name Selection', 
 	DSS_EmptyTransformText = 'Click to Choose a New Landcover Type';
 
@@ -82,7 +124,7 @@ Ext.create('Ext.data.Store', {
 	storeId: 'dss-scenario-store',
     fields: ['selection_name', 'transform_text', 'management_text', 'transform', 'query'],
     data: {
-    	items: occlusionExample,
+    	items: baseExample,
     },autoLoad: true,
     proxy: {
         type: 'memory',
@@ -165,6 +207,9 @@ Ext.define('DSS.components.ScenarioGrid', {
 			callback: function(toolOwner, tool) {
 				// TODO: actually run the simulation
 				DSS_viewport.enableNavBar();
+				Ext.defer(function() {
+					DSS_viewport.virtualClickAnalyze();
+				}, 1000);
 			}
 		}]
 	}],
@@ -205,7 +250,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 			if (cellIndex == 1 || cellIndex == 2) {
 				var query = record.get('query');
 				var name = record.get('selection_name')
-				DSS_viewport.updateLayerBrowser(query, name);
+				DSS_viewport.updateLayerBrowser(query, name, true);
 			}
 			if (cellIndex == 3) {
 				var rectOfClicked = e.target.getBoundingClientRect();
@@ -266,9 +311,16 @@ Ext.define('DSS.components.ScenarioGrid', {
 	                	if (!Ext.fly(tip.triggerElement).hasCls('dss-trx-col'))
 	                		return false;
 	                	var tt = tip.down('#msg');
-	                	tt.update('To: ' + view.getRecord(tip.triggerElement).get('transform_text'));
-	                	tt = tip.down('#management');
-	                	tt.update(view.getRecord(tip.triggerElement).get('management_text'));
+	                	var trx_text = view.getRecord(tip.triggerElement).get('transform_text');
+	                	if (!trx_text) {
+	                		tt.update('click to choose...');
+		                	tt = tip.down('#management');
+		                	tt.update('<ul><li>click to choose...</li></ul>');
+	                	} else {
+	                		tt.update('To: ' + view.getRecord(tip.triggerElement).get('transform_text'));
+		                	tt = tip.down('#management');
+		                	tt.update(view.getRecord(tip.triggerElement).get('management_text'));
+	                	}
 	                }
 	            }
 	        });  
@@ -286,6 +338,15 @@ Ext.define('DSS.components.ScenarioGrid', {
 			tooltip: 'View the effective selection for this tranform',
 			handler: function(grid, rowIndex, colIndex) {
 				var record = grid.getStore().getAt(rowIndex);
+				
+				// FIXME: sync the browser to prevent settings corruptions due to 
+				//	listern 'beforedeselect' but don't let it actually query...
+				var query = record.get('query');
+				var name = record.get('selection_name')
+				// FIXME: but then this still causes other weirdness. 
+				//	like show occlusion but ALSO then show the filter query results
+		//		DSS_viewport.updateLayerBrowser(query, name, false);
+
 				grid.getSelectionModel().select([record]); // make record selected to make things less confusing IMO
 				
 				if (rowIndex > 0) {

@@ -90,6 +90,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 					{boxLabel: 'Warm Grass', name: "wl", indexValues: [5]},
 					{boxLabel: 'Cool Grass', name: "wl", indexValues: [4]},
 					{boxLabel: 'Developed', name: "wl", indexValues: [12,13], checked: true},
+					{boxLabel: 'Woodland',	name: "wl", indexValues: [6,7,8]},
 				],
 			});
 			me.addLayer(lt);
@@ -257,6 +258,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 			},{
 				xtype: 'tool',
 				itemId: 'DSS-add-layer-tool',
+				margin: '2 0 0 0',
 				hidden: true,
 				iconCls: 'inverted-plus-icon',
 				tooltip: 'Choose other landscape characteristics to match on...',
@@ -454,7 +456,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 	},
 	
 	//---------------------------------------------------------------------------------
-	validateImageOL: function(json) {
+	validateImageOL: function(json, tryCount) {
 		var me = this;
 		tryCount = (typeof tryCount !== 'undefined') ? tryCount : 0;
 		
@@ -522,7 +524,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 	},
 	
 	//---------------------------------------------------------------------------------
-	configureFromQuery: function(query) {
+	configureFromQuery: function(query, runQuery) {
 		var me = this;
 		
 		Ext.suspendLayouts();
@@ -545,6 +547,8 @@ Ext.define('DSS.components.AttributeBrowser', {
 			})
 		})
 		Ext.resumeLayouts(true);
+		if (!runQuery) return;
+		
 		me.flushValueUpdates();
 	}
 	

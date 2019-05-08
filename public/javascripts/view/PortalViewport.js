@@ -107,6 +107,7 @@ Ext.define('DSS.view.PortalViewport', {
 							var pie = me.down('#dss-radar').setVisible(true);
 							Ext.getCmp('d3-portal-stats').setHidden(true);
 							Ext.getCmp('dss-selected-info').setHidden(true);
+							Ext.getCmp('dss-portal-title').setHidden(true);
 						}
 						else {
 							if (item.isVisible()) {
@@ -123,6 +124,7 @@ Ext.define('DSS.view.PortalViewport', {
 							}
 							Ext.getCmp('dss-selected-info').setVisible(true);
 							Ext.getCmp('d3-portal-stats').setVisible(true);
+							Ext.getCmp('dss-portal-title').setVisible(true);
 							var pie = me.down('#dss-radar').setVisible(false);
 						}
 					}
@@ -307,8 +309,13 @@ Ext.define('DSS.view.PortalViewport', {
 						xtype: 'component',
 						id: 'dss-selected-info',
 						style: 'color: #333',
-						margin: '4 8 4 8',
+						margin: '4 16',
 						minHeight: 100//4//
+					},{
+						xtype: 'component',
+						id: 'dss-portal-title',
+						style: 'color: #346; font-size: 14px; font-weight: bold',
+						html: 'Modeled Outcome within Landcover Proportion'
 					},{
 						xtype: 'portal_statistics',
 					//	hidden: true
@@ -338,12 +345,10 @@ Ext.define('DSS.view.PortalViewport', {
 			}
 		}).show().anchorTo(me, 'tr-tr', [-16,16]);
 		
-		me.getProportions();
-		me.getRadar();
 	},
 	
 	//------------------------------------------------------------------
-	getProportions: function(selected) {
+	getProportions: function(selected, fast) {
     	var me = this;
 		var obj = Ext.Ajax.request({
 			url: '/app/getLandcoverProportions',
@@ -354,6 +359,7 @@ Ext.define('DSS.view.PortalViewport', {
 			success: function(response, opts) {
 				if (response.responseText != '') {
 					var obj = JSON.parse(response.responseText);
+					Ext.getCmp('d3-portal-stats').updatePieTo(obj, fast);
 					var chartData = Ext.data.StoreManager.lookup('dss-proportions');
 					for (var i = 0; i < obj.length; i++) {
 						var rec = chartData.findRecord("name", obj[i].type);
@@ -404,6 +410,21 @@ Ext.define('DSS.view.PortalViewport', {
 			return {val: val/max * 100.0, base: baseline / max * 100.0};
     	}
     	
+    	function grade(val, bad, ok, good, great) {
+    		if (val <= bad) {
+    			return val / bad * 0.25
+    		}
+    		else if (val <= ok) {
+    			return (val - bad) / (ok - bad) * 0.25 + 0.25
+    		}
+    		else if (val <= good) {
+    			return (val - bad) / (good) * 0.25 + 0.5
+    		}
+    		else if (val <= great) {
+    			return (val - bad) / (great) * 0.25 + 0.75
+    		}
+    		return 1
+    	}
 		var obj = Ext.Ajax.request({
 			url: '/app/getRadarData',
 			jsonData: selected || {},
@@ -413,8 +434,21 @@ Ext.define('DSS.view.PortalViewport', {
 			success: function(response, opts) {
 				if (response.responseText != '') {
 					var obj = JSON.parse(response.responseText);
+					
 					var radarData = Ext.data.StoreManager.lookup('dss-values');
 					
+					var values = [
+						{v:grade(obj.bh, 0.2, 0.3, 0.45, 1.0), t:'Bird Habitat'},
+						{v:grade(obj.ps, 0.23, 0.4, 0.6, 1.0), t:'Pest Suppression'},
+						{v:1 - grade(obj.ni, -25, 90, 180, 400), t:'N Retention'},
+						{v:grade(obj.sl, 0.04, 0.1, 0.24, 2.0), t:'Soil Retention'},
+						{v:grade(obj.gb, 200, 410, 700, 2000), t:'P Retention'},
+						{v:grade(obj.sc, 5, 11, 16, 60), t:'Soil Carbon'},
+						{v:grade(0.008 - obj.em, .0069, .0072, .0073, .0082), t:'Emissions'},
+						{v: grade(obj.pl, 0.1, 0.15, 0.25, 1.0), t:'Pollinators'}
+					];
+					Ext.getCmp('d3-portal-stats').updateRadarTo(values);
+	
 					var rec = radarData.findRecord("type", 'pl');
 					if (rec) {
 						var v = rescale(obj.pl, rec.get('base'))

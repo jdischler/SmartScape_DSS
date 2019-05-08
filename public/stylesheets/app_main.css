@@ -120,7 +120,7 @@
 }
 
 .x-btn-pressed .x-btn-wrap .x-btn-button .x-btn-inner {
-    color: #2887c7;
+    color: #fff;
     font-weight: bold;
 }
 .x-grid-header-ct {
@@ -128,7 +128,7 @@
 }
 .x-btn.x-btn-menu-active.x-btn-default-medium, .x-btn.x-btn-pressed.x-btn-default-medium {
     border-color: #809fb9;
-    background-color: #fff
+    background-color: #2a6e9f
 }
 
 .x-btn-wrap-default-small.x-btn-arrow-right:after {
@@ -252,6 +252,35 @@
 .dss-tool-refresh {
     background-image: url(images/new-scenario-icon.png);
     background-size: cover
+}
+
+.dss-map-icon {
+	background-image: url(images/map-icon.png);
+	background-size: cover;
+	opacity: 0.7;
+	width: 22px !important
+}
+
+.dss-map-icon-pressed {
+	background-image: url(images/map-icon-active.png);
+	background-size: cover;
+	opacity: 1;
+	width: 22px !important
+}
+
+.dss-map-icon:hover {
+	opacity: 1
+}
+
+.dss-model-link {
+	text-align: right;
+	color: #225;
+	text-decoration: underline;
+	cursor: pointer;	
+}
+
+.dss-model-link:hover {
+	color: #36d;
 }
 
 .sankey-chart {

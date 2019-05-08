@@ -76,7 +76,7 @@ var globalMap = new ol.Map({
 		new ol.layer.Tile({
 			source: new ol.source.Stamen({
 				layer: 'terrain'//-background' // terrain/ terrain-labels / terrain-lines
-			})
+			}),
 		}),
 		watershed,
 		county

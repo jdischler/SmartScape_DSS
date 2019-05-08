@@ -20,6 +20,10 @@
 }
 
 
+.d3-comparison-marks:hover {
+	stroke-width: 1.5
+}
+
 .d3-nav-bg {
 	stroke: #aaa;
 	stroke-width: 1;

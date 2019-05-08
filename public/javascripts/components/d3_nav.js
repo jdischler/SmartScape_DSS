@@ -78,6 +78,12 @@ Ext.define('DSS.components.d3_nav', {
 	},
 	
 	//--------------------------------------------------------------------------
+	clickElement: function(id) {
+		console.log('called with: '+ id)
+		d3.select(id).dispatch('click');
+	},
+	
+	//--------------------------------------------------------------------------
 	createD3_Elements: function() {
 		var me = this;
 		
@@ -92,33 +98,33 @@ Ext.define('DSS.components.d3_nav', {
 		const cx = (me.DSS_align === "c") ? (me.getWidth() - width) / 2 : 
 			(me.DSS_align === "l") ? 20 : (me.getWidth() - width) - 20; // account for shadow
 
-	var defs = me.DSS_svg.append("defs");
-	
-	var filter = defs.append("filter")
-		.attr("id", "nav-shadow")
-		.attr("width", "120%")
-		.attr("height", "150%");
-	filter.append("feGaussianBlur")
-		.attr("in", "SourceAlpha")
-		.attr("stdDeviation", "4")
-		.attr("result", "blur");
-	filter.append("feOffset")
-		.attr("in", "blur")
-		.attr("dx","0")
-		.attr("dy","10")
-		.attr("result","offsetBlur");
-	var transfer = filter.append("feComponentTransfer")
-		.attr("in",	"offsetBlur")
-		.attr("result","alphaBlur");
-	transfer.append("feFuncA")
-			.attr("type", "linear")
+		var defs = me.DSS_svg.append("defs");
+		
+		var filter = defs.append("filter")
+			.attr("id", "nav-shadow")
+			.attr("width", "120%")
+			.attr("height", "150%");
+		filter.append("feGaussianBlur")
+			.attr("in", "SourceAlpha")
+			.attr("stdDeviation", "4")
+			.attr("result", "blur");
+		filter.append("feOffset")
+			.attr("in", "blur")
+			.attr("dx","0")
+			.attr("dy","10")
+			.attr("result","offsetBlur");
+		var transfer = filter.append("feComponentTransfer")
+			.attr("in",	"offsetBlur")
+			.attr("result","alphaBlur");
+		transfer.append("feFuncA")
+				.attr("type", "linear")
 			.attr("slope", "0.3");
 
-	var merge = filter.append("feMerge");
-		merge.append("feMergeNode")
-			.attr("in", "alphaBlur");
-		merge.append("feMergeNode")
-			.attr("in", "SourceGraphic");
+		var merge = filter.append("feMerge");
+			merge.append("feMergeNode")
+				.attr("in", "alphaBlur");
+			merge.append("feMergeNode")
+				.attr("in", "SourceGraphic");
 
 		me.DSS_svg
 			.append("g")
@@ -171,7 +177,6 @@ Ext.define('DSS.components.d3_nav', {
 		                .style("opacity", 1);		
 		            me.DSS_tooltip.
 		            	html(d.disabled ? (d.disabledTooltip || d.tooltip) : d.tooltip)	
-		                .style("left", (d3.event.pageX) + "px")		
 		                .style("left", (d3.event.target.parentNode.getBoundingClientRect().x 
 		                		+ me.DSS_tooltipOffset[0]) + "px")
 		            	.style("top", (d3.event.target.parentNode.getBoundingClientRect().y 
@@ -196,6 +201,14 @@ Ext.define('DSS.components.d3_nav', {
 				const res = "translate("+ (d.t_x + cx) +"," + me.DSS_containerPad + ")";
 				return res;
 			})
+		d3.selectAll('.d3-nav')
+			.filter(function(d) {
+				return d.id;
+			})
+			.attr("id", function(d) {
+				return d.id;
+			})
+
 
 		navs.append("path")
 			.data(me.DSS_elements)

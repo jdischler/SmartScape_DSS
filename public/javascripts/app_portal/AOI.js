@@ -6,7 +6,7 @@ Ext.create('Ext.data.Store', {
 	fields: ['name', 'value', 'desc', 'feature'],
 	data: [{ 
 		name: 'Central Sands', value: 'cs', objectid: 0,
-		desc: "The remnants of an ancient lake, this area is characterised by sand and p'taters",
+		desc: "The remnants of an ancient lake, the sandier soils here favor crops less commonly grown in other portions of the state. Less able to hold applied fertilizers, the sandier soils risk leaching nutrients into the nearby Wisconsin River with potential for far-reaching effects.",
 	},{ 
 		name: 'Driftless', value: 'd', objectid: 1,
 		desc: "The driftless area escaped glaciation during the last ice age and is characterized by steep, forested ridges, deeply-carved river valleys, and cold-water trout streams.",
@@ -15,7 +15,7 @@ Ext.create('Ext.data.Store', {
 		desc: "Some special risks and opportunities here...Far too many to list.",
 	},{ 
 		name: 'Urban Corridor', value: 'uc', objectid: 3,
-		desc: "A mix of comparatively densely populated areas and glaciated bits. It'd be nice to have a train to get us to and fro.",
+		desc: "This area is characterized by a mix of densely populated areas surrounding lakes, glaciated areas to the east, and hillier landscapes to the west. With agricultural activities to the north, excess nutrients have easy access to a chain of lakes and the river system they feed.",
 	}]
 });
 

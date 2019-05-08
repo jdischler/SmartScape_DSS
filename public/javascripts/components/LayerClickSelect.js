@@ -172,4 +172,22 @@ Ext.define('DSS.components.LayerClickSelect', {
         return queryLayer;
 	},
 	
+	//--------------------------------------------------------------------------
+	fromQuery: function(queryStep) {
+		var me = this;
+		var ar = me.DSS_vectorLayer.getSource().getFeatures();
+		
+		me.DSS_clickInteraction.getFeatures().clear();
+		Ext.each(queryStep.matchValues, function(val) {
+			Ext.each(ar, function(feat) {
+				if (feat.get(me.DSS_vectorId) == val) {
+					me.DSS_clickInteraction.getFeatures().push(feat);
+					return false;
+				}
+			})
+		})
+		
+		me.updateSelectionCount();
+	}
+	
 });

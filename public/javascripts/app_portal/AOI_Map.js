@@ -235,20 +235,12 @@ Ext.define('DSS.app_portal.AOI_Map', {
 	countyClicked: function(feature) {
 		Ext.getCmp('dss-main-view').getProportions(this.getSelected());
 		Ext.getCmp('dss-main-view').getRadar(this.getSelected());
-		if (feature.selected.length > 0) {
-			var sel = feature.selected[0].get("OBJECTID");
-		//	me.getSelectionModel().select(sel);
-		}
 	},
 
 	//--------------------------------------------------------------------------
 	watershedClicked: function(feature) {
 		Ext.getCmp('dss-main-view').getProportions(this.getSelected());
 		Ext.getCmp('dss-main-view').getRadar(this.getSelected());
-		if (feature.selected.length > 0) {
-			var sel = feature.selected[0].get("OBJECTID");
-		//	me.getSelectionModel().select(sel);
-		}
 	},
 
 	//--------------------------------------------------------------------------
@@ -281,7 +273,7 @@ Ext.define('DSS.app_portal.AOI_Map', {
 	
 		var clickInteraction = objRef['clickTool'] = new ol.interaction.Select({
 			condition: ol.events.condition.click,
-			toggleCondition: singleSelection ? ol.events.condition.never : undefined,
+			toggleCondition: singleSelection ? ol.events.condition.never : ol.events.condition.always,
 			layers: [layer],
 			style: objRef['clickStyle'] || me.DSS_clickStyle,
 		});

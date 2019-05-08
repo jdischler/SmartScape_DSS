@@ -1,44 +1,11 @@
 
-var pi = Math.PI,
-	halfPi = pi / 2,
-	tau = 2 * pi,
-	epsilon = 1e-6,
-	tauEpsilon = tau - epsilon,
-	radToDeg = 360.0 / tau,
-	degToRad = tau / 360.0;
-
-function polarToCartesian(centerX, centerY, radius, angleInRadians) {
-
-  return {
-    x: centerX + (radius * Math.cos(angleInRadians)),
-    y: centerY + (radius * Math.sin(angleInRadians))
-  };
-}
-
-function describeArc(x, y, r, startAngle, endAngle){
-
-	startAngle -= (halfPi);
-	endAngle -= (halfPi);
-    var start = polarToCartesian(x, y, r, endAngle);
-    var end = polarToCartesian(x, y, r, startAngle);
-
-    var sweepFlag = endAngle > startAngle ? "0" : "1"
-    var largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1"
-    	
-    var d = [
-        "M", start.x, start.y, 
-        "A", r, r, 0, largeArcFlag, sweepFlag, end.x, end.y
-    ].join(" ");
-
-    return d;       
-}
 //------------------------------------------------------------------------------
-Ext.define('DSS.components.d3_gradedRadar', {
+Ext.define('DSS.components.d3_multiRadar', {
 //------------------------------------------------------------------------------
     extend: 'Ext.Component',
-	alias: 'widget.graded_radar',
+	alias: 'widget.multi_radar',
 	
-	id: 'd3-graded-radar',
+	id: 'd3-multi-radar',
 	width: 340,
 	height: 340,
 	//style: 'background: #fff',
@@ -48,40 +15,16 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		}
 	},
 	DSS_values: [
-		{v:0.4, vo: 0.35, t:'Bird Habitat'},
-		{v:0.48, vo: 0.44, t:'Pest Suppression'},
-		{v:0.56, vo: 0.50, t:'N Retention'},
-		{v:0.59, vo: 0.501, t:'Soil Retention'},
-		{v:0.38, vo: 0.245, t:'P Retention'},
-		{v:0.1, vo: 0.26, t:'Soil Carbon'},
-		{v:0.25, vo: 0.32, t:'Climate Mitigation'},
-		{v:0.43, vo: 0.39, t:'Pollinators'},
+		{v1:1, v2: 0.612, 	t:'Bird Habitat'},
+		{v1:1, v2: 0.753, t:'Pest Suppression'},
+		{v1:1, v2: 0.811,  t:'N Retention'},
+		{v1:1, v2: 0.609,  	t:'Soil Retention'},
+		{v1:1, v2: 0.413,  t:'P Retention'},
+		{v1:0.881, v2: 1,  	t:'Soil Carbon'},
+		{v1:0.954, v2: 1,  t:'Climate Mitigation'},
+		{v1:1, v2: 0.717,  t:'Pollinators'},
 	],
 
-	DSS_valueWorst: '#d53e4f',
-	DSS_valuePoor: '#dc8f50',
-	DSS_valueAccetable: '#f6e851',
-	DSS_valueBest: '#98bf63',
-	DSS_colorGrade: null,
-	
-	listeners: {
-		afterrender: function(self) {
-			self.createD3_Elements();
-			var res = [];
-			Ext.each(self.DSS_values, function(d,i) {
-				res.push({
-					v: Math.random() * 0.1,
-					t: d.t
-				})
-			});
-			self.animateTo(res);
-		},
-		show: function(self) {
-			Ext.defer(function() {
-				self.animateTo(self.DSS_values)
-			}, 250);
-		}
-	},
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
@@ -89,18 +32,19 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		Ext.applyIf(me, {
 		});
 		
+		var tt = 0;
 		me.callParent(arguments);
-		me.DSS_colorGrade = me.createColorGrade();
-	},
-
-	//--------------------------------------------------------------------------
-	createColorGrade: function() {
-		var me = this;
-		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
-		
-		return d3.scaleLinear()
-			.domain([0,0.25, 0.26,0.5, 0.51,0.75, 0.76,1])
-			.range([c1,c1, c2,c2, c3,c3, c4,c4])
+	/*	setInterval(function() {
+			var res = [];
+			Ext.each(me.DSS_values, function(d,i) {
+				res.push({
+					v: Math.random() * 0.5 + (Math.cos(tt + i * 0.4) + 1) * 0.25,
+					t: d.t
+				})
+			});
+		//	me.animateTo(res);
+			tt += 0.5;
+		}, 6000)*/
 	},
 
 	//--------------------------------------------------------------------------
@@ -110,7 +54,9 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		const circlePow = 0.8;
 		const count = me.DSS_values.length;
 		
-		me['DSS_svg'] = d3.select("#d3-graded-radar")
+		var cx = w * 0.5, cy = cx + (h-w);
+		
+		me['DSS_svg'] = d3.select("#d3-multi-radar")
 			.append("svg")
 				.attr("width", w)
 				.attr("height",h)
@@ -119,37 +65,130 @@ Ext.define('DSS.components.d3_gradedRadar', {
 			padded_hh = (h * 0.5) - 30;
 		
 		var root = me.DSS_svg.append('g')
-			.attr('transform','translate(' + (w * 0.5) + ',' +  (h * 0.5) + ')');
+			.attr('transform','translate(' + cx + ',' + cy + ')');
 		
 		root.append("circle")
-			.attr('r', padded_hw + 10)
+			.attr('r', padded_hw)
 			.attr('fill', '#fff')
-		
-		var colorGrade = me.DSS_colorGrade;
 		
 		var circularGrid = [];
 		for (var i = 0; i <= 8; i++) {
 			var g = {
 				r: i * 0.125,
 				o: (i == 0 || i == 8) ? 1 : 
-					(i % 2) ? 0.1 : 0.5
+					(i % 2) ? 0.2 : 0.5
 			};
 			circularGrid.push(g);
 		}
 		
-		const wedgeSize = tau / count;
+		const wedgeSize = Math.PI * 2 / count;
 		var wedges = root.selectAll('.d3-wedge-container')
 			.data(me.DSS_values)
 			.enter()
 			.append("g").attr('class','d3-wedge-container')
 		
 		var arcGenerator = d3.arc()
-			.innerRadius(10)
+			.innerRadius(0)
 			.padAngle(0.005)
 			.cornerRadius(2)
 			.padRadius(padded_hw + 10);
 		
-		wedges
+		var path1 = null, path2 = null;
+		wedges.each(function(d, i) {
+			var ptx = Math.cos(i * wedgeSize - Math.PI / 2) * d.v1 * padded_hw,
+				pty = Math.sin(i * wedgeSize - Math.PI / 2) * d.v1 * padded_hw;
+			path1 = (path1 ? path1 + 'L' : 'M') + ptx + ','+ pty;
+			
+			ptx = Math.cos(i * wedgeSize - Math.PI / 2) * d.v2 * padded_hw,
+				pty = Math.sin(i * wedgeSize - Math.PI / 2) * d.v2 * padded_hw;
+			path2 = (path2 ? path2 + 'L' : 'M') + ptx + ','+ pty; 
+		})
+		path1 += "Z"; path2 += "Z";
+		
+		root.append("path")
+			.attr("d", path1)
+			.attr("stroke", "#580")
+			.attr("stroke-width", 2)
+			.attr("fill", 'rgba(130,170,10,0.3)')
+			.attr("opacity", '0.5')
+		
+		root.append("path")
+			.attr("d", path2)
+			.attr("stroke", "#15a")
+			.attr("stroke-width", 2)
+			.attr("fill", 'rgba(0,30,200,0.3)')
+			.attr("opacity", '0.5')
+			
+		root.selectAll('.d3-nodes')
+			.data(me.DSS_values)
+			.enter()
+			.append("circle")
+				.attr("r", 4)
+				.attr("cx", function(d,i) {
+					return Math.cos(i * wedgeSize - Math.PI / 2) * d.v1 * padded_hw;
+				})
+				.attr("cy", function(d,i) {
+					return Math.sin(i * wedgeSize - Math.PI / 2) * d.v1 * padded_hw;
+				})
+				.attr("stroke", "#000")
+				.attr("stroke-width", 1)
+				.attr("fill", '#6a2')
+		        .on("mouseover", function(d) {
+		            me.DSS_tooltip
+		            	.transition()
+		            	.delay(function(d) {
+		            		return me.DSS_tooltip.style("opacity") > 0 ? 0 : 600;
+		            	})
+		                .duration(100)		
+		                .style("opacity", 1);		
+		            me.DSS_tooltip
+		            	.html("<b>" + d.t + ":</b> " + (d.v1 * 100).toFixed(1) + "%")	
+		                .style("left", (d3.event.clientX + "px"))
+		            	.style("top", (d3.event.clientY + "px"))
+		        })
+		        .on("mouseout", function(d) {		
+		    		me.DSS_tooltip
+		    		.transition()		
+		            .duration(100)		
+		            .style("opacity", 0);	
+		        });
+		
+		root.selectAll('.d3-nodes')
+		.data(me.DSS_values)
+		.enter()
+			.append("circle")
+			.attr("r", 4)
+			.attr("cx", function(d,i) {
+				return Math.cos(i * wedgeSize - Math.PI / 2) * d.v2 * padded_hw;
+			})
+			.attr("cy", function(d,i) {
+				return Math.sin(i * wedgeSize - Math.PI / 2) * d.v2 * padded_hw;
+			})
+			.attr("stroke", "#000")
+			.attr("stroke-width", 1)
+			.attr("fill", '#15a')
+	        .on("mouseover", function(d) {
+	            me.DSS_tooltip
+	            	.transition()
+	            	.delay(function(d) {
+	            		return me.DSS_tooltip.style("opacity") > 0 ? 0 : 600;
+	            	})
+	                .duration(100)		
+	                .style("opacity", 1);		
+	            me.DSS_tooltip
+	            	.html("<b>" + d.t + ":</b> " + (d.v2 * 100).toFixed(1) + "%")	
+	                .style("left", (d3.event.clientX + "px"))
+	            	.style("top", (d3.event.clientY + "px"))
+	        })
+	        .on("mouseout", function(d) {		
+        		me.DSS_tooltip
+        		.transition()		
+                .duration(100)		
+                .style("opacity", 0);	
+	        });
+
+			
+		/*wedges
 			.append("path")
 			.attr("class", 'd3-wedge')
 			.attr("d", function(d,i) {
@@ -172,7 +211,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
 				return d3.color(c).darker(1).hex()
 			})
 			.attr("stroke-width", 1)
-			
+		*/	
 		arcGenerator
 			.innerRadius(10)
 			.outerRadius(padded_hw + 30);
@@ -193,8 +232,8 @@ Ext.define('DSS.components.d3_gradedRadar', {
 					.endAngle(test < 0 ? sAngle : sAngle + wedgeSize);
 				return path();
 			})
-			.attr("fill", 'rgba(0,0,0,0)')
-	        .on("mouseover", function(d) {
+			.attr("fill", 'rgba(0,0,0,0)');
+/*	        .on("mouseover", function(d) {
 	            me.DSS_tooltip
 	            	.transition()
 	            	.delay(function(d) {
@@ -203,7 +242,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
 	                .duration(100)		
 	                .style("opacity", 1);		
 	            me.DSS_tooltip
-	            	.html("<b>" + d.t + ":</b> " + (d.v * 100).toFixed(1) + "%")	
+	            	.html("<b>" + d.t + ":</b> " + (d.v1 * 100).toFixed(1) + "%")	
 	                .style("left", (d3.event.clientX + "px"))
 	            	.style("top", (d3.event.clientY + "px"))
 	        })
@@ -212,7 +251,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
         		.transition()		
                 .duration(100)		
                 .style("opacity", 0);	
-	        });
+	        });*/
 		
 		wedges.append("text")
 			.attr("class","d3-wedge-text")
@@ -232,63 +271,6 @@ Ext.define('DSS.components.d3_gradedRadar', {
 				return d.t;
 			})
 
-		// add on comparison
-		root.selectAll('.d3-comparison-marks')
-			.data(me.DSS_values)
-			.enter()
-			.append("path")
-				.attr("class", "d3-comparison-marks")
-				.attr('transform', function(d,i) {
-					var angle = i * wedgeSize - pi;
-					return "rotate(" + (angle * radToDeg) + ")"
-				})
-				.attr("d", function(d,i) {
-					var r = (Math.pow(d.vo,circlePow) * padded_hw + 10);
-					return "M0," + (r-6) + "l3.5,6 l-3.5,6 l-3.5,-6 Z" 
-				})
-				.attr("stroke-width", 0.5)
-				.attr("stroke", "#000")
-				.attr("fill", function(d) {
-					return colorGrade(d.vo)
-				})
-	        .on("mouseover", function(d) {
-	            me.DSS_tooltip
-	            	.transition()
-	            	.delay(function(d) {
-	            		return me.DSS_tooltip.style("opacity") > 0 ? 0 : 600;
-	            	})
-	                .duration(100)		
-	                .style("opacity", 1);		
-	            me.DSS_tooltip
-	            	.html("<b>" + d.t + ":</b> " + (d.vo * 100).toFixed(1) + "%")	
-	                .style("left", (d3.event.clientX + "px"))
-	            	.style("top", (d3.event.clientY + "px"))
-	        })
-	        .on("mouseout", function(d) {		
-        		me.DSS_tooltip
-        		.transition()		
-                .duration(100)		
-                .style("opacity", 0);	
-	        })			
-				
-		root.selectAll('.d3-comparison-lines')
-			.data(me.DSS_values)
-			.enter()
-			.append("path")
-				.attr("class", "d3-comparison-lines")
-				.attr("d", function(d,i) {
-					var sAngle = (i-0.3) * wedgeSize,
-						eAngle = (i+0.3) * wedgeSize;
-					return describeArc(0, 0, Math.pow(d.vo,circlePow) * padded_hw + 10, sAngle, eAngle);
-					
-				})
-				.attr("stroke-width", 0.75)
-				.attr("stroke", "#000")
-				.attr("fill", "none")
-				.style("pointer-events","none")
-
-
-			
 		root.append("g")
 			.attr("opacity", 0.25)
 			.attr("stroke", '#000')
@@ -298,25 +280,15 @@ Ext.define('DSS.components.d3_gradedRadar', {
 			.enter()
 			.append("line")
 			.attr("class", 'd3-radial-grid')
-			.attr("x1", function(d,i) {
-				i -= 0.5;
-				var sAngle = i * wedgeSize - halfPi;
-				return Math.cos(sAngle) * 10;
-			})
-			.attr("y1", function(d,i) {
-				i -= 0.5;
-				var sAngle = i * wedgeSize - halfPi;
-				return Math.sin(sAngle) * 10;
-			})
+			.attr("x1", 0)
+			.attr("y1", 0)
 			.attr("x2", function(d,i) {
-				i -= 0.5;
-				var sAngle = i * wedgeSize - halfPi;
-				return Math.cos(sAngle) * (padded_hw + 10);
+				var sAngle = i * wedgeSize - (Math.PI / 0.2);
+				return Math.sin(sAngle) * (padded_hw + 10);
 			})
 			.attr("y2", function(d,i) {
-				i -= 0.5;
-				var sAngle = i * wedgeSize - halfPi;
-				return Math.sin(sAngle) * (padded_hw + 10);
+				var sAngle = i * wedgeSize - (Math.PI / 0.2);
+				return Math.cos(sAngle) * (padded_hw + 10);
 			});
 			
 		root.append("g")
@@ -329,7 +301,7 @@ Ext.define('DSS.components.d3_gradedRadar', {
 			.append("circle")
 			.attr("class", "d3-circular-grid")
 			.attr("r", function(d) {
-				return Math.pow(d.r,circlePow) * padded_hw + 10;
+				return Math.pow(d.r,circlePow) * padded_hw;
 			})
 			.attr("stroke-width", function(d) {
 				return d.o * 0.5 + 0.6;
@@ -354,9 +326,13 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		const padded_hw = (w * 0.5) - 30,
 			padded_hh = (h * 0.5) - 30;
 		
-		var colorGrade = me.DSS_colorGrade;
+		var c1 = me.DSS_valueWorst, c2 = me.DSS_valuePoor, c3 = me.DSS_valueAccetable, c4 = me.DSS_valueBest;
 		
-		const wedgeSize = tau / count;
+		var colorGrade = d3.scaleLinear()
+			.domain([0,0.25, 0.26,0.5, 0.51,0.75, 0.76,1])
+			.range([c1,c1, c2,c2, c3,c3, c4,c4])
+		
+		const wedgeSize = Math.PI * 2 / count;
 		var arcGenerator = d3.arc()
 			.cornerRadius(2)
 			.innerRadius(10)
@@ -370,9 +346,6 @@ Ext.define('DSS.components.d3_gradedRadar', {
 		me.DSS_svg.selectAll('.d3-wedge')
 		.data(newData)
 		.transition()
-		.delay(function(d,i) {
-			return i * 50 
-		})
 		.duration(1000)
 		.ease(d3.easeBounce)
 		.attr("d", function(d,i) {

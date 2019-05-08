@@ -20,7 +20,7 @@ var DSS_TransformTypes = Ext.create('Ext.data.Store', {
 		controls: ['Fertilizer'] 
 	},{ 
 		index: 6, name: 'Mixed Grass (C3 / C4)',
-		controls: ['Fertilizer'] 
+		controls: []//'Fertilizer'] 
 	},{ 
 		index: 7, name: 'No Change',
 		controls: ['Fertilizer','Tillage','CoverCrops','Contouring'] 

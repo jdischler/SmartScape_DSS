@@ -28,13 +28,13 @@ Ext.define('Ext.chart.theme.Custom', {
     }
 });		
 
-var emText = '          Emissions';
-var niText = 'Phosphorus Retention';
+var emText = 'Climate \nMitigation';
+var niText = 'Phosphorus\nRetention';
 var scText = 'Soil Carbon';
 var bhText = 'Bird   \nHabitat';
-var srText = 'Soil\n          Retention';
+var srText = 'Soil\n Retention';
 var gbText = 'Nitrogen\n            Retention';
-var psText = 'Pest\nSupression       ';
+var psText = 'Pest\nSupression   ';
 var plText = 'Pollinators';
 
 Ext.create('Ext.data.Store', {
@@ -42,12 +42,12 @@ Ext.create('Ext.data.Store', {
 	fields: ['type','name', 'data1', 'location'],
 	data: [
 	{type:'sr',name: srText ,data1: 30.1, dataBak: 30.1, data2: 100,location: 'uc', base:0.10442078},
-	{type:'em',name: emText, data1: 90.7, dataBak: 90.7, data2: 100,location: 'uc',base:0.000828},
+	{type:'ni',name: niText, data1: 91.8, dataBak: 91.8, data2: 100,location: 'uc', base:-31.1382},
 	{type:'sc',name: scText, data1: 20.1, dataBak: 30.1, data2: 100,location: 'uc',base:11.103638},
 	{type:'bh',name: bhText, data1: 10.9, dataBak: 10.9, data2: 100,location: 'uc',base:0.3476668},
 	{type:'ps',name: psText, data1: 15.6, dataBak: 15.6, data2: 100,location: 'uc',base:0.428911},
 	{type:'pl',name: plText ,data1: 30.4, dataBak: 30.4, data2: 100,location: 'uc',base:0.094198},
-	{type:'ni',name: niText, data1: 91.8, dataBak: 91.8, data2: 100,location: 'uc', base:-31.1382},
+	{type:'em',name: emText, data1: 90.7, dataBak: 90.7, data2: 100,location: 'uc',base:0.000828},
 	{type:'gb',name: gbText, data1: 80.5, dataBak: 80.5, data2: 100,location: 'uc', base:310.64678},
 	
 	{type:'sr',name: srText, data1: 100,  data2:90,location: 'cs'},
@@ -215,15 +215,16 @@ var radarDef = {
 	border: false,
 	hidden: true,
 //	height: 250,
+	padding: '48 0',
 	flex: 1,
 	bodyStyle: 'background: transparent',
 	background: 'transparent',
-	innerPadding: 5,
+	innerPadding: 15,
 	header: false,
 	insetPadding: {
 		top: 45,
-		left: 40,
-		right: 40,
+		left: 50,
+		right: 50,
 		bottom: 25
 	},
 	animation: {

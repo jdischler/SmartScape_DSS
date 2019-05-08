@@ -121,8 +121,10 @@ public class Analyzer_LandcoverProportions
 		
 		ArrayNode ar = JsonNodeFactory.instance.arrayNode();
 		ar.add(Json.pack(
-				"type", "Grasses", 
+				"type", "Grasses",
 				"val", (hayCt + pastureCt + coolCt + warmCt) / frac,
+				"t","Grasses",
+				"v", (hayCt + pastureCt + coolCt + warmCt) / frac,
 				"sub", Json.pack(
 					"Hay", hayCt / frac,
 					"Pasture", pastureCt / frac,
@@ -133,6 +135,8 @@ public class Analyzer_LandcoverProportions
 		ar.add(Json.pack(
 				"type", "Row Crops",
 				"val", (contCornCt + dairyCt + cashGrainCt) / frac,
+				"t", "Row Crops",
+				"v", (contCornCt + dairyCt + cashGrainCt) / frac,
 				"sub", Json.pack(
 					"Continuous Corn", contCornCt / frac,
 					"Dairy Rotation", dairyCt / frac,
@@ -142,14 +146,18 @@ public class Analyzer_LandcoverProportions
 		ar.add(Json.pack(
 				"type", "Developed",
 				"val", (urbanCt + suburbanCt) / frac,
+				"t", "Developed",
+				"v", (urbanCt + suburbanCt) / frac,
 				"sub", Json.pack(
 					"Urban", urbanCt / frac,
 					"Other", suburbanCt / frac
 				)
 			));
 		ar.add(Json.pack(
-				"type", "Wetlands/Water",
+				"type", "Wetlands / Water",
 				"val", (waterCt + wetlandCt) / frac,
+				"t", "Wetlands / Water",
+				"v", (waterCt + wetlandCt) / frac,
 				"sub", Json.pack(
 					"Open Water", waterCt / frac,
 					"Wetlands", wetlandCt / frac
@@ -158,6 +166,8 @@ public class Analyzer_LandcoverProportions
 		ar.add(Json.pack(
 				"type", "Woodland",
 				"val", (coniferCt + deciduousCt + mixedCount) / frac,
+				"t", "Woodland",
+				"v", (coniferCt + deciduousCt + mixedCount) / frac,
 				"sub", Json.pack(
 					"Conifers", coniferCt / frac,
 					"Deciduous", deciduousCt / frac

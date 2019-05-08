@@ -13,9 +13,8 @@ Ext.define('DSS.view.AppViewport', {
 	    'DSS.components.ScenarioManager',
 	    'DSS.components.SelectionStatistics',
 	    'DSS.components.AnalyzeResults',
-	    'DSS.components.d3_gradedRadar',
-	    'DSS.components.d3_pie',
-	    'DSS.components.d3_portalStatistics'
+//	    'DSS.components.d3_pie',
+//	    'DSS.components.d3_portalStatistics'
 	],
 
 	minWidth: 640,
@@ -32,9 +31,9 @@ Ext.define('DSS.view.AppViewport', {
 		me['DSS-logo-bar'].enableNavBar()
 	},
 	//--------------------------------------------------------------------------
-	updateLayerBrowser: function(query, selection_name) {
+	updateLayerBrowser: function(query, selection_name, runQuery) {
 		var me = this;
-		me['DSS-layer-browser'].configureFromQuery(query);
+		me['DSS-layer-browser'].configureFromQuery(query, runQuery);
 	},
 	
 	//--------------------------------------------------------------------------
@@ -80,6 +79,54 @@ Ext.define('DSS.view.AppViewport', {
 				x: 8
 			}
 		})
+	},
+
+	//--------------------------------------------------------------------------
+	hideStatistics: function(overrideExistingAnim) {
+		var me = this;
+		var statisticsPane = me['DSS-selection-statistics'];
+		
+//		if (!statisticsPane || typeof statisticsPane.DSS_active === 'undefined') return;
+		
+		if (!statisticsPane.DSS_active) return;
+		
+		var atX = statisticsPane.getX();
+		var desiredX = -(statisticsPane.getWidth());
+		
+		if (overrideExistingAnim) statisticsPane.stopAnimation();
+		statisticsPane.animate({
+			duration: 500,
+			from: {
+				x: atX,
+			},
+			to: {
+				x: desiredX
+			}
+		})
+		statisticsPane.DSS_active = false;
+	},
+
+	//--------------------------------------------------------------------------
+	hideAttributeBrowser: function(hide) {
+		var me = this;
+		var ab = me['DSS-layer-browser']
+		
+		if (!hide && ab.getX() >= 0) return;
+		if (hide && ab.getX() < 0) return;
+		
+		var atX = hide ? ab.getX() : -ab.getWidth();
+		var desiredX = hide ? -ab.getWidth() : 8;
+		
+		ab.animate({
+			duration: 500,
+			from: {
+				x: atX,
+			},
+			to: {
+				x: desiredX
+			}
+		})
+		
 	},
 	
 	//--------------------------------------------------------------------------
@@ -136,6 +183,8 @@ Ext.define('DSS.view.AppViewport', {
 				//	win.anchorTo(DSS_viewport, 'tr-tr'[-8,80]);
 				}
 			})
+			me.hideStatistics(true);
+			me.hideAttributeBrowser(true);
 		}
 		else {
 			win.removeAnchor();
@@ -148,7 +197,15 @@ Ext.define('DSS.view.AppViewport', {
 					win.anchorTo(DSS_viewport, 'tl-tr', [1024,80]);
 				}
 			})
+			me.hideAttributeBrowser(false);
+			//me.positionStatistics(true)
 		}
+	},
+	
+	//--------------------------------------------------------------------------
+	virtualClickAnalyze: function() {
+		var me = this;
+		me['DSS-logo-bar'].clickAnalyze()
 	},
 	
 	//--------------------------------------------------------------------------
