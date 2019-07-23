@@ -76,7 +76,31 @@ public class Json
 			carrierNode.put(key, value.toString());
 		}
 	}
+	
+	//--------------------------------------------------------------------------	
+	public static ArrayNode array(Object ... arguments) {
+		
+		ArrayNode data = JsonNodeFactory.instance.arrayNode();
+		for (int i = 0; i < arguments.length; i++) {
+			Object o = arguments[i];
+			if (o instanceof Boolean) {
+				data.add((Boolean)o);
+			
+			} else if (o instanceof Double) {
+				data.add((Double)o);
 
+			} else if (o instanceof Long) {
+				data.add((Long)o);
+				
+			} else if (o instanceof Integer) {
+				data.add((Integer)o);
+				
+			} else {// if (o instanceof String) {
+				data.add(o.toString());
+			}
+		}
+		return data;
+	}
 	//--------------------------------------------------------------------------
 	public static final String safeGetString(JsonNode objectNode, String key) throws RuntimeException {
 	

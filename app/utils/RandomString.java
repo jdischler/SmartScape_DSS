@@ -5,6 +5,7 @@ import java.util.*;
 //------------------------------------------------------------------------------
 public class RandomString {
 
+	// return A-Z
 	public static final String get(int numCharacters) {
 	
 		StringBuilder result = new StringBuilder(numCharacters);
@@ -16,5 +17,17 @@ public class RandomString {
 		
 		return result.toString();
 	}
-}
 
+	// return ! - @, A-Z, [ - `, a-z, { - ~ 
+	public static final String getComplex(int numCharacters) {
+		
+		StringBuilder result = new StringBuilder(numCharacters);
+		Random rand = new Random();
+		for (int i=0; i < numCharacters; i++) {	
+			int value = rand.nextInt(94) + 33; // 94 characters, ! starts at 33 ASCII, returns up to ~
+			result.append((char)value);
+		}
+		
+		return result.toString();
+	}
+}

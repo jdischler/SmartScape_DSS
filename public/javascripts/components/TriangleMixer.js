@@ -264,7 +264,7 @@ Ext.define('DSS.components.TriangleMixer', {
 			// convert coords with a given triangle...and test point..
 		    var X1 = 0, Y1 = -144;
 		    var X2 = -124, Y2 = 72;
-		    var X3 = 124, Y3 = 72;
+		    var X3 = 124, Y3 = 72; 
 		    var X4 = d.x, Y4 = d.y;
 		    
 		    //to UVW barycentric coords, ie, a tuple that represents the ratio(proportion) of each triangle

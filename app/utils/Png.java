@@ -173,6 +173,8 @@ public class Png {
 			
 			// Blah, find max 
 			//	(would be nice if ASC file could just have the min and max value saved in it?)
+			// TODO: Make a custom file type for this? Probably have min and max inside and it'd
+			//	be a downsampled data source for performance/disk savings.
 			double max = 0.3;
 			while (file1.ready() && file2.ready()) {
 				

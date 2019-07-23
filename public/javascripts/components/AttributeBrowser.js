@@ -10,6 +10,7 @@ Ext.define('DSS.components.AttributeBrowser', {
         'DSS.components.LayerBase',
         'DSS.components.LayerIndexed',
         'DSS.components.LayerFloat',
+        'DSS.components.LayerFarmInteraction',
         'DSS.components.LayerClickSelect',
         'DSS.components.LayerDrawShape',
     ],
@@ -182,6 +183,9 @@ Ext.define('DSS.components.AttributeBrowser', {
 				DSS_vectorLayer: county
 			}));
 			
+			me.addLayer(Ext.create('DSS.components.LayerFarmInteraction', {
+				hidden: true
+			}))
 		/*	me.addLayer(Ext.create('DSS.components.LayerDrawShape', {
 				hidden: true
 			}));
@@ -362,6 +366,11 @@ Ext.define('DSS.components.AttributeBrowser', {
 					-10062652.65061, 5278060.469521415,
 					-9878152.65061, 5415259.640662575
 				]
+				// bounds seems off? Hacked tweak...
+				obj['bounds']= [
+					-10062652.65061, 5278380.4034,
+					-9878152.65061, 5415100.4034
+				]
 				var area = (obj.selectedPixels * 30.0 * 30.0) / 1000000.0;
 				// then convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
 				area *= 247.105;
@@ -465,6 +474,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 			var src = new ol.source.ImageStatic({
 				url: json.url,
 				crossOrigin: '',
+				projection: 'EPSG:3857',
 				imageExtent: json.bounds
 			});			
 			src.on('imageloadend', function() { // IMAGELOADEND: 'imageloadend',

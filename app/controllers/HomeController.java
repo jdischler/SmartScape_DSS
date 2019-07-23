@@ -17,6 +17,7 @@ import utils.RandomString;
 import utils.ServerStartup;
 import query.Layer_Base;
 import query.Query;
+import resources.Farm;
 
 //------------------------------------------------------------------
 public class HomeController extends Controller {
@@ -78,6 +79,12 @@ public class HomeController extends Controller {
 	}
 	
 	//------------------------------------------------------------------
+	public Result main() {
+		return ok(views.html.main.render());
+	}
+	
+	
+	//------------------------------------------------------------------
 	private String createNewUser() {
 		
 		String user = null;
@@ -136,5 +143,10 @@ public class HomeController extends Controller {
 	public Result getRadarData() {
 
 		return ok(Analyzer_ModelResults.get(request().body().asJson()));
+	}
+	
+	//--------------------------------------------------------------------------
+	public Result getFarmGeoJson() {
+		return ok(Farm.toGeoJson());
 	}
 }

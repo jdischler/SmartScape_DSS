@@ -83,6 +83,16 @@
 	background-size: cover;	
 }
 
+.square-icon {
+	background-image: url(images/square-icon.png);
+	background-size: cover;	
+}
+
+.circle-icon {
+	background-image: url(images/circle-icon.png);
+	background-size: cover;	
+}
+
 .dss-delete-icon {
 	background-image: url(images/delete-icon.png);
 	background-size: cover;

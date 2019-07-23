@@ -125,6 +125,30 @@ Ext.define('DSS.components.MainMap', {
 	animate: false,
 	style: 'background-color: rgb(198,208,168)', // rgb(217,221,183)
 
+	DSS_farmStyleDef: {
+		'5': {
+			radius: 5,
+			fill: new ol.style.Fill({color: '#7fff00af'}),
+			stroke: new ol.style.Stroke({color: '#224400bf', width: 2})
+		},
+		'8': {
+			radius: 8,
+			fill: new ol.style.Fill({color: '#ffff00af'}),
+			stroke: new ol.style.Stroke({color: '#444400bf', width: 2})
+		},
+		'12': {
+			radius: 12,
+			fill: new ol.style.Fill({color: '#ff7f00af'}),
+			stroke: new ol.style.Stroke({color: '#442200bf', width: 2})
+		}
+	},
+	// Contains the real styles which are scale modified defs from above
+	DSS_farmLayerStyle: {
+		'5': {},
+		'8': {},
+		'12': {}
+	},
+
 	//--------------------------------------------------------------------------
 	initComponent: function() {
 		var me = this;
@@ -135,6 +159,8 @@ Ext.define('DSS.components.MainMap', {
 		me.callParent(arguments);
 		me.addSelectionLayer();
 		me.addMapMask();
+	    
+	    me.addFarmPoints();
 	},
 	
 	//-------------------------------------------------------
@@ -188,6 +214,84 @@ Ext.define('DSS.components.MainMap', {
 		globalMap.addLayer(selectionLayer);
 	},
 
+	//--------------------------------------------------------------------------
+	addFarmPoints: function() {
+		
+		var me = this;
+		var source =  new ol.source.Vector({
+			url: location.href + '/getFarmPoints',
+			format: new ol.format.GeoJSON()
+		});
+
+		function onViewChange(evt) {
+			var t = evt.target;
+			var z = t.getZoom();
+
+			let def5 = me.DSS_farmStyleDef['5'],
+				def8 = me.DSS_farmStyleDef['8'],
+				def12 = me.DSS_farmStyleDef['12']; 
+
+			// roughly scale zoom such that we end up with 0.25x to 3x
+			let scale = (z - 6) * 0.15;
+			if (scale < 0) scale = 0;
+			if (scale > 3) scale = 3;
+			scale = Math.pow(scale, 4) + 0.25;
+			
+			me.DSS_farmLayerStyle['5'] = new ol.style.Style({
+				image: new ol.style.Circle({
+					radius: def5.radius * scale, fill: def5.fill, stroke: def5.stroke
+				})
+			});
+			me.DSS_farmLayerStyle['8'] = new ol.style.Style({
+				image: new ol.style.Circle({
+					radius: def8.radius * scale, fill: def8.fill, stroke: def8.stroke
+				})
+			})
+			me.DSS_farmLayerStyle['12'] = new ol.style.Style({
+				image: new ol.style.Circle({
+					radius: def12.radius * scale, fill: def12.fill, stroke: def12.stroke
+				})
+			})
+		}
+		// establish starting style
+		onViewChange({target: globalMap.getView()});
+		
+		// refresh style based on scale change
+		globalMap.getView().on('change:resolution', onViewChange);
+		
+		var layer = new ol.layer.Vector({
+			//opacity: 0.7,
+			style: function(f) {
+				// lookup the right style to use
+				let ct = f.get("count");
+				if (ct < 150) ct = 5
+				else if (ct >= 1000) ct = 12
+				else ct = 8;
+				
+				return me.DSS_farmLayerStyle[ct]
+			},
+			source: source,
+			// these potentially reduce performance but looks better
+			updateWhileAnimating: true, updateWhileInteracting: true
+		})		
+		me.getMap().addLayer(layer);
+		/*
+		var obj = Ext.Ajax.request({
+			url: location.href + '/getFarmPoints',
+			jsonData: {},
+			timeout: 25000, // in milliseconds
+			
+			success: function(response, opts) {
+				var obj = JSON.parse(response.responseText);
+				console.log(obj);
+			},
+			
+			failure: function(response, opts) {
+				console.log(response);
+			}
+		});*/
+	},
+	
 	//-----------------------------------------------------------------------
 	addTips: function() {
 		

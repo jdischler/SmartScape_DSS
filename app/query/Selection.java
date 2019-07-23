@@ -75,7 +75,7 @@ public class Selection
 		return count;
 	}
 	
-	// Takes the selected pixels in otherSel and adds them into this selection
+	// Takes the selected pixels in otherSel and adds them into this selection (union operation)
 	//--------------------------------------------------------------------------
 	public void combineSelection(Selection otherSel) {
 		
@@ -83,6 +83,17 @@ public class Selection
 		for (y = 0; y < mHeight; y++) {
 			for (x = 0; x < mWidth; x++) {
 				mRasterData[y][x] |= otherSel.mRasterData[y][x];
+			}
+		}
+	}
+	
+	// Intersection (common elements) of two selections
+	//--------------------------------------------------------------------------
+	public void intersectSelection(Selection otherSel) {
+		int x, y;
+		for (y = 0; y < mHeight; y++) {
+			for (x = 0; x < mWidth; x++) {
+				mRasterData[y][x] &= otherSel.mRasterData[y][x];
 			}
 		}
 	}

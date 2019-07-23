@@ -1,18 +1,18 @@
 //-----------------------------------------------------
-// DSS.components.LayerFloat
+// DSS.components.LayerFarmInteraction
 //
 //-----------------------------------------------------
-Ext.define('DSS.components.LayerFloat', {
+Ext.define('DSS.components.LayerFarmInteraction', {
     extend: 'DSS.components.LayerBase',
-    alias: 'widget.layer_float',
+    alias: 'widget.layer_farm',
     
-	title: 'Title',
+	title: 'Land Near Farms',
 	
-	DSS_serverLayer: false, // 'cdl_2012' for example
-	DSS_stepSize: 1,
-	DSS_greaterThanValue: 10,
-	DSS_maxValue: 100,
-	DSS_layerUnit: ' (meters)',
+	DSS_serverLayer: '$farm', // TEST TEST:  considering whether it helps to have $ denotes custom handling
+	DSS_stepSize: 50,
+	DSS_greaterThanValue: 250,
+	DSS_maxValue: 8000,
+	DSS_layerUnit: ' (count)',
 	
 	
 	//--------------------------------------------------------------------------
@@ -27,8 +27,8 @@ Ext.define('DSS.components.LayerFloat', {
 					align: 'left'
 				},
 				padding: '0 8 6 0',
-				items: [{
-					// Livestock Count section...
+				items: [{ 
+					// Count of Livestock selection
 					xtype: 'container',
 					padding: '2 0',
 					layout: {
@@ -39,7 +39,7 @@ Ext.define('DSS.components.LayerFloat', {
 					items: [{
 						xtype: 'component',
 						style: 'text-align: right',
-						html: me.DSS_shortTitle,
+						html: 'Livestock',
 						width: 72,
 						padding: '3 4',
 					},{
@@ -119,7 +119,92 @@ Ext.define('DSS.components.LayerFloat', {
 					itemId: 'dss-value-range',
 					html: 'Value range: -- to -- degrees',
 					style: 'color: #777; font-style: italic',
-					padding: '2 4 0 80',
+					padding: '2 4 8 80', // to auto center on inputs and not the label in front of those
+				},{
+					// Livestock types
+					xtype: 'radiogroup',
+					padding: '2 0',
+					itemId: 'livestockType',
+					labelAlign: 'right',
+					fieldLabel: 'Type',
+					labelSeparator: '',
+					labelPad: 8,
+					labelWidth: 68,
+					width: 270,
+					columns: 3,
+					listeners: {
+						change: function(self, newVal, oldVal) {
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},
+					items: [{
+						boxLabel: 'Any',
+						inputValue: 'any',
+						name: 'farm-livestock-type',
+						checked: true
+					},{
+						boxLabel: 'Dairy',
+						inputValue: 'dairy',
+						name: 'farm-livestock-type',
+					},{
+						boxLabel: 'Beef',
+						inputValue: 'beef',
+						name: 'farm-livestock-type',
+					}]
+				},{	
+					// Land area selection...
+					xtype: 'container',
+					padding: '2 0',
+					layout: {
+						type: 'hbox',
+						align: 'stretch',
+						pack: 'start'
+					},
+					items: [{
+						xtype: 'component',
+						style: 'text-align: right',
+						html: 'Radius',
+						width: 72,
+						padding: '3 4',
+					},{
+						xtype: 'numberfield',
+						itemId: 'selectRadius',
+						hideEmptyLabel: true,
+						value: 600,
+						width: 104,
+						step: 100,
+						minValue: 30,
+						maxValue: 5000,
+						listeners: {
+							change: function(self, newVal, oldVal) {
+								Ext.getCmp('DSS_attributeFixMe').valueChanged();
+							}
+						}
+					},{
+						xtype: 'button',
+						iconCls: 'circle-icon',
+						itemId: 'selectShape',
+						text: '',
+						tooltip: 'Land selection shape (circle)',
+						margin: '0 0 0 10',
+						toggleGroup: 'dss-selection-shape',
+						pressed: true,
+						allowDepress: false,
+						handler: function(self) {
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},{
+						xtype: 'button',
+						iconCls: 'square-icon',
+						toggleGroup: 'dss-selection-shape',
+						text: '',
+						tooltip: 'Land selection shape (square)',
+						allowDepress: false,
+						margin: '0 1',
+						handler: function(self) {
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					}]
 				}]
 			}]
 		});
@@ -149,10 +234,11 @@ Ext.define('DSS.components.LayerFloat', {
 
 		selectionDef['greaterThanTest'] = me.down('#greaterThanTest').getText();
 		selectionDef['lessThanTest'] = me.down('#lessThanTest').getText();
+		selectionDef['radius'] = me.down('#selectRadius').getValue();
+		selectionDef['shapeCircle'] = me.down('#selectShape').pressed ? true : false;
+		selectionDef['type'] = me.down('#livestockType').getValue()['farm-livestock-type'];
 		
-		
-//		String lessTest = queryNode.get("lessThanTest").textValue();
-//		String gtrTest = queryNode.get("greaterThanTest").textValue();
+		console.log(selectionDef)
         return selectionDef;		
 	},
 	
@@ -196,6 +282,7 @@ Ext.define('DSS.components.LayerFloat', {
 			},
 			
 			failure: function(response, opts) {
+				me.down('#dss-value-range').setHtml('Value range: 5 to 8000 ' + me.DSS_layerUnit);
 				console.log('layer request failed');
 			}
 		});
@@ -209,6 +296,14 @@ Ext.define('DSS.components.LayerFloat', {
 		me.down('#lessThan').setValue(queryStep.lessThanValue);
 		me.down('#greaterThanTest').setText(queryStep.greaterThanTest);
 		me.down('#lessThanTest').setText(queryStep.lessThanTest);
+
+		// TODO: set these up
+		/*
+		selectionDef['radius'] = me.down('#selectRadius').getValue();
+		selectionDef['shapeCircle'] = me.down('#selectShape').pressed ? true : false;
+		selectionDef['type'] = me.down('#livestockType').getValue();
+		*/
+		
 	}
 
 });

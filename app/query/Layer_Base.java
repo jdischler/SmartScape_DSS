@@ -1,6 +1,8 @@
 package query;
 
 import play.*;
+import query.Layer_Integer.EType;
+import resources.Farm;
 import utils.*;
 import java.util.*;
 import java.io.*;
@@ -41,62 +43,6 @@ public abstract class Layer_Base
 	// MASK values from ClientUser.ACCESS...
 	protected int mAccessRestrictions = 0;
 	
-	// Return the Layer_Base object when asked for it by name
-	//--------------------------------------------------------------------------
-	public static Layer_Base getLayer(String name) {
-		
-		String name_low = name.toLowerCase();
-		if (!mLayers.containsKey(name_low)) {
-			Logger.error("getLayer called looking for: <" + name_low + "> but layer doesn't exist");
-			return null;
-		}
-		return mLayers.get(name_low);
-	}
-
-	// Use carefully...e.g., only if you are temporarily loading data for a process that rarely runs...
-	//--------------------------------------------------------------------------
-	public static void removeLayer(String name) {
-
-		Logger.warn("A call was made to remove layer: " + name + " from memory");
-		name = name.toLowerCase();
-		mLayers.remove(name);
-	}
-	
-	// Use even more carefully...currently only be used when the server shuts down.
-	//--------------------------------------------------------------------------
-	public static void removeAllLayers() {
-
-		Logger.info(" ... A call was made to clear all Layers!");
-		mLayers.clear();
-	}
-	
-	// returns an array of restricted layer names...
-	//--------------------------------------------------------------------------
-	public static ArrayNode getAccessRestrictedLayers() {
-	
-		ArrayNode list = JsonNodeFactory.instance.arrayNode();
-		for (Layer_Base layer : mLayers.values()) {
-			if (layer.mAccessRestrictions > 0) {
-				list.add(layer.mName);
-			}
-		}
-		
-		return list;
-	}
-	
-	// returns an array of access restricted layer names the given user can actually access...
-	//--------------------------------------------------------------------------
-	public static ArrayNode getAccessibleRestrictedLayers(int accessFlags) {
-	
-		ArrayNode list = JsonNodeFactory.instance.arrayNode();
-		for (Layer_Base layer : mLayers.values()) {
-			if (layer.mAccessRestrictions > 0 && (layer.mAccessRestrictions & accessFlags) > 0) {
-				list.add(layer.mName);
-			}
-		}
-		
-		return list;
-	}
 	
 	//--------------------------------------------------------------------------
 	// Functions that must be in the subclass. 
@@ -273,23 +219,6 @@ public abstract class Layer_Base
 		Logger.info(" ");
 	}
 	
-	// Generally comes from a client request for data about this layer...
-	//	this could be layer width/height, maybe cell size (30m), maybe the layer
-	//	ranges, in the case of indexed layers...the key/legend for the layer
-	//--------------------------------------------------------------------------
-	public static JsonNode getParameter(JsonNode clientRequest) throws Exception {
-		
-		JsonNode ret = null;
-		String layername = clientRequest.get("name").textValue();
-		
-		Layer_Base layer = Layer_Base.getLayer(layername);
-		if (layer != null) {
-			ret = layer.getParameterInternal(clientRequest);
-		}
-
-		return ret;
-	}
-	
 	// ordering expects subclasses to call the super (this) first...
 	//--------------------------------------------------------------------------
 	protected JsonNode getParameterInternal(JsonNode clientRequest) throws Exception {
@@ -302,67 +231,7 @@ public abstract class Layer_Base
 		
 		return ret;
 	}
-			
-	// NOTE: that clientUser can be null
-	//--------------------------------------------------------------------------
-	public static void execQuery(JsonNode layerList, Selection selection, ClientUser user) {
 
-		String wisc_land = "wisc_land";
-
-		int userAccessRights = 0;
-		if (user != null) {
-			userAccessRights = user.accessFlags;
-		}
-
-		if (layerList != null && layerList.isArray()) {
-	
-			boolean queriedWiscLand = false;
-			ArrayNode arNode = (ArrayNode)layerList;
-			int count = arNode.size();
-			for (int i = 0; i < count; i++) {
-				detailedLog("Processing one array element in the queryLayers layer list");
-				JsonNode arElem = arNode.get(i);
-				JsonNode layerName = arElem.get("name");
-				if (arElem != null && layerName != null) {
-					Layer_Base layer = Layer_Base.getLayer(layerName.textValue());
-					if (layer != null) {
-						if (layer.allowAccessFor(userAccessRights)) {
-							if (wisc_land.equalsIgnoreCase(layerName.textValue())) {
-								queriedWiscLand = true;
-							}
-							layer.query(arElem, selection);
-						}
-						else {
-							Logger.error("Query Access Violation detected!");
-						}
-					}
-				}
-			}
-			
-			// If query didn't contain wisc_land, force one to restrict changes to only the
-			//	types of landcover that SmartScape allows changing...
-			if (!queriedWiscLand) {
-				detailedLog("Did not have a wisc_land query component. Manually adding one");
-				Layer_Integer layer = (Layer_Integer)Layer_Base.getLayer(wisc_land);
-				if (layer != null) {
-					
-					ObjectNode fakeQueryObj = JsonNodeFactory.instance.objectNode();
-					ArrayNode queryParms = JsonNodeFactory.instance.arrayNode();
-			
-					queryParms.add(layer.getIndexForString("continuous corn"));
-					queryParms.add(layer.getIndexForString("cash grain"));
-					queryParms.add(layer.getIndexForString("dairy rotation"));
-					queryParms.add(layer.getIndexForString("hay"));
-					queryParms.add(layer.getIndexForString("pasture"));
-					queryParms.add(layer.getIndexForString("cool-season grass"));
-					queryParms.add(layer.getIndexForString("warm-season grass"));
-					fakeQueryObj.set("matchValues", queryParms);
-			
-					layer.query(fakeQueryObj, selection);
-				}
-			}
-		}
-	}
 
 	//--------------------------------------------------------------------------
 	// BINARY format reading/writing
@@ -459,5 +328,248 @@ public abstract class Layer_Base
 		onLoadEnd();
 		Logger.info("");
 	}
-}
 
+	//--------------------------------------------------------------------------
+	//	
+	// 	   ____  _        _   _          
+	//	  / ___|| |_ __ _| |_(_) ___ ___ 
+	//	  \___ \| __/ _` | __| |/ __/ __|
+	//	   ___) | || (_| | |_| | (__\__ \
+	//	  |____/ \__\__,_|\__|_|\___|___/
+	//	                                 
+	//	
+	//--------------------------------------------------------------------------
+	
+	// Return the Layer_Base object when asked for it by name
+	//--------------------------------------------------------------------------
+	public static Layer_Base getLayer(String name) {
+		
+		String name_low = name.toLowerCase();
+		if (!mLayers.containsKey(name_low)) {
+			Logger.error("getLayer called looking for: <" + name_low + "> but layer doesn't exist");
+			return null;
+		}
+		return mLayers.get(name_low);
+	}
+
+	// Use carefully...e.g., only if you are temporarily loading data for a process that rarely runs...
+	//--------------------------------------------------------------------------
+	public static void removeLayer(String name) {
+
+		Logger.warn("A call was made to remove layer: " + name + " from memory");
+		name = name.toLowerCase();
+		mLayers.remove(name);
+	}
+	
+	// Use even more carefully...currently only be used when the server shuts down.
+	//--------------------------------------------------------------------------
+	public static void removeAllLayers() {
+
+		Logger.info(" ... A call was made to clear all Layers!");
+		mLayers.clear();
+	}
+	
+	// returns an array of restricted layer names...
+	//--------------------------------------------------------------------------
+	public static ArrayNode getAccessRestrictedLayers() {
+	
+		ArrayNode list = JsonNodeFactory.instance.arrayNode();
+		for (Layer_Base layer : mLayers.values()) {
+			if (layer.mAccessRestrictions > 0) {
+				list.add(layer.mName);
+			}
+		}
+		
+		return list;
+	}
+	
+	// returns an array of access restricted layer names the given user can actually access...
+	//--------------------------------------------------------------------------
+	public static ArrayNode getAccessibleRestrictedLayers(int accessFlags) {
+	
+		ArrayNode list = JsonNodeFactory.instance.arrayNode();
+		for (Layer_Base layer : mLayers.values()) {
+			if (layer.mAccessRestrictions > 0 && (layer.mAccessRestrictions & accessFlags) > 0) {
+				list.add(layer.mName);
+			}
+		}
+		
+		return list;
+	}	
+	
+	//--------------------------------------------------------------------------
+	public static Layer_Float newFloatLayer(String name) {
+		Layer_Float layer = new Layer_Float(name);
+		return layer;
+	}
+	
+	//--------------------------------------------------------------------------
+	public static Layer_Integer newIntegerLayer(String name, EType layerType) {
+		Layer_Integer layer = new Layer_Integer(name, layerType);
+		return layer;
+	}
+	
+	//--------------------------------------------------------------------------
+	public static Layer_Integer newIntegerLayer(String name) {
+		Layer_Integer layer = new Layer_Integer(name, EType.EPreShiftedIndex);
+		return layer;
+	}
+
+	//--------------------------------------------------------------------------
+	public static void computeLayers() {
+
+		Logger.info("Computing layers if needed");
+		/* // Uncomment if need to recalculate and output crop rotation
+		CropRotation cr = new CropRotation();
+		cr.computeRotation();
+		*/
+	}
+	
+	//--------------------------------------------------------------------------
+	public static void cacheLayers() 
+	{
+		PerformanceTimer timer = new PerformanceTimer();
+		Layer_Base layer;
+		try {
+			Logger.info("Caching all data layers");
+			
+			// Queryable layers...though some of these are also used by model computations..
+			layer = new Layer_ProceduralFraction(); layer.init();// really has no data...init may not also be needed?
+			newIntegerLayer("cdl_2012").init();
+			newIntegerLayer("wisc_land").init();
+			newFloatLayer("slope").init();
+			newFloatLayer("dist_to_water").init();
+			newFloatLayer("rivers").init();
+			newIntegerLayer("watersheds", Layer_Integer.EType.ERaw).init();
+			newIntegerLayer("huc-10", Layer_Integer.EType.ERaw).init();
+			newIntegerLayer("counties", Layer_Integer.EType.ERaw).init();
+		//	newFloatLayer("cow_index").init();
+			
+			// Layers for model computation
+			newFloatLayer("cec").init();
+			newFloatLayer("depth").init();
+			newFloatLayer("silt").init();
+			newFloatLayer("soc").init();
+			newFloatLayer("texture").init();
+			newFloatLayer("om_soc").init();
+			newFloatLayer("drainage").init();
+			newFloatLayer("ph").init();
+			newFloatLayer("ls").init();
+			newFloatLayer("rainfall_erosivity").init();
+			newFloatLayer("soil_erodibility").init();
+			newFloatLayer("n2o_composite").init();
+			
+			// Epic computed data...
+			newFloatLayer("alfa_p").init();
+			newFloatLayer("corn_p").init();
+			newFloatLayer("soy_p").init();
+			newFloatLayer("grass_p").init();
+			
+			newIntegerLayer("ag_lands", Layer_Integer.EType.ERaw).init();
+			newIntegerLayer("crp", Layer_Integer.EType.ERaw) // don't do fancy shift/match tricks...there are only two values possible here...
+				.setNoDataConversion(0)// work around a data issue - conversion -9999 to zeros
+				.init();
+
+			newIntegerLayer("lcc").init();
+			newIntegerLayer("lcs").init();
+			newFloatLayer("dairy").init();
+			newFloatLayer("public_land").init();
+		}
+		catch (Exception e) {
+			Logger.error(e.toString());
+		}
+		
+		Logger.debug(" -Time to cache all layers (s): " + timer.stringSeconds(2));
+	}
+	
+	// Generally comes from a client request for data about this layer...
+	//	this could be layer width/height, maybe cell size (30m), maybe the layer
+	//	ranges, in the case of indexed layers...the key/legend for the layer
+	//--------------------------------------------------------------------------
+	public static JsonNode getParameter(JsonNode clientRequest) throws Exception {
+		
+		JsonNode ret = null;
+		String layername = clientRequest.get("name").textValue();
+		
+		// Check for custom layer handlers
+		if (layername.startsWith("$")) {
+			ret = Farm.getParameterInternal(clientRequest);
+		}
+		else {		
+			Layer_Base layer = Layer_Base.getLayer(layername);
+			if (layer != null) {
+				ret = layer.getParameterInternal(clientRequest);
+			}
+		}
+
+		return ret;
+	}
+	
+	
+	// NOTE: that clientUser can be null
+	//--------------------------------------------------------------------------
+	public static void execQuery(JsonNode layerList, Selection selection, ClientUser user) {
+
+		String wisc_land = "wisc_land";
+
+		int userAccessRights = 0;
+		if (user != null) {
+			userAccessRights = user.accessFlags;
+		}
+
+		if (layerList != null && layerList.isArray()) {
+	
+			boolean queriedWiscLand = false;
+			ArrayNode arNode = (ArrayNode)layerList;
+			int count = arNode.size();
+			for (int i = 0; i < count; i++) {
+				detailedLog("Processing one array element in the queryLayers layer list");
+				JsonNode arElem = arNode.get(i);
+				JsonNode layerName = arElem.get("name");
+				if (arElem != null && layerName != null) {
+					// Check for custom layer handlers
+					if (layerName.textValue().startsWith("$")) {
+						Farm.select(arElem, selection);
+						continue;
+					}
+					Layer_Base layer = Layer_Base.getLayer(layerName.textValue());
+					if (layer != null) {
+						if (layer.allowAccessFor(userAccessRights)) {
+							if (wisc_land.equalsIgnoreCase(layerName.textValue())) {
+								queriedWiscLand = true;
+							}
+							layer.query(arElem, selection);
+						}
+						else {
+							Logger.error("Query Access Violation detected!");
+						}
+					}
+				}
+			}
+			
+			// If query didn't contain wisc_land, force one to restrict changes to only the
+			//	types of landcover that SmartScape allows changing...
+			if (!queriedWiscLand) {
+				detailedLog("Did not have a wisc_land query component. Manually adding one");
+				Layer_Integer layer = (Layer_Integer)Layer_Base.getLayer(wisc_land);
+				if (layer != null) {
+					
+					ObjectNode fakeQueryObj = JsonNodeFactory.instance.objectNode();
+					ArrayNode queryParms = JsonNodeFactory.instance.arrayNode();
+			
+					queryParms.add(layer.getIndexForString("continuous corn"));
+					queryParms.add(layer.getIndexForString("cash grain"));
+					queryParms.add(layer.getIndexForString("dairy rotation"));
+					queryParms.add(layer.getIndexForString("hay"));
+					queryParms.add(layer.getIndexForString("pasture"));
+					queryParms.add(layer.getIndexForString("cool-season grass"));
+					queryParms.add(layer.getIndexForString("warm-season grass"));
+					fakeQueryObj.set("matchValues", queryParms);
+			
+					layer.query(fakeQueryObj, selection);
+				}
+			}
+		}
+	}
+	
+}

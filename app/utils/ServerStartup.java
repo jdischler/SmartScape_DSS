@@ -1,6 +1,5 @@
 package utils;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -12,6 +11,7 @@ import analysis.ModelResult;
 import play.Logger;
 import play.inject.ApplicationLifecycle;
 import query.*;
+import resources.Farm;
 import models.*;
 import fileHandling.QueuedWriter;
 
@@ -27,8 +27,8 @@ public class ServerStartup {
 		
 		QueuedWriter.launchQueuedWriter();
 		
-		Layer_Manager.computeLayers();
-		Layer_Manager.cacheLayers();
+		Layer_Base.computeLayers();
+		Layer_Base.cacheLayers();
 
 		conditionalCreateDefaultModelOutputs();		
 		cacheModelDefaults();
@@ -43,6 +43,8 @@ public class ServerStartup {
         }); 
      
         Subset.getSubset(0);
+        
+        testFarmProcessing();
 	}
 	
 	private void prepareSubsets() {
@@ -160,7 +162,26 @@ public class ServerStartup {
 				}
 			}
 		}
-	}	
+	}
+	
+	private void testFarmProcessing() {
+		
+		// Rotation
+		Layer_Base layer = Layer_Base.getLayer("wisc_land");
+		int width = layer.getWidth();
+		int height = layer.getHeight();
+		
+		Scenario scenario = new Scenario(null); // user can be null
+		scenario.mNewRotation = layer.getIntData();
+		scenario.mSelection = new Selection(width, height);
+		scenario.mAssumptions = new GlobalAssumptions();
+		scenario.mOutputDir = "default";
+		
+		Logger.info(" ... Farm Init ...");
+		Farm.init();
+		Logger.info(" ... Farm processing ...");
+		Farm.processFarms(scenario);
+	}
 }
 
 

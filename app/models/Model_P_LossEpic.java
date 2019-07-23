@@ -14,9 +14,13 @@ import analysis.ModelResult;
 //------------------------------------------------------------------------------
 // Modeling Process
 //
-// This program calculates phosphorus for each pixel at watershed scale using the results of EPIC models and then sum them up at watershed level (Kg per year)
+// This program calculates phosphorus for each pixel at watershed scale using the results of EPIC 
+//	models and then sum them up at watershed level (Kg per year)
+//
 // Version 01/20/2014
 //
+// FIXME: TODO: With rotations, there isn't always a single crop per cell. Take weighted average?
+//	other?
 //------------------------------------------------------------------------------
 public class Model_P_LossEpic extends Model_Base {
 	

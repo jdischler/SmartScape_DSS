@@ -1,6 +1,7 @@
 package query;
 
 import play.*;
+import resources.Farm;
 import transformData.Downsampler;
 import utils.ClientUser;
 import utils.Png;
@@ -42,7 +43,7 @@ public class Query {
 	public JsonNode selection(JsonNode requestBody) throws Exception
 	{
 		// selection color
-		int r1 = 32, g1 = 96, b1 = 255;
+		int r1 = 200, g1 = 0, b1 = 255;
 		int resampleFactor = 4;
 		
 		// FIXME: can't base size off of a hardcoded layer? The expectation is that
@@ -123,6 +124,7 @@ public class Query {
 		// Actually run the query...
 		JsonNode layerList = requestBody.get("queryLayers");
 		Layer_Base.execQuery(layerList, selection, user);
+		
 		return selection;
 	}
 	

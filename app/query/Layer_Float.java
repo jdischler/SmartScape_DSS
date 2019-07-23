@@ -1,6 +1,8 @@
 package query;
 
 import play.*;
+import utils.Json;
+
 import java.nio.*;
 
 import com.fasterxml.jackson.databind.*;
@@ -127,10 +129,8 @@ public class Layer_Float extends Layer_Base
 
 		String type = clientRequest.get("type").textValue();
 		if (type.equals("layerRange")) {
-			ObjectNode layerRangeObj = JsonNodeFactory.instance.objectNode();
-			layerRangeObj.put("layerMin", getLayerMin());
-			layerRangeObj.put("layerMax", getLayerMax());
-			ret = layerRangeObj;
+			ret = Json.pack("layerMin", getLayerMin(),
+					"layerMax", getLayerMax());
 		}
 		
 		return ret;

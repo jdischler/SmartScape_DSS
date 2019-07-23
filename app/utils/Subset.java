@@ -46,6 +46,25 @@ public class Subset {
 		subset.write();
 	}
 	
+	//-----------------------------------------------
+		// TODO: this probably belongs on an Area of Interest object... 
+		class Point {
+			public Double mX, mY;
+			Point(Double x, Double y) {
+				mX = x; mY = y;
+			}
+		};
+		
+		// get the raster lookup x,y index of the given point location
+		public Point indexOf(Point location) {
+	
+			Double x = (mCornerCoordsX - location.mX) / -30.0;
+			// VERIFY: the change in y across the raster space doesn't seem to be perfectly linear in proj 3857
+			Double y = (mCornerCoordsY - location.mY) / -30.0;  
+			return new Point(x,y);
+		}
+	//-----------------------------------------------
+	
 	//-------------------------------------------------------------------------
 	public static Subset getSubset(Integer idx) {
 		

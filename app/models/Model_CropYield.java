@@ -135,19 +135,29 @@ public class Model_CropYield extends Model_Base
 			for (int x = 0; x < width; x++) {
 				
 				int landCover = rotationData[y][x];
-									
-				if ((landCover & TotalMask) <= 0 || slope[y][x] < 0 || 
-						depth[y][x] < 0 || silt[y][x] < 0 || cec[y][x] < 0) {
+				if ((landCover & TotalMask) <= 0) {
 					
 					yield[y][x] = -1;
 					continue;
 				}
+				
+				float _slope = slope[y][x], _depth = depth[y][x], _silt = silt[y][x], _cec = cec[y][x];
+				/* // currently there isn't any NODATA cells here...
+				 * if (_slope < 0 || _depth < 0 || _silt < 0 || _cec < 0) {
+					
+					yield[y][x] = -1;
+					continue;
+				}*/
+				
 				long packedYield = 0;
 				
+				// landcover such as dairy rotation may yield multiple different crops. We pack up the
+				//	full amount to reduce precision loss and then scale it back to the actual proportion on
+				//	unpacking.
 				if ((landCover & Corn_Mask) > 0) {
 					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
 					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
-					Corn_Y = 22.0f - 1.05f * slope[y][x] + 0.19f * depth[y][x] + 0.817f * silt[y][x] + 1.32f * cec[y][x];
+					Corn_Y = 22.0f - 1.05f * _slope + 0.19f * _depth + 0.817f * _silt + 1.32f * _cec;
 					// Combined corn coefficients & Land management factors
 					Corn_Y = Corn_Y * cornCoefficient * NT_M * CC_M;
 					packedYield = packYield(Corn_Y, packedYield, 0);
@@ -156,19 +166,19 @@ public class Model_CropYield extends Model_Base
 					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
 					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
 					// Bushels per acre
-					Soy_Y = 6.37f - 0.34f * slope[y][x] + 0.065f * depth[y][x] + 0.278f * silt[y][x] + 0.437f * cec[y][x];
+					Soy_Y = 6.37f - 0.34f * _slope + 0.065f * _depth + 0.278f * _silt + 0.437f * _cec;
 					Soy_Y = Soy_Y * soyCoefficient * NT_M * CC_M;
 					packedYield = packYield(Soy_Y, packedYield, 1);
 				}
 				if ((landCover & Alfalfa_Mask) > 0) {
-					// Short tons per A\acre
-					Alfalfa_Y = 1.26f - 0.045f * slope[y][x] + 0.007f * depth[y][x] + 0.027f * silt[y][x] + 0.041f * cec[y][x];
+					// Short tons per acre
+					Alfalfa_Y = 1.26f - 0.045f * _slope + 0.007f * _depth + 0.027f * _silt + 0.041f * _cec;
 					Alfalfa_Y = Alfalfa_Y * alfalfaCoefficient;
 					packedYield = packYield(Alfalfa_Y, packedYield, 2);
 				}
 				if ((landCover & Grass_Mask) > 0) {
 					// short tons per acre
-					Grass_Y = 0.77f - 0.031f * slope[y][x] + 0.008f * depth[y][x] + 0.029f * silt[y][x] + 0.038f * cec[y][x];
+					Grass_Y = 0.77f - 0.031f * _slope + 0.008f * _depth + 0.029f * _silt + 0.038f * _cec;
 					Grass_Y = Grass_Y * grassCoefficient;
 					packedYield = packYield(Grass_Y, packedYield, 3);
 				}
