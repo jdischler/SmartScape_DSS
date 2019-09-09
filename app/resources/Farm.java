@@ -457,45 +457,62 @@ public class Farm {
 	//-----------------------------------------------------------------
 	public static Selection select(JsonNode queryNode, Selection selection) {
 	
-		String lessTest = queryNode.get("lessThanTest").textValue();
-		String gtrTest = queryNode.get("greaterThanTest").textValue();
+		String lessTest = Json.safeGetOptionalString(queryNode, "lessThanTest", "<");
+		String gtrTest = Json.safeGetOptionalString(queryNode, "greaterThanTest", ">");
 		
-		JsonNode gtrValNode = queryNode.get("greaterThanValue");
-		JsonNode lessValNode = queryNode.get("lessThanValue");
+		Integer gtrValNode = Json.safeGetOptionalInteger(queryNode, "greaterThanValue", null);
+		Integer lessValNode = Json.safeGetOptionalInteger(queryNode, "lessThanValue", null);
 
-		JsonNode radius = queryNode.get("radius");
-		JsonNode shapeCircle = queryNode.get("shapeCircle");
+		String type = Json.safeGetOptionalString(queryNode, "type", "any");
 		
-		String type = queryNode.get("type").textValue();
-		
-		Boolean selectAsCircle = shapeCircle.booleanValue();
+		Boolean selectAsCircle = Json.safeGetOptionalBoolean(queryNode, "shapeCircle", false);
+		Boolean invertSelection = Json.safeGetOptionalBoolean(queryNode, "invert", false);
+		Boolean headCountRelative = Json.safeGetOptionalBoolean(queryNode, "headCountRelative", false);
+		Float radius = Json.safeGetOptionalFloat(queryNode, "radius", 30.0f);		
 		
 		float minVal = 0, maxVal = 0;
 		boolean isGreaterThan = false, isGreaterThanEqual = false;
 		boolean isLessThan = false, isLessThanEqual = false;
 		
 		if (gtrValNode != null) {
-			if (gtrValNode.isNumber()) {
-				isGreaterThan = (gtrTest.compareTo(">") == 0);
-				isGreaterThanEqual = !isGreaterThan;
-				minVal = gtrValNode.numberValue().floatValue();
-			}
+			isGreaterThan = (gtrTest.compareTo(">") == 0);
+			isGreaterThanEqual = !isGreaterThan;
+			minVal = gtrValNode;
 		}
 		if (lessValNode != null) {
-			if (lessValNode.isNumber()) {
-				isLessThan = (lessTest.compareTo("<") == 0);
-				isLessThanEqual = !isLessThan;
-				maxVal = lessValNode.numberValue().floatValue();
-			}
+			isLessThan = (lessTest.compareTo("<") == 0);
+			isLessThanEqual = !isLessThan;
+			maxVal = lessValNode;
 		}		
 		int width = 6150, height = 4557;
 		Selection farmSel = new Selection(width, height, (byte)0);
 
-		Double selectRadius = radius.numberValue().floatValue() / 30.0;
+		// Overridden per farm if cowRelative is True
+		Double selectRadius = radius / 30.0;
 		
 		for(Entry<Integer, Farm> ef : mFarms.entrySet()) {
 			
 			Farm f = ef.getValue();
+			
+			if (headCountRelative) {
+				// calc area needed for numCows then compute the width of the selection square or radius of selection circle
+				Double acreToM_sqr = 4046.86;
+				if (selectAsCircle) {
+					// FIXME: treating radius as a measure of acres. Make this more explicit in client interface
+					//	additionally, allow units in something like hectares?
+					selectRadius = Math.sqrt((radius * f.mCount * acreToM_sqr)
+							/ Math.PI);
+				}
+				else {
+					// FIXME: treating radius as a measure of acres. Make this more explicit in client interface
+					//	additionally, allow units in something like hectares?
+					selectRadius = Math.sqrt(radius * f.mCount * acreToM_sqr);
+					// selectRadius is expected to be half of the width of the box
+					selectRadius /= 2.0;
+				}
+				// convert to DST scale units
+				selectRadius /= 30.0;
+			}
 			
 			if (type != null && !type.equalsIgnoreCase("any")) {
 				if (!f.mType.equalsIgnoreCase(type)) continue;
@@ -511,8 +528,7 @@ public class Farm {
 					// >  <=
 					if (f.mCount <= minVal || f.mCount > maxVal) continue;
 				}
-				else
-				{ // >
+				else { // >
 					if (f.mCount <= minVal) continue;
 				}
 			}
@@ -525,8 +541,7 @@ public class Farm {
 					// >=  <=
 					if (f.mCount < minVal || f.mCount > maxVal) continue;
 				}
-				else
-				{ // >=
+				else { // >=
 					if (f.mCount < minVal) continue;
 				}
 			}
@@ -556,27 +571,36 @@ public class Farm {
 
 					if (selectAsCircle) {
 						Float dist = (float) loc.distanceSq(xx, yy);
-						if (dist > (selectRadius + 0.5)*(selectRadius + 0.5)) continue;
+						// FIXME: why the additional fudge factor?
+						if (dist > (selectRadius + 0.1f)*(selectRadius + 0.1f)) continue;
 					}
 					farmSel.mRasterData[yy][xx] = 1;
 				}
 			}
 
 		}
-		selection.intersectSelection(farmSel);
+		if (invertSelection) {
+			farmSel.invert();
+		}
+		selection.intersect(farmSel);
 		return selection;
 	}
 
 	//-----------------------------------------------------------------
 	public static void processFarms(Scenario s) {
 
-		int width = s.getWidth(), height = s.getHeight();
-			
 		PerformanceTimer timer = new PerformanceTimer();
 		
-		// Precompute yield...
+		// Calculate yield...
 		Model_CropYield cropYield = new Model_CropYield();
-		long[][] packedYield = cropYield.run(s);
+		cropYield.initialize(s);
+		long[][] packedYield = null;
+		try {
+			packedYield = cropYield.run();
+		}
+		catch(Exception e) {
+			
+		}
 		
 		Allocate_Yield ay = new Allocate_Yield();
 		ay.aggregate(s, packedYield, 510 / 30);

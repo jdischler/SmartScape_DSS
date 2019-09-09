@@ -3,9 +3,9 @@ package models;
 import play.*;
 import query.Layer_Base;
 import query.Layer_Integer;
+import query.Layer_WiscLand;
 import query.Scenario;
 import utils.ManagementOptions;
-import utils.Utils;
 
 //------------------------------------------------------------------------------
 // Modeling Process
@@ -29,6 +29,8 @@ public class Model_CropYield extends Model_Base
 {
 	private static final boolean SELF_DEBUG_LOGGING = false;
 	
+	long[][] mOutput;
+	
 	// slot is 0-4, which corresponds to 5 - 12-bit chunks in a 64 bit long
 	// The combination of slots vs. bits per slot is somewhat arbitrary, but this gives us
 	// accuracy down to about 0.006... with 5 crops
@@ -38,75 +40,73 @@ public class Model_CropYield extends Model_Base
 		scaled = scaled > 4095 ? 4095 : (scaled < 0 ? 0 : scaled);
 		return lValue |= (scaled << (slot * 12));
 	}
+
+	// Check to see if the required data layers are available
+	//--------------------------------------------------------------------
+	public static Boolean available() {
+		return (Layer_WiscLand.get() != null) &
+			(Layer_Base.getLayer("Slope") != null) &
+			(Layer_Base.getLayer("Silt") != null) &
+			(Layer_Base.getLayer("Depth") != null) &
+			(Layer_Base.getLayer("CEC") != null);
+	}
 	
 	//--------------------------------------------------------------------------
-	public long[][] run(Scenario scenario) {
+	public Boolean initialize(Scenario scenario) {
+		
+		super.initialize(scenario);
+		
+		mOutput = new long[mHeight][mWidth];
+		debugLog("  > Allocated memory for Yield");
 
-		int[][] rotationData = scenario.mNewRotation;
-		int width = scenario.getWidth(), height = scenario.getHeight();
+		mbInitialized = true;
+		return true;
+	}
+	
+	//--------------------------------------------------------------------------
+	public long[][] run() throws Exception {
+
+		if (!mbInitialized) throw new Exception("uninitialized model run");
 		
 		debugLog(" >> Computing Yield");
 
 		// No Till SoilLoss Multiplier
 		float NT_M = 1.0f;
 		// Cover Crop Multiplier
-		float CC_M = 1.0f;
-		
-		// Multipliers from client variables
-		Float annualNoTillageModifier = 1.0f; //
-		Float annualCoverCropModifier = 1.0f;		
-
-		// Get user changeable yield scaling values from the client...
-		//----------------------------------------------------------------------
-		try {	
-			// values come in as straight multiplier
-			annualNoTillageModifier = scenario.mAssumptions.getFloat("y_nt_annuals");
-			annualCoverCropModifier = scenario.mAssumptions.getFloat("y_cc_annuals");		
-		}
-		catch (Exception e) {
-			Logger.warn(e.toString());
-		}
-		
-		debugLog(" Agricultural no till from client = " + annualNoTillageModifier);
-		debugLog(" Agricultural cover crop from client = " + annualCoverCropModifier);
+		float CC_M = 1.0f;		
 		
 		// Mask
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		Layer_Integer wl = Layer_WiscLand.get(); 
 		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
 		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
 		int Soy_Mask = wl.stringToMask("cash grain");
 		int Alfalfa_Mask = wl.stringToMask("dairy rotation");
 		int TotalMask = Grass_Mask | Corn_Mask | Soy_Mask | Alfalfa_Mask;
 		
-		// Corn and Grass Yield
-		float Corn_Y = 0;
-		float Grass_Y = 0;
-		float Soy_Y = 0;
-		float Alfalfa_Y = 0;
-		
-		float Yield = 0;
-
 		// Yield Modification/Scalar - default to multiply by 1.0, which is NO change
 		Float cornYieldModifier = 1.0f; //
 		Float soyYieldModifier = 1.0f; //
 		Float alfalfaYieldModifier = 1.0f; //
 		Float grassYieldModifier = 1.0f; //
+		// Multipliers from client variables
+		Float annualNoTillageModifier = 1.0f; //
+		Float annualCoverCropModifier = 1.0f;		
 		
 		// Get user changeable yield scaling values from the client...
 		//----------------------------------------------------------------------
 		try {	
 			// Value comes in as a percent, e.g. -5%...convert to a multiplier
-			cornYieldModifier = scenario.mAssumptions.getFloat("ym_corn") / 100.0f + 1.0f;
-			soyYieldModifier = scenario.mAssumptions.getFloat("ym_soy") / 100.0f + 1.0f;
-			alfalfaYieldModifier = scenario.mAssumptions.getFloat("ym_alfalfa") / 100.0f + 1.0f;
-			grassYieldModifier = scenario.mAssumptions.getFloat("ym_grass") / 100.0f + 1.0f;
+			cornYieldModifier = mAssumptions.getFloat("ym_corn") / 100.0f + 1.0f;
+			soyYieldModifier = mAssumptions.getFloat("ym_soy") / 100.0f + 1.0f;
+			alfalfaYieldModifier = mAssumptions.getFloat("ym_alfalfa") / 100.0f + 1.0f;
+			grassYieldModifier = mAssumptions.getFloat("ym_grass") / 100.0f + 1.0f;
+			// values come in as straight multiplier
+			annualNoTillageModifier = mAssumptions.getFloat("y_nt_annuals");
+			annualCoverCropModifier = mAssumptions.getFloat("y_cc_annuals");		
 		}
 		catch (Exception e) {
 			Logger.warn(e.toString());
 		}
-		
-		long[][] yield = new long[height][width];
-		debugLog("  > Allocated memory for Yield");
 		
 		float slope[][] = Layer_Base.getLayer("Slope").getFloatData();
 		float silt[][] = Layer_Base.getLayer("Silt").getFloatData();
@@ -131,13 +131,13 @@ public class Model_CropYield extends Model_Base
 				* 1.905f				// conversion to Mg per Ha
 				* alfalfaYieldModifier;	// user-set assumption
 
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
+		for (int y = 0; y < mHeight; y++) {
+			for (int x = 0; x < mWidth; x++) {
 				
-				int landCover = rotationData[y][x];
+				int landCover = mRotationData[y][x];
 				if ((landCover & TotalMask) <= 0) {
 					
-					yield[y][x] = -1;
+					mOutput[y][x] = -1;
 					continue;
 				}
 				
@@ -157,7 +157,7 @@ public class Model_CropYield extends Model_Base
 				if ((landCover & Corn_Mask) > 0) {
 					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
 					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
-					Corn_Y = 22.0f - 1.05f * _slope + 0.19f * _depth + 0.817f * _silt + 1.32f * _cec;
+					float Corn_Y = 22.0f - 1.05f * _slope + 0.19f * _depth + 0.817f * _silt + 1.32f * _cec;
 					// Combined corn coefficients & Land management factors
 					Corn_Y = Corn_Y * cornCoefficient * NT_M * CC_M;
 					packedYield = packYield(Corn_Y, packedYield, 0);
@@ -166,28 +166,28 @@ public class Model_CropYield extends Model_Base
 					NT_M = ManagementOptions.E_Till.getIfActive(landCover, 1.0f, annualNoTillageModifier);
 					CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
 					// Bushels per acre
-					Soy_Y = 6.37f - 0.34f * _slope + 0.065f * _depth + 0.278f * _silt + 0.437f * _cec;
+					float Soy_Y = 6.37f - 0.34f * _slope + 0.065f * _depth + 0.278f * _silt + 0.437f * _cec;
 					Soy_Y = Soy_Y * soyCoefficient * NT_M * CC_M;
 					packedYield = packYield(Soy_Y, packedYield, 1);
 				}
 				if ((landCover & Alfalfa_Mask) > 0) {
 					// Short tons per acre
-					Alfalfa_Y = 1.26f - 0.045f * _slope + 0.007f * _depth + 0.027f * _silt + 0.041f * _cec;
+					float Alfalfa_Y = 1.26f - 0.045f * _slope + 0.007f * _depth + 0.027f * _silt + 0.041f * _cec;
 					Alfalfa_Y = Alfalfa_Y * alfalfaCoefficient;
 					packedYield = packYield(Alfalfa_Y, packedYield, 2);
 				}
 				if ((landCover & Grass_Mask) > 0) {
 					// short tons per acre
-					Grass_Y = 0.77f - 0.031f * _slope + 0.008f * _depth + 0.029f * _silt + 0.038f * _cec;
+					float Grass_Y = 0.77f - 0.031f * _slope + 0.008f * _depth + 0.029f * _silt + 0.038f * _cec;
 					Grass_Y = Grass_Y * grassCoefficient;
 					packedYield = packYield(Grass_Y, packedYield, 3);
 				}
 				
-				yield[y][x] = packedYield;
+				mOutput[y][x] = packedYield;
 			}
 		}
 		
-		return yield;
+		return mOutput;
 	}
 	
 	//-------------------------------------------------------------------------------------------

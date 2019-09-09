@@ -16,6 +16,7 @@ Ext.define('DSS.components.LayerBase', {
 	padding: 4,
 	margin: 2,
 	style: 'background: #fff; border-radius: 8px; border: 1px solid #ccc',
+	DSS_closable: true,
 	
 	//--------------------------------------------------------------------------
 	initComponent: function() {
@@ -25,15 +26,17 @@ Ext.define('DSS.components.LayerBase', {
 		});
 		
 		me.callParent(arguments);
-		me.insert(0, {xtype: 'container',
-			layout: 'hbox',
-			items: [{
-				xtype: 'component',
-				html: me.title,
-				flex: 1,
-				padding: '2 4',
-				style: 'font-weight: bold; color: #2a6e9f; font-size: 1.1em'
-			},{
+		
+		
+		var titleDef = [{
+			xtype: 'component',
+			html: me.title,
+			flex: 1,
+			padding: '2 4',
+			style: 'font-weight: bold; color: #2a6e9f; font-size: 1.1em'
+		}];
+		if (me.DSS_closable) {
+			titleDef.push({
 				xtype: 'tool',
 				type: 'minimize',
 				margin: '0 16',
@@ -44,9 +47,13 @@ Ext.define('DSS.components.LayerBase', {
 						me.cancelClickSelection();
 					}
 				}
-				
-			}]
-		})
+			});			
+		}
+		me.insert(0, {
+			xtype: 'container',
+			layout: 'hbox',
+			items: titleDef
+		});
 	},
 
 });

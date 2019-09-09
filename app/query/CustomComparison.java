@@ -5,6 +5,7 @@ import java.util.*;
 import utils.*;
 
 //------------------------------------------------------------------------------
+@Deprecated
 public class CustomComparison 
 {
 	// CustomComparison can be cached for sharing amongst other threads

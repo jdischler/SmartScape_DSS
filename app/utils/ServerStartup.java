@@ -174,7 +174,7 @@ public class ServerStartup {
 		Scenario scenario = new Scenario(null); // user can be null
 		scenario.mNewRotation = layer.getIntData();
 		scenario.mSelection = new Selection(width, height);
-		scenario.mAssumptions = new GlobalAssumptions();
+		//scenario.mAssumptions = new GlobalAssumptions();
 		scenario.mOutputDir = "default";
 		
 		Logger.info(" ... Farm Init ...");

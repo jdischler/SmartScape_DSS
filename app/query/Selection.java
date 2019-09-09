@@ -89,7 +89,7 @@ public class Selection
 	
 	// Intersection (common elements) of two selections
 	//--------------------------------------------------------------------------
-	public void intersectSelection(Selection otherSel) {
+	public void intersect(Selection otherSel) {
 		int x, y;
 		for (y = 0; y < mHeight; y++) {
 			for (x = 0; x < mWidth; x++) {
@@ -114,7 +114,7 @@ public class Selection
 	// Anything that is selected becomes NOT selected. Anything NOT selected
 	//	becomes selected
 	//--------------------------------------------------------------------------
-	public void invertSelection() {
+	public void invert() {
 		
 		int x, y;
 		for (y = 0; y < mHeight; y++) {

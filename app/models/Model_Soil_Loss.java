@@ -55,10 +55,15 @@ public class Model_Soil_Loss extends Model_Base {
 		
 		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
 		int agMask = wl.stringToMask("continuous corn","cash grain","dairy rotation","other crops");
+		int dr = wl.stringToMask("dairy rotation");
+		int cg = wl.stringToMask("cash grain");
+		
 		int totalMask = agMask | grassMask;
 		
 		// Arrays to save soil loss at cell base (Mg/ha)
 		float[][] Soil_Loss_Data = new float[height][width];
+		// full raster save process...
+		debugLog("  > Allocated memory for Soil_Loss");
 		
 		// Rainfall erosivity index for Dane County
 		//float Rainfall_Erosivity = 150.0f;
@@ -73,7 +78,7 @@ public class Model_Soil_Loss extends Model_Base {
 		// Contouring is tilling and planting across slope rather than with it
 		// Strip cropping uses alternate lands of cover and row crops across the slope
 		// Terrace are soil embankment that reshape slopes into a series of short slopes that slow water flow and reduce its erosivity
-		// Terrace that open to grasses waterways further limit erosion
+		// Terrace that open to grassed waterways further limit erosion
 		// P is 1 for No Practice
 		float P = 0.0f;
 		// Till Multiplier
@@ -103,13 +108,9 @@ public class Model_Soil_Loss extends Model_Base {
 		debugLog(" Agricultural Contouring from client = " + Float.toString(Management_P1) );
 		debugLog(" Agricultural Terrace from client = " + Float.toString(Management_P2) );
 		
-		// full raster save process...
-		debugLog("  > Allocated memory for Soil_Loss");
-
 		// Soil Loss Model
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				
 				int landCover = rotationData[y][x];
 				CC_M = 1.0f;
 				
@@ -124,17 +125,24 @@ public class Model_Soil_Loss extends Model_Base {
 						C = 0.02f;
 						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
 					} 
-					/*// NOTE: alfalfa no longer a crop type though it is a component of a rotation?
-					 * else if ((landCover & Alfalfa_Mask) > 0) {
-						C = 0.02f;
-						P = ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
-					} */
 					// Agriculture
 					else if ((landCover & agMask) > 0) {
-						C = 0.3f;
-						CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
-						P = ManagementOptions.E_Contour.getIfActive(landCover, Management_P1, 1.0f) *
-						ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
+						if ((landCover & dr) > 0) {
+							// split loss based on higher loss for the corn portion of the rotation...
+							//	and the lower loss for the alfalfa portion of the rotation
+							C = 0.3f * 0.3333f + 0.02f * 0.66667f;
+							CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f) * 0.333f +
+									0.66667f;
+							P = ManagementOptions.E_Contour.getIfActive(landCover, Management_P1, 1.0f) *
+									ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f) * 0.333f +
+									ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f) * 0.66667f;
+						}
+						else {
+							C = 0.3f;
+							CC_M = ManagementOptions.E_CoverCrop.getIfActive(landCover, annualCoverCropModifier, 1.0f);
+							P = ManagementOptions.E_Contour.getIfActive(landCover, Management_P1, 1.0f) *
+									ManagementOptions.E_Terrace.getIfActive(landCover, Management_P2, 1.0f);
+						}
 					}
 
 					// Convert Mg per Ha to Mg per cell

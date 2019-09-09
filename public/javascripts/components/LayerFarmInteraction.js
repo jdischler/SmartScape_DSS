@@ -28,6 +28,37 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 				},
 				padding: '0 8 6 0',
 				items: [{ 
+					// Livestock types
+					xtype: 'radiogroup',
+					padding: '2 0',
+					itemId: 'livestockType',
+					labelAlign: 'right',
+					fieldLabel: 'Operation',
+					labelSeparator: '',
+					labelPad: 8,
+					labelWidth: 68,
+					width: 270,
+					columns: 3,
+					listeners: {
+						change: function(self, newVal, oldVal) {
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},
+					items: [{
+						boxLabel: 'Any',
+						inputValue: 'any',
+						name: 'farm-livestock-type',
+						checked: true
+					},{
+						boxLabel: 'Dairy',
+						inputValue: 'dairy',
+						name: 'farm-livestock-type',
+					},{
+						boxLabel: 'Beef',
+						inputValue: 'beef',
+						name: 'farm-livestock-type',
+					}]
+				},{
 					// Count of Livestock selection
 					xtype: 'container',
 					padding: '2 0',
@@ -120,36 +151,32 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 					html: 'Value range: -- to -- degrees',
 					style: 'color: #777; font-style: italic',
 					padding: '2 4 8 80', // to auto center on inputs and not the label in front of those
-				},{
-					// Livestock types
+				},{	
+					// Selection radius/unit type
 					xtype: 'radiogroup',
 					padding: '2 0',
-					itemId: 'livestockType',
+					itemId: 'cowRelative',
 					labelAlign: 'right',
-					fieldLabel: 'Type',
+					fieldLabel: 'Select',
 					labelSeparator: '',
 					labelPad: 8,
 					labelWidth: 68,
-					width: 270,
-					columns: 3,
+					width: 320,
+					columns: 2,
 					listeners: {
 						change: function(self, newVal, oldVal) {
 							Ext.getCmp('DSS_attributeFixMe').valueChanged();
 						}
 					},
 					items: [{
-						boxLabel: 'Any',
-						inputValue: 'any',
-						name: 'farm-livestock-type',
+						boxLabel: 'Count Relative',
+						inputValue: true,
+						name: 'cow-relative',
 						checked: true
 					},{
-						boxLabel: 'Dairy',
-						inputValue: 'dairy',
-						name: 'farm-livestock-type',
-					},{
-						boxLabel: 'Beef',
-						inputValue: 'beef',
-						name: 'farm-livestock-type',
+						boxLabel: 'Fixed Distance',
+						inputValue: false,
+						name: 'cow-relative',
 					}]
 				},{	
 					// Land area selection...
@@ -170,23 +197,38 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 						xtype: 'numberfield',
 						itemId: 'selectRadius',
 						hideEmptyLabel: true,
-						value: 600,
+						value: 5,
 						width: 104,
-						step: 100,
-						minValue: 30,
-						maxValue: 5000,
+						step: 1, // TODO: step should be unit mode relative?
+						minValue: 0.5, // TODO: should be unit mode relative
+						maxValue: 30,	// TODO: should be unit mode relative
 						listeners: {
 							change: function(self, newVal, oldVal) {
 								Ext.getCmp('DSS_attributeFixMe').valueChanged();
 							}
 						}
+					}]
+				},{
+					// Selection method
+					xtype: 'container',
+					padding: '2 0',
+					layout: {
+						type: 'hbox',
+						align: 'stretch',
+						pack: 'start'
+					},
+					items: [{
+						xtype: 'component',
+						style: 'text-align: right',
+						html: 'Shape',
+						width: 72,
+						padding: '3 4',
 					},{
 						xtype: 'button',
 						iconCls: 'circle-icon',
 						itemId: 'selectShape',
 						text: '',
 						tooltip: 'Land selection shape (circle)',
-						margin: '0 0 0 10',
 						toggleGroup: 'dss-selection-shape',
 						pressed: true,
 						allowDepress: false,
@@ -201,6 +243,15 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 						tooltip: 'Land selection shape (square)',
 						allowDepress: false,
 						margin: '0 1',
+						handler: function(self) {
+							Ext.getCmp('DSS_attributeFixMe').valueChanged();
+						}
+					},{
+						xtype: 'checkbox',
+						itemId: 'invertSelection',
+						boxLabel: "Invert selection",
+						margin: '0 0 0 10',
+						checked: false,
 						handler: function(self) {
 							Ext.getCmp('DSS_attributeFixMe').valueChanged();
 						}
@@ -237,7 +288,8 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 		selectionDef['radius'] = me.down('#selectRadius').getValue();
 		selectionDef['shapeCircle'] = me.down('#selectShape').pressed ? true : false;
 		selectionDef['type'] = me.down('#livestockType').getValue()['farm-livestock-type'];
-		
+		selectionDef['invert'] = me.down('#invertSelection').getValue() ? true : false;
+		selectionDef['headCountRelative'] = me.down('#cowRelative').getValue()['cow-relative'];
 		console.log(selectionDef)
         return selectionDef;		
 	},
@@ -302,6 +354,8 @@ Ext.define('DSS.components.LayerFarmInteraction', {
 		selectionDef['radius'] = me.down('#selectRadius').getValue();
 		selectionDef['shapeCircle'] = me.down('#selectShape').pressed ? true : false;
 		selectionDef['type'] = me.down('#livestockType').getValue();
+		selectionDef['invert'] = true : false;
+		selectionDef['headCountRelative'] = true : false;
 		*/
 		
 	}

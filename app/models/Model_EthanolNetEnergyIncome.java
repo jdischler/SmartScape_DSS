@@ -1,8 +1,8 @@
 package models;
 
 import play.*;
-import query.Layer_Base;
 import query.Layer_Integer;
+import query.Layer_WiscLand;
 import query.Scenario;
 import utils.PerformanceTimer;
 
@@ -44,17 +44,23 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		
 		// Precompute yield....
 		Model_CropYield cropYield = new Model_CropYield();
-		long[][] packedYield = cropYield.run(scenario);
+		cropYield.initialize(scenario);
+		long[][] packedYield = null;
+		try {
+			packedYield = cropYield.run();
+		}
+		catch(Exception e) {
+		}
 
 		float [][] netEnergyData = new float[height][width];
 		float [][] netIncomeData = new float[height][width];
 		float [][] ethanolData = new float[height][width];
-		debugLog("  > Allocated memory for NetEnergy, NetIncom, Fuel");
+		debugLog("  > Allocated memory for NetEnergy, NetIncome, Fuel");
 		
 		float Net_Energy_C = 0;
 		float Net_Energy_S = 0;
 		// Mask
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		Layer_Integer wl = Layer_WiscLand.get(); 
 		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
 		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
 		int Soy_Mask = wl.stringToMask("cash grain");
@@ -112,8 +118,8 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 
 		// Get user changeable values from the client...
 		//----------------------------------------------------------------------
-		// Net Income
 		try {
+			// Net Income
 			// Production
 			PC_Cost = scenario.mAssumptions.getFloat("p_corn_p");
 			PCS_Cost = scenario.mAssumptions.getFloat("p_stover_p");
@@ -126,13 +132,8 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 			P_Per_Grass = scenario.mAssumptions.getFloat("p_grass_s");
 			P_Per_Soy = scenario.mAssumptions.getFloat("p_soy_s");
 			P_Per_Alfalfa = scenario.mAssumptions.getFloat("p_alfalfa_s");
-		}
-		catch (Exception e) {
-			Logger.warn(e.toString());
-		}
 		
-		// Net Energy
-		try {
+			// Net Energy
 			// Energy Input at Farm
 			EI_CF = scenario.mAssumptions.getFloat("e_corn");
 			EI_CSF = scenario.mAssumptions.getFloat("e_stover");
@@ -151,20 +152,6 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 			Logger.warn(e.toString());
 		}
 		
-		// Net Income
-		// Production
-		debugLog(" Corn production price from client = " + PC_Cost);
-		debugLog(" Stover production price from client = " + PCS_Cost);
-		debugLog(" Grass production price from client = " + PG_Cost);
-		debugLog(" Soy production price from client = " + PS_Cost);
-		debugLog(" Alfalfa production price from client = " + PA_Cost);
-		
-		// Sell
-		debugLog(" Corn price from client = " + P_Per_Corn);
-		debugLog(" Stover price from client = " + P_Per_Stover);
-		debugLog(" Grass price from client = " + P_Per_Grass);
-		debugLog(" Soy price from client = " + P_Per_Soy);
-		debugLog(" Alfalfa price from client = " + P_Per_Alfalfa);
 		//----------------------------------------------------------------------		
 
 		for (int y = 0; y < height; y++) {

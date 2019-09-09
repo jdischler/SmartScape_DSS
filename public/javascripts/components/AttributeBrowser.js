@@ -9,8 +9,10 @@ Ext.define('DSS.components.AttributeBrowser', {
     requires: [
         'DSS.components.LayerBase',
         'DSS.components.LayerIndexed',
+        'DSS.components.LayerLandcoverFilter',
         'DSS.components.LayerFloat',
         'DSS.components.LayerFarmInteraction',
+        'DSS.components.LayerLandSubset',
         'DSS.components.LayerClickSelect',
         'DSS.components.LayerDrawShape',
     ],
@@ -80,7 +82,8 @@ Ext.define('DSS.components.AttributeBrowser', {
 			lt = Ext.create('DSS.components.LayerIndexed', {
 				title: 'Landcover Type (WiscLand 2.0)',
 				DSS_serverLayer: 'wisc_land',
-				DSS_active: true,
+				DSS_active: false,
+				hidden: true,
 				DSS_columns: 3,
 				DSS_indexConfig: [
 					{boxLabel: 'Cont. Corn', name: "wl", indexValues: [1]},
@@ -95,7 +98,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 				],
 			});
 			me.addLayer(lt);
-			
+
 			//----------------------------------------------------------
 			me.addLayer(Ext.create('DSS.components.LayerFloat', {
 				title: 'Slope',
@@ -186,10 +189,44 @@ Ext.define('DSS.components.AttributeBrowser', {
 			me.addLayer(Ext.create('DSS.components.LayerFarmInteraction', {
 				hidden: true
 			}))
+			
+			me.addLayer(Ext.create('DSS.components.LayerLandSubset', {
+				hidden: true
+			}))
+
 		/*	me.addLayer(Ext.create('DSS.components.LayerDrawShape', {
 				hidden: true
 			}));
 		*/	
+			
+			var val = true;
+			//----------------------------------------------------------
+			lt = Ext.create('DSS.components.LayerLandcoverFilter', {
+				title: 'Restrict Selection to',
+				DSS_serverLayer: 'wisc_land',
+				DSS_active: true,
+				DSS_columns: 2,
+				DSS_groups: [
+					{boxLabel: 'All row crops', name: 'lctf', inputValue: 'total_options0', checked: val,
+						DSS_subItems: [
+							{boxLabel: 'Continuous Corn', name: "wl", indexValues: [1], margin: '-2 0', checked: val},
+							{boxLabel: 'Cash Grain', name: "wl", indexValues: [14], margin: '-2 0', checked: val},
+							{boxLabel: 'Dairy Rotation', name: "wl", indexValues: [15], margin: '-2 0', checked: val}
+						]
+					},
+					{boxLabel: 'All grasses', name: 'lctf', inputValue: 'total_options1',
+						DSS_subItems: [
+							{boxLabel: 'Hay', 		name: "wl", indexValues: [2], margin: '-2 0'},
+							{boxLabel: 'Pasture', 	name: "wl", indexValues: [3], margin: '-2 0'},
+							{boxLabel: 'Warm Grass', name: "wl", indexValues: [5], margin: '-2 0'},
+							{boxLabel: 'Cool Grass', name: "wl", indexValues: [4], margin: '-2 0'}
+						]
+					}
+				]
+			});
+			me.addLayer(lt);
+			
+			
 			//------------------------------------------------------------
 			Ext.resumeLayouts(true);
 			//------------------------------------------------------------
@@ -317,27 +354,35 @@ Ext.define('DSS.components.AttributeBrowser', {
 		var me = this;
 		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
 		me.processing = false;
-		me.DSS_TimeoutId = setTimeout(me.valueChanged.bind(me), 10)
+		me.DSS_TimeoutId = setTimeout(me.executeUpdate.bind(me), 10)
 	},
 	
 	//------------------------------------------------------------
 	valueChanged: function() {
 		var me = this;
 		if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
+		me.DSS_TimeoutId = setTimeout(me.executeUpdate.bind(me), 300)
+	},
+	
+	//------------------------------------------------------------
+	executeUpdate: function() {
+		var me = this;
+		if (!me.processing) {
+			me.processing = true;
+			me.getSelectionParms();
+		}
+		else {
+			if (me.DSS_TimeoutId) clearTimeout(me.DSS_TimeoutId);
+			me.DSS_TimeoutId = setTimeout(me.executeUpdate.bind(me), 300)
+		}
 		Ext.getCmp('dss-selection-loading').animate({
 			duration: 100,
 			to: {
 				opacity: 1
 			}
 		});
-		if (!me.processing) {
-			me.processing = true;
-			me.getSelectionParms();
-			return;
-		}
-		me.DSS_TimeoutId = setTimeout(me.valueChanged.bind(me), 300)
 	},
-		
+	
 	//------------------------------------------------------------
 	getSelectionParms: function() {
 		var me = this;

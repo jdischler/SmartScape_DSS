@@ -20,6 +20,8 @@ import analysis.ModelResult;
 // Output is ASCII map of SOC
 // Version 08/20/2013
 //
+// TODO: needs updating for supporting rotations in a cell.
+//
 //------------------------------------------------------------------------------
 public class Model_SoilCarbon extends Model_Base {
 	

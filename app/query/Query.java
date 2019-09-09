@@ -1,7 +1,6 @@
 package query;
 
 import play.*;
-import resources.Farm;
 import transformData.Downsampler;
 import utils.ClientUser;
 import utils.Png;

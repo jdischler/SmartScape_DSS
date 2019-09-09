@@ -546,7 +546,9 @@ public abstract class Layer_Base
 					}
 				}
 			}
-			
+			//selection = SelectionTransform_CriticalMax.transform(selection, 3000, 0.3f);
+			//queriedWiscLand = false;
+
 			// If query didn't contain wisc_land, force one to restrict changes to only the
 			//	types of landcover that SmartScape allows changing...
 			if (!queriedWiscLand) {
@@ -560,10 +562,10 @@ public abstract class Layer_Base
 					queryParms.add(layer.getIndexForString("continuous corn"));
 					queryParms.add(layer.getIndexForString("cash grain"));
 					queryParms.add(layer.getIndexForString("dairy rotation"));
-					queryParms.add(layer.getIndexForString("hay"));
-					queryParms.add(layer.getIndexForString("pasture"));
-					queryParms.add(layer.getIndexForString("cool-season grass"));
-					queryParms.add(layer.getIndexForString("warm-season grass"));
+					//queryParms.add(layer.getIndexForString("hay"));
+					//queryParms.add(layer.getIndexForString("pasture"));
+					//queryParms.add(layer.getIndexForString("cool-season grass"));
+					//queryParms.add(layer.getIndexForString("warm-season grass"));
 					fakeQueryObj.set("matchValues", queryParms);
 			
 					layer.query(fakeQueryObj, selection);

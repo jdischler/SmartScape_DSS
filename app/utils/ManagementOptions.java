@@ -33,6 +33,13 @@ public enum ManagementOptions
     E_Contour  		(30), // Contour if true, No Contour if false
     E_Terrace 		(31); // Terrace if true, No Terrace if false
 
+	// TODO: if still needed, consider more sophisticated masks. Example, uses only 2 bits vs. 3 bits above
+	//	Biggest problem might be confusion between which to use. Example: E_Fertilized would be used differently...
+	//	E_Fertilized 		(0x00000110000000000000000000000000) // mask any using | and test if > 0
+	//  E_Synthetic			(0x00000010000000000000000000000000) // mask match using & AND must == E_Synthetic
+	//  E_Manure			(0x00000100000000000000000000000000)
+	//  E_FallManure		(0x00000110000000000000000000000000)
+	
     private final int mIndexMask; // stores the shifted value for easy masking
     
     // private Constructor, cannot be accessed...

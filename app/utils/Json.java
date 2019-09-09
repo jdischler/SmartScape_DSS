@@ -287,7 +287,7 @@ public class Json
 			if (valNode == null) {
 				throw new RuntimeException("Json: safeGetFloat: key <" + key + "> doesn't exist in object node");
 			}
-			else if (!valNode.isFloatingPointNumber()) {
+			else if (!valNode.isNumber()) {
 				throw new RuntimeException("Json: safeGetFloat: key <" + key + "> is not a valid float");
 			}
 			return valNode.floatValue();
@@ -305,7 +305,7 @@ public class Json
 			if (valNode == null || valNode.isNull()) {
 				return optionalValue;
 			}
-			else if (!valNode.isFloatingPointNumber()) {
+			else if (!valNode.isNumber()) {
 				throw new RuntimeException("Json: safeGetOptionalFloat: key <" + key + "> is not a valid float");
 			}
 			return valNode.floatValue();
