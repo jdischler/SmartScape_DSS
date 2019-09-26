@@ -27,8 +27,9 @@ public class ServerStartup {
 		
 		QueuedWriter.launchQueuedWriter();
 		
-		Layer_Base.computeLayers();
+//		Layer_Base.computeLayers();
 		Layer_Base.cacheLayers();
+		Layer_Base.computeLayers();
 
 		conditionalCreateDefaultModelOutputs();		
 		cacheModelDefaults();

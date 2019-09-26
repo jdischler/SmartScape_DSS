@@ -41,6 +41,13 @@ public class Model_CropYield extends Model_Base
 		return lValue |= (scaled << (slot * 12));
 	}
 
+	// slot is 0-4, which corresponds to 5 - 12-bit chunks in a 64 bit long
+	//--------------------------------------------------------------------
+	public static final float unpackYield(long lValue, int slot) {
+		Long res = (lValue >> (slot * 12)) & 0xfff;
+		return res * (25.0f / 4095.0f);
+	}	
+
 	// Check to see if the required data layers are available
 	//--------------------------------------------------------------------
 	public static Boolean available() {

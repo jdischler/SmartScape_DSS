@@ -1,30 +1,10 @@
 
-
-// TODO: determine sensible units of area
-// NOTE: none of them will likely be exact matches
-//------------------------------------------------------------------------------
-var DSS_GridSizes = Ext.create('Ext.data.Store', {
-		
-	fields: ['size', 'name'],
-	data: [
-		{ 'size': 5, 'name': '2 Hectares'}, // the real value should be 4.7
-		{ 'size': 7, 'name': '10 Acres'}, // the real value should be 6.7 x 6.7 cells at 30 m (rounded up)
-		{ 'size': 13, 'name': '40 Acres'}, // the real value should be 13.4
-		{ 'size': 21, 'name': '100 Acres'},// real value is 21.2 x 21.2
-		{ 'size': 33, 'name': '1 sq km'},// real value is 33.3333
-		{ 'size': 38, 'name': '0.5 sq Miles'},// real value is 37.9
-		{ 'size': 54, 'name': '1 sq Mile'},// real value is 53.7
-	]
-});
-
 //--------------------------------------------------------------------------
-Ext.define('DSS.components.LayerLandSubset', {
+Ext.define('DSS.components.LayerCriticalMass', {
     extend: 'DSS.components.LayerBase',
-    alias: 'widget.layer_subset',
+    alias: 'widget.layer_critical_mass',
 
-    DSS_seed: 12345,
-    
-    title: 'Subset of Selection',
+    title: 'Critical Mass Re-Selector',
     
     //--------------------------------------------------------------------------
     initComponent: function() {
@@ -69,7 +49,7 @@ Ext.define('DSS.components.LayerLandSubset', {
 						labelAlign: 'right',
 						labelWidth: 90,
 						labelPad: 5,
-						fieldLabel: 'Proportion',
+						fieldLabel: 'C.M.',
 						decimalPrecision: 0,
 						step: 5,
 						value: 50,
@@ -86,21 +66,6 @@ Ext.define('DSS.components.LayerLandSubset', {
 						width: 50,
 						margin: '3 0 0 3',
 						text: '%'
-					},{
-						xtype: 'button', 
-						text: 'Reshuffle',
-						width: 80,
-						tooltip: {
-							text: 'Select a different fraction of the land'
-						},
-						handler: function(button, evt) {
-							var res = Math.random();
-							res *= 32767.0;
-							res = Math.floor(res);
-							
-							me.DSS_Seed = res;
-							me.DSS_browser.valueChanged();
-						}
 					}]
 				}]
             }]
@@ -121,10 +86,9 @@ Ext.define('DSS.components.LayerLandSubset', {
 			scale = combo.getValue();
 		}
 		var selectionDef = { 
-			name: 'proceduralFraction',
+			name: 'criticalMass',
 			fraction: me.down('#DSS_FractionOfLand').getValue(),
 			gridCellSize: scale,
-			seed: this.DSS_Seed
 		};
 			
         return selectionDef;		

@@ -28,11 +28,6 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 	private static String mNetEnergyModelFile = "net_energy";
 	private static String mNetIncomeModelFile = "net_income";
 	
-	// slot is 0-4, which corresponds to 5 - 12-bit chunks in a 64 bit long
-	private final float unpackYield(long lValue, int slot) {
-		Long res = (lValue >> (slot * 12)) & 0xfff;
-		return res * (25.0f / 4095.0f);
-	}	
 	//--------------------------------------------------------------------------
 	public List<ModelResult> run(Scenario scenario) {
 
@@ -168,7 +163,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 				float ethanol = 0, netEnergy = 0, netIncome = 0;
 				
 				if ((rotationData[y][x] & Corn_Mask) > 0) {
-					float yield = unpackYield(pYield, 0);
+					float yield = Model_CropYield.unpackYield(pYield, 0);
 					float cropProp = 1.0f;
 					if ((rotationData[y][x] & cg) > 0) {
 						cropProp = 0.5f; yield *= cropProp; 
@@ -190,7 +185,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 				}
 				
 				if ((rotationData[y][x] & Soy_Mask) > 0) {
-					float yield = unpackYield(pYield, 1);
+					float yield = Model_CropYield.unpackYield(pYield, 1);
 					float cropProp = 1.0f;
 					if ((rotationData[y][x] & cg) > 0) {
 						cropProp = 0.5f; yield *= cropProp; 
@@ -207,7 +202,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 				}
 				
 				if ((rotationData[y][x] & Alfalfa_Mask) > 0) {
-					float yield = unpackYield(pYield, 2);
+					float yield = Model_CropYield.unpackYield(pYield, 2);
 					float cropProp = 1.0f;
 					if ((rotationData[y][x] & dr) > 0) {
 						cropProp = 0.6667f; yield *= cropProp;
@@ -224,7 +219,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 				}
 				
 				if ((rotationData[y][x] & Grass_Mask) > 0) {
-					float yield = unpackYield(pYield, 3);
+					float yield = Model_CropYield.unpackYield(pYield, 3);
 					
 					// L per Ha
 					ethanol += yield * CEO_G;

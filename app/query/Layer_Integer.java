@@ -15,7 +15,8 @@ public class Layer_Integer extends Layer_Base
 	private static final int RAW_BREAK_EVEN_COUNT = 10;
 	
 	public enum EType {
-		EPreShiftedIndex,		// data is shifted at load time
+		EPreShiftedIndex,		// data imported is already shifted, do shift compares
+		ELoadShiftedIndex,		// data is shifted at load time
 		EQueryShiftedIndex,		// data is shifted for query testing only
 		ERaw					// data is loaded raw and unmodified
 	}	
@@ -160,7 +161,7 @@ public class Layer_Integer extends Layer_Base
 	//--------------------------------------------------------------------------
 	public Layer_Integer(String name) {
 		
-		this(name, EType.EPreShiftedIndex); // default to a pre-shifted (load time) index
+		this(name, EType.ELoadShiftedIndex); // default to a pre-shifted (load time) index
 	}
 
 	// Call after constructor...But before Layer.init...if default conversion of -9999 to 0
@@ -216,7 +217,7 @@ public class Layer_Integer extends Layer_Base
 			else {
 				cacheMinMax(val);
 				// Optionally convert to a bit style value for fast/simultaneous compares
-				if (mLayerDataFormat == EType.EPreShiftedIndex) {
+				if (mLayerDataFormat == EType.ELoadShiftedIndex) {
 					if (val <= 31) {
 						val = convertIndexToMask(val);
 					}
@@ -495,7 +496,7 @@ public class Layer_Integer extends Layer_Base
 		else {
 			// Doing the faster bit-mask check...
 			int test_mask = getCompareBitMask(queryValues);
-			if (mLayerDataFormat == EType.EPreShiftedIndex) {
+			if (mLayerDataFormat == EType.ELoadShiftedIndex || mLayerDataFormat == EType.EPreShiftedIndex) {
 				// Doing the fastest already-shifted test...
 				for (int y = 0; y < mHeight; y++) {
 					for (int x = 0; x < mWidth; x++) {

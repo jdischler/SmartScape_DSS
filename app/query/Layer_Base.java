@@ -411,7 +411,7 @@ public abstract class Layer_Base
 	
 	//--------------------------------------------------------------------------
 	public static Layer_Integer newIntegerLayer(String name) {
-		Layer_Integer layer = new Layer_Integer(name, EType.EPreShiftedIndex);
+		Layer_Integer layer = new Layer_Integer(name, EType.ELoadShiftedIndex);
 		return layer;
 	}
 
@@ -532,6 +532,14 @@ public abstract class Layer_Base
 						Farm.select(arElem, selection);
 						continue;
 					}
+					if (layerName.textValue().equalsIgnoreCase("criticalMass")) {
+						Float frac = Json.safeGetOptionalFloat(arElem, "fraction", 3.0f) / 100.0f;
+						Integer scale = (int)(Json.safeGetOptionalFloat(arElem, "gridCellSize", 3.0f) * 30.0f);
+						
+						selection = SelectionTransform_CriticalMax.transform(selection, scale, frac);
+						continue;
+					}
+
 					Layer_Base layer = Layer_Base.getLayer(layerName.textValue());
 					if (layer != null) {
 						if (layer.allowAccessFor(userAccessRights)) {
@@ -544,31 +552,6 @@ public abstract class Layer_Base
 							Logger.error("Query Access Violation detected!");
 						}
 					}
-				}
-			}
-			//selection = SelectionTransform_CriticalMax.transform(selection, 3000, 0.3f);
-			//queriedWiscLand = false;
-
-			// If query didn't contain wisc_land, force one to restrict changes to only the
-			//	types of landcover that SmartScape allows changing...
-			if (!queriedWiscLand) {
-				detailedLog("Did not have a wisc_land query component. Manually adding one");
-				Layer_Integer layer = (Layer_Integer)Layer_Base.getLayer(wisc_land);
-				if (layer != null) {
-					
-					ObjectNode fakeQueryObj = JsonNodeFactory.instance.objectNode();
-					ArrayNode queryParms = JsonNodeFactory.instance.arrayNode();
-			
-					queryParms.add(layer.getIndexForString("continuous corn"));
-					queryParms.add(layer.getIndexForString("cash grain"));
-					queryParms.add(layer.getIndexForString("dairy rotation"));
-					//queryParms.add(layer.getIndexForString("hay"));
-					//queryParms.add(layer.getIndexForString("pasture"));
-					//queryParms.add(layer.getIndexForString("cool-season grass"));
-					//queryParms.add(layer.getIndexForString("warm-season grass"));
-					fakeQueryObj.set("matchValues", queryParms);
-			
-					layer.query(fakeQueryObj, selection);
 				}
 			}
 		}

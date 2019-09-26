@@ -13,6 +13,7 @@ Ext.define('DSS.components.AttributeBrowser', {
         'DSS.components.LayerFloat',
         'DSS.components.LayerFarmInteraction',
         'DSS.components.LayerLandSubset',
+        'DSS.components.LayerCriticalMass',
         'DSS.components.LayerClickSelect',
         'DSS.components.LayerDrawShape',
     ],
@@ -84,17 +85,20 @@ Ext.define('DSS.components.AttributeBrowser', {
 				DSS_serverLayer: 'wisc_land',
 				DSS_active: false,
 				hidden: true,
-				DSS_columns: 3,
+				DSS_columns: 2,
 				DSS_indexConfig: [
-					{boxLabel: 'Cont. Corn', name: "wl", indexValues: [1]},
+					{boxLabel: 'Continuous Corn', name: "wl", indexValues: [1]},
 					{boxLabel: 'Cash Grain', name: "wl", indexValues: [14]},
-					{boxLabel: 'Dairy Rotn', name: "wl", indexValues: [15]},
+					{boxLabel: 'Dairy Rotation', name: "wl", indexValues: [15]},
+					{boxLabel: 'Other Crops',	name: "wl", indexValues: [16]},
 					{boxLabel: 'Hay', 		name: "wl", indexValues: [2]},
 					{boxLabel: 'Pasture', 	name: "wl", indexValues: [3]},
-					{boxLabel: 'Warm Grass', name: "wl", indexValues: [5]},
-					{boxLabel: 'Cool Grass', name: "wl", indexValues: [4]},
+					{boxLabel: 'Warm-Season Grass', name: "wl", indexValues: [5]},
+					{boxLabel: 'Cool-Season Grass', name: "wl", indexValues: [4]},
 					{boxLabel: 'Developed', name: "wl", indexValues: [12,13], checked: true},
 					{boxLabel: 'Woodland',	name: "wl", indexValues: [6,7,8]},
+					{boxLabel: 'Wetland',	name: "wl", indexValues: [10]},
+					{boxLabel: 'Barren/Scrub',	name: "wl", indexValues: [11,17]},
 				],
 			});
 			me.addLayer(lt);
@@ -190,6 +194,10 @@ Ext.define('DSS.components.AttributeBrowser', {
 				hidden: true
 			}))
 			
+			me.addLayer(Ext.create('DSS.components.LayerCriticalMass', {
+				hidden: true
+			}))
+			
 			me.addLayer(Ext.create('DSS.components.LayerLandSubset', {
 				hidden: true
 			}))
@@ -205,7 +213,7 @@ Ext.define('DSS.components.AttributeBrowser', {
 				title: 'Restrict Selection to',
 				DSS_serverLayer: 'wisc_land',
 				DSS_active: true,
-				DSS_columns: 2,
+				DSS_columns: 3,
 				DSS_groups: [
 					{boxLabel: 'All row crops', name: 'lctf', inputValue: 'total_options0', checked: val,
 						DSS_subItems: [
@@ -221,7 +229,12 @@ Ext.define('DSS.components.AttributeBrowser', {
 							{boxLabel: 'Warm Grass', name: "wl", indexValues: [5], margin: '-2 0'},
 							{boxLabel: 'Cool Grass', name: "wl", indexValues: [4], margin: '-2 0'}
 						]
-					}
+					},
+					{boxLabel: 'Other', name: 'lctf', inputValue: 'total_options2',
+						DSS_subItems: [
+							{boxLabel: 'Other', name: "wl", indexValues: [6,7,8,9,10,12,13,11,16,17], margin: '-2 0'},
+						]
+					},
 				]
 			});
 			me.addLayer(lt);
