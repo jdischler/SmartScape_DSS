@@ -40,17 +40,17 @@ public class Model_HabitatIndex extends Model_Base
 				"continuous corn","cash grain","dairy rotation","other crops");
 
 		// --- Model specific code starts here
-		Moving_CDL_Window zWin = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
+		Moving_CDL_Window win = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
 		Moving_Window.WindowPoint point;
 		
 		boolean moreCells = true;
 		while (moreCells) {
-			point = zWin.getPoint();
+			point = win.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
-			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && zWin.canGetProportions()) {
-				float proportionAg = zWin.getProportionAg();
-				float proportionGrass = zWin.getProportionGrass();
+			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && win.canGetProportions()) {
+				float proportionAg = win.getProportionAg();
+				float proportionGrass = win.getProportionGrass();
 				
 				// Habitat Index
 				float lambda = -4.47f + (2.95f * proportionAg) + (5.17f * proportionGrass); 
@@ -62,7 +62,7 @@ public class Model_HabitatIndex extends Model_Base
 				habitatData[point.mY][point.mX] = -9999.0f; // NO DATA
 			}
 			
-			moreCells = zWin.advance();
+			moreCells = win.advance();
 		}		
 		
 		List<ModelResult> results = new ArrayList<ModelResult>();

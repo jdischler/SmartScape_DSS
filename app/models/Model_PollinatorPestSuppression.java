@@ -52,7 +52,7 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		float [][] pestData = new float[height][width];
 		float [][] pollinatorData = new float[height][width];
 		
-		Moving_CDL_Window zWin = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
+		Moving_CDL_Window win = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
 		Moving_Window.WindowPoint point;
 
 		// derived from pollinatorIndex formula. 
@@ -61,11 +61,11 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		boolean moreCells = true;
 		while (moreCells) {
 			
-			point = zWin.getPoint();
-			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && zWin.canGetProportions()) {
+			point = win.getPoint();
+			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && win.canGetProportions()) {
 				
-				float proportionForest = zWin.getProportionForest();
-				float proportionGrass = zWin.getProportionGrass();
+				float proportionForest = win.getProportionForest();
+				float proportionGrass = win.getProportionGrass();
 				
 				// Calculate visitation index and normalize value by max
 				float pollinatorIndex = (float)Math.pow((proportionForest * proportionGrass) * 3.0f 
@@ -91,7 +91,7 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 			}
 
 			
-			moreCells = zWin.advance();
+			moreCells = win.advance();
 		}	
 	
 		List<ModelResult> results = new ArrayList<ModelResult>();
