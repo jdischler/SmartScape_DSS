@@ -405,30 +405,24 @@ Ext.define('DSS.components.AttributeBrowser', {
 			url: location.href + '/createSelection',
 			jsonData: {
 				queryLayers: queryData,
-				first: {
+				// FIXME: what the?
+				/*first: {
 					queryLayers: [{
 						"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":120
 					}]
 				},
 				second: {
 					queryLayers: queryData
-				}
+				}*/
 			},
 			timeout: 25000, // in milliseconds
 			
 			success: function(response, opts) {
 				var obj = JSON.parse(response.responseText);
-				// TODO: server should pass this all back...
-				//-10062652.65061, -9878152.65061, 5278060.469521415, 5415259.640662575
-				obj['bounds']= [
-					-10062652.65061, 5278060.469521415,
-					-9878152.65061, 5415259.640662575
-				]
-				// bounds seems off? Hacked tweak...
-				obj['bounds']= [
-					-10062652.65061, 5278380.4034,
-					-9878152.65061, 5415100.4034
-				]
+				// grrrr, mangle
+				var b = obj.bounds;
+				obj.bounds = [b.x, b.y, b.x+b.w, b.y+b.h];
+				
 				var area = (obj.selectedPixels * 30.0 * 30.0) / 1000000.0;
 				// then convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)
 				area *= 247.105;
@@ -475,11 +469,11 @@ Ext.define('DSS.components.AttributeBrowser', {
 			
 			success: function(response, opts) {
 				var obj = JSON.parse(response.responseText);
-				// TODO: server should pass this all back...
-				obj['bounds']= [
-					-10062652.65061, 5278060.469521415,
-					-9878152.65061, 5415259.640662575
-				]
+				
+				// grrrr, mangle
+				var b = obj.bounds;
+				obj.bounds = [b.x, b.y, b.x+b.w, b.y+b.h];
+				
 				if (obj.selectedPixelsFirst) {
 					var diff = obj.selectedPixelsSecond - obj.occludedSecondPixels;
 					// convert from km sqr to acres (I know, wasted step, just go from 30x30 meters to acres)

@@ -25,7 +25,7 @@ public class Layer_Integer extends Layer_Base
 	//--------------------------------------------------------------------------
 	protected class Layer_Key {
 
-		private class Key_Item {
+		protected class Key_Item {
 			public int mIndex;
 			public String mLabel, mHexColor, mTooltip;
 			
@@ -144,7 +144,7 @@ public class Layer_Integer extends Layer_Base
 	
 	// Pass true to have the data shifted for mask type comparisons.
 	//--------------------------------------------------------------------------
-	public Layer_Integer(String name, EType layerType) {
+	public Layer_Integer(String name, Layer_Integer.EType layerType) {
 		
 		super(name);
 		

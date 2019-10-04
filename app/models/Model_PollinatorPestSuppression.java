@@ -1,15 +1,15 @@
 package models;
 
 import play.*;
-import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.PerformanceTimer;
 
 import java.util.*;
 
-import analysis.ModelResult;
-import analysis.Moving_Z_Window;
+import analysis.*;
+import analysis.window.*;
 
 //------------------------------------------------------------------------------
 // Modeling Process
@@ -27,7 +27,7 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 
 	private static final boolean SELF_DEBUG_LOGGING = false;
 
-	private static final int mWindowSizeMeters = 990;
+	private static final int mWindowSizeMeters = 1500;
 	private static final int mWindowSizeInCells = mWindowSizeMeters / 30; // Number of Cells in Raster Map
 	
 	private static final String mPollinatorModelFile = "pollinator";
@@ -42,18 +42,18 @@ public class Model_PollinatorPestSuppression extends Model_Base {
 		debugLog(">>> Computing Model Pest/ Pollinator");
 		PerformanceTimer timer = new PerformanceTimer();
 		
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
+		Layer_Integer cdl = Layer_CDL.get();
 		
-		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
-		int totalMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
+		int grassMask = cdl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
+		int totalMask = cdl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
 				"continuous corn","cash grain","dairy rotation","other crops");
 		
 		// full raster save process...
 		float [][] pestData = new float[height][width];
 		float [][] pollinatorData = new float[height][width];
 		
-		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
-		Moving_Z_Window.WindowPoint point = zWin.getPoint();
+		Moving_CDL_Window zWin = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
+		Moving_Window.WindowPoint point;
 
 		// derived from pollinatorIndex formula. 
 		float max = (float)Math.pow(2.8f, 2.0f);

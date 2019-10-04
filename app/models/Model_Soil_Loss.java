@@ -2,6 +2,7 @@ package models;
 
 import play.*;
 import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.ManagementOptions;
@@ -51,12 +52,11 @@ public class Model_Soil_Loss extends Model_Base {
 		float[][] LS = Layer_Base.getLayer("LS").getFloatData();
 		
 		// Mask
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
+		Layer_Integer cdl = Layer_CDL.get();
 		
-		int grassMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
-		int agMask = wl.stringToMask("continuous corn","cash grain","dairy rotation","other crops");
-		int dr = wl.stringToMask("dairy rotation");
-		int cg = wl.stringToMask("cash grain");
+		int grassMask = cdl.stringToMask("hay","pasture","cool-season grass","warm-season grass");	
+		int agMask = cdl.stringToMask("continuous corn","cash grain","dairy rotation","other crops");
+		int dr = cdl.stringToMask("dairy rotation");
 		
 		int totalMask = agMask | grassMask;
 		

@@ -1,0 +1,15 @@
+[{
+  "name" : "Greater Yahara Watershed",
+  "description" : "A large portion of area in southern Wisconsin",
+  "assets" : "./layerData/yahara/",
+  "coordinates" : [-10062652.65061, 5278380.4034, 184500, 136720],
+  "mapping" : [0, 0, 6150, 4557]
+  
+},{
+  "name" : "Driftless",
+  "description" : "A large portion of area in south-western Wisconsin",
+  "assets" : "./layerData/driftless/",
+  "coordinates" : [-10162652.65061, 5278380.4034, 164500, 146720],
+  "mapping" : [0, 0, 6150, 4557]
+  
+}]

@@ -4,7 +4,7 @@ import play.*;
 import transformData.Downsampler;
 import utils.ClientUser;
 import utils.Png;
-
+import utils.Subset;
 import ar.com.hjg.pngj.chunks.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,9 +45,9 @@ public class Query {
 		int r1 = 200, g1 = 0, b1 = 255;
 		int resampleFactor = 4;
 		
-		// FIXME: can't base size off of a hardcoded layer? The expectation is that
-		//	all layers are of the same size....
-		Layer_Base tmp = Layer_Base.getLayer("cdl_2012");
+		// TODO: FIXME: investigate ways to avoid having to use the CDL as the source layer
+		//	for height, width, etc. info
+		Layer_Base tmp = Layer_CDL.get();
 		int width = tmp.getWidth();
 		int height = tmp.getHeight();
 		
@@ -106,6 +106,9 @@ public class Query {
 		ret.put("url", urlPath);
 		ret.put("selectedPixels", count);
 		ret.put("totalPixels", height * width);
+		
+		// FIXME: get the real subset
+		ret.set("bounds", Subset.getSubset(0).getMapMask());;
 
 		return ret;
 	}
@@ -114,15 +117,15 @@ public class Query {
 	//--------------------------------------------------------------------------
 	public Selection execute(JsonNode requestBody, ClientUser user) throws Exception {
 		
-		// FIXME: can't base size off of a hardcoded layer? The expectation is that
-		// all layers are of the same size....
-		Layer_Base tmp = Layer_Base.getLayer("cdl_2012");
+		// TODO: FIXME: investigate ways to avoid having to use the CDL as the source layer
+		//	for height, width, etc. info
+		Layer_Base tmp = Layer_CDL.get();
 		
 		Selection selection = new Selection(tmp.getWidth(), tmp.getHeight());
 
 		// Actually run the query...
 		JsonNode layerList = requestBody.get("queryLayers");
-		Layer_Base.execQuery(layerList, selection, user);
+		selection = Layer_Base.execQuery(layerList, selection, user);
 		
 		return selection;
 	}
@@ -139,8 +142,9 @@ public class Query {
 		
 		int resampleFactor = 3; // e.g., sampledWidth = realWidth / resampleFactor
 		
-		// FIXME: need a more robust sizing mechanism
-		Layer_Base tmp = Layer_Base.getLayer("cdl_2012");
+		// TODO: FIXME: investigate ways to avoid having to use the CDL as the source layer
+		//	for height, width, etc. info
+		Layer_Base tmp = Layer_CDL.get();
 		int width = tmp.getWidth();
 		int height = tmp.getHeight();
 		
@@ -241,6 +245,9 @@ public class Query {
 		ret.put("occludedSecondPixels", occluded);
 		ret.put("totalPixels", height * width);
 
+		// FIXME: get the real subset
+		ret.set("bounds", Subset.getSubset(0).getMapMask());
+		
 		return ret;
 	}
 

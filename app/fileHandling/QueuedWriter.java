@@ -64,7 +64,7 @@ public class QueuedWriter implements Runnable {
 			if (mResultsToWrite == null) {
 				mResultsToWrite = new ConcurrentLinkedQueue<ModelResult>();
 			}
-			mThreadHandle = new Thread(mWriter);
+			mThreadHandle = new Thread(mWriter,"QueuedWriter");
 			conditionalLog(" ...Queued writer priority is: " + Integer.toString(mThreadHandle.getPriority()));
 			// Sanity check, seems to almost never happen? 
 			if (mThreadHandle.getPriority() > Thread.NORM_PRIORITY) {
@@ -126,8 +126,9 @@ public class QueuedWriter implements Runnable {
 		}
 	}
 	
-	// run can't be made private despite the fact that we really want it for internal use onlly...
+	// run can't be made private despite the fact that we really want it for internal use only...
 	//--------------------------------------------------------------------------
+	@SuppressWarnings("unused")
 	public void run() {
 		
 		mRunning.set(true);

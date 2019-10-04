@@ -435,6 +435,7 @@ public abstract class Layer_Base
 			
 			// Queryable layers...though some of these are also used by model computations..
 			layer = new Layer_ProceduralFraction(); layer.init();// really has no data...init may not also be needed?
+			// FIXME: TODO: get rid of CDL_2012 entirely
 			newIntegerLayer("cdl_2012").init();
 			newIntegerLayer("wisc_land").init();
 			newFloatLayer("slope").init();
@@ -505,25 +506,21 @@ public abstract class Layer_Base
 		return ret;
 	}
 	
-	
 	// NOTE: that clientUser can be null
 	//--------------------------------------------------------------------------
-	public static void execQuery(JsonNode layerList, Selection selection, ClientUser user) {
-
-		String wisc_land = "wisc_land";
-
-		int userAccessRights = 0;
-		if (user != null) {
-			userAccessRights = user.accessFlags;
-		}
+	public static Selection execQuery(JsonNode layerList, Selection selection, ClientUser user) {
 
 		if (layerList != null && layerList.isArray()) {
 	
-			boolean queriedWiscLand = false;
 			ArrayNode arNode = (ArrayNode)layerList;
+			
+			// FIXME: TODO: Client could send along the subset selection restriction or
+			//	it could be added somewhere in this pipeline. 
+			//	Example: this restricts the selection to Dane county
+			//arNode.insert(0,Json.pack("name", "counties", "type", "indexed", "matchValues", Json.array(12)));
+			
 			int count = arNode.size();
 			for (int i = 0; i < count; i++) {
-				detailedLog("Processing one array element in the queryLayers layer list");
 				JsonNode arElem = arNode.get(i);
 				JsonNode layerName = arElem.get("name");
 				if (arElem != null && layerName != null) {
@@ -542,19 +539,16 @@ public abstract class Layer_Base
 
 					Layer_Base layer = Layer_Base.getLayer(layerName.textValue());
 					if (layer != null) {
-						if (layer.allowAccessFor(userAccessRights)) {
-							if (wisc_land.equalsIgnoreCase(layerName.textValue())) {
-								queriedWiscLand = true;
-							}
-							layer.query(arElem, selection);
-						}
-						else {
-							Logger.error("Query Access Violation detected!");
-						}
+						layer.query(arElem, selection);
 					}
+/*					if (i == 0) {
+						selection = SelectionTransform_Buffer.transform(selection, 990);
+					}
+*/
 				}
 			}
 		}
+		return selection;
 	}
 	
 }

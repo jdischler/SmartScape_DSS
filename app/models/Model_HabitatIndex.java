@@ -1,15 +1,15 @@
 package models;
 
 import play.*;
-import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.PerformanceTimer;
 
 import java.util.*;
 
-import analysis.ModelResult;
-import analysis.Moving_Z_Window;
+import analysis.*;
+import analysis.window.*;
 
 //------------------------------------------------------------------------------
 public class Model_HabitatIndex extends Model_Base
@@ -34,17 +34,18 @@ public class Model_HabitatIndex extends Model_Base
 		float [][] habitatData = new float[height][width];
 		debugLog("  > Allocated memory for Habitat Index");
 		
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land");
+		Layer_Integer cdl = Layer_CDL.get();
 		
-		int totalMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
+		int totalMask = cdl.stringToMask("hay","pasture","cool-season grass","warm-season grass",	
 				"continuous corn","cash grain","dairy rotation","other crops");
 
 		// --- Model specific code starts here
-		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, rotationData, width, height);
+		Moving_CDL_Window zWin = new Moving_CDL_Window_N(mWindowSizeInCells, rotationData, width, height);
+		Moving_Window.WindowPoint point;
 		
 		boolean moreCells = true;
 		while (moreCells) {
-			Moving_Z_Window.WindowPoint point = zWin.getPoint();
+			point = zWin.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
 			if ((rotationData[point.mY][point.mX] & totalMask) > 0 && zWin.canGetProportions()) {

@@ -2,6 +2,7 @@ package models;
 
 import play.*;
 import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.ManagementOptions;
@@ -78,7 +79,7 @@ public class Model_P_LossEpic extends Model_Base {
 		// Spatial Layers
 		int[][] rotationData = scenario.mNewRotation;
 		int width = scenario.getWidth(), height = scenario.getHeight();
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012");
+		Layer_Integer cdl = Layer_CDL.get();
 		float[][] Alfa_p = Layer_Base.getLayer("alfa_p").getFloatData();
 		float[][] Corn_p = Layer_Base.getLayer("corn_p").getFloatData();
 		float[][] Soy_p = Layer_Base.getLayer("soy_p").getFloatData();
@@ -87,6 +88,8 @@ public class Model_P_LossEpic extends Model_Base {
 		float[][] waterDist = Layer_Base.getLayer("dist_to_water").getFloatData();
 		
 		// Mask
+		// TODO: fixme masks for WiscLand 2.0 layers
+		
 		int Grass_Mask = cdl.stringToMask("grass");
 		int Alfalfa_Mask = cdl.stringToMask("alfalfa");
 		int Corn_Mask = cdl.stringToMask("corn");

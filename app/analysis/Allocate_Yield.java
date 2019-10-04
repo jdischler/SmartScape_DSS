@@ -1,13 +1,11 @@
 package analysis;
 
 import play.*;
-import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import resources.Farm;
 import resources.Farm.Crop;
-import utils.PerformanceTimer;
-
 import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -52,9 +50,9 @@ public class Allocate_Yield
 		int gsW = (int) Math.ceil(width / (double)gridStride);
 		int gsH = (int) Math.ceil(height / (double)gridStride);
 		
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
-		int dr = wl.stringToMask("dairy rotation");
-		int cg = wl.stringToMask("cash grain");
+		Layer_Integer cdl = Layer_CDL.get(); 
+		int dr = cdl.stringToMask("dairy rotation");
+		int cg = cdl.stringToMask("cash grain");
 		int [][] rotation = s.mNewRotation;
 		
 		mAggregatedYield = new FeedBucket[gsH][gsW];
@@ -294,7 +292,7 @@ public class Allocate_Yield
 				
 				if (fb.mPotentialFarms == null || fb.mPotentialFarms.size() <= 0) continue;
 				
-				int sz = fb.mPotentialFarms.size() * 2;
+				int sz = fb.mPotentialFarms.size() * 2; // fixme: why * 2??
 				for (Integer fid : fb.mPotentialFarms) {
 					Farm.receiveExcessCrop(Crop.E_CORN, fid, (double) (fb.mCornYield / sz));
 					Farm.receiveExcessCrop(Crop.E_SOY, fid, (double) (fb.mSoyYield / sz));

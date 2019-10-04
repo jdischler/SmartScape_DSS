@@ -1,11 +1,5 @@
 package query;
 
-import play.*;
-import java.util.*;
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-
 //------------------------------------------------------------------------------
 public class SelectionTransform_CriticalMax {
 

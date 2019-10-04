@@ -1,15 +1,11 @@
 package analysis;
 
 import query.*;
-import utils.Json;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
-
-import play.Logger;
 
 //------------------------------------------------------------------------------
 public class Analyzer_ModelResults
@@ -25,11 +21,11 @@ public class Analyzer_ModelResults
 		int countyData[][] = county.getIntData();
 		int watershedData[][] = huc.getIntData();
 
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		Layer_Integer cdl = Layer_CDL.get(); 
 		
-		int width = wl.getWidth(), height = wl.getHeight();
-		int data[][] = wl.getIntData();
-		int totalMask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass",
+		int width = cdl.getWidth(), height = cdl.getHeight();
+		int data[][] = cdl.getIntData();
+		int totalMask = cdl.stringToMask("hay","pasture","cool-season grass","warm-season grass",
 				"continuous corn","dairy rotation","cash grain",
 				"urban","suburban",
 				"wetland","open water",

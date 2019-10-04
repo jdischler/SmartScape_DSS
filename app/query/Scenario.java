@@ -11,6 +11,7 @@ import java.util.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 
+// TODO: probably rethink
 //------------------------------------------------------------------------------
 public class Scenario 
 {
@@ -26,8 +27,6 @@ public class Scenario
 	// Scenarios can be cached for sharing amongst other threads
 	private static Map<String, Scenario>	mCachedScenarios;
 	private long mCachedAtTime;
-	
-	public int mRefCounts;
 	
 	public GlobalAssumptions mAssumptions;
 	public Selection mSelection; 
@@ -71,13 +70,12 @@ public class Scenario
 	
 	// Returns a cacheStringID, which should be saved and returned to free the scenario...
 	//--------------------------------------------------------------------------
-	public static final String cacheScenario(Scenario theScenario, String clientID, int requestCount) {
+	public static final String cacheScenario(Scenario theScenario, String clientID) {
 		
 		if (mCachedScenarios == null) {
 			mCachedScenarios = new HashMap<String, Scenario>();
 		}
 		
-		theScenario.mRefCounts = requestCount;
 		int tryCount = 0;
 		while(tryCount < 1000) {
 			String scenarioCacheID = RandomString.get(5) + 
@@ -148,10 +146,6 @@ public class Scenario
 			return;
 		}
 		
-		res.mRefCounts--;
-		if (res.mRefCounts > 0) {
-			return;
-		}
 		detailedLog(" - releasing cache for scenario, cache string named <" + cacheStringID + ">");
 		mCachedScenarios.remove(cacheStringID);
 	}
@@ -187,10 +181,10 @@ public class Scenario
 	private int[][] duplicateRotation() {
 	
 		// uses clone to duplicate the data array
-		Layer_Integer original = Layer_WiscLand.get();//Base.getLayer("wisc_land");//.getIntData().clone();
-		int [][] originalData = original.getIntData();
+		Layer_Integer originalCDL = Layer_CDL.get();
+		int [][] originalData = originalCDL.getIntData();
 		
-		int height = original.getHeight();
+		int height = originalCDL.getHeight();
 		
 		mNewRotation = new int[height][];
 		for (int y = 0; y < height; y++) {
@@ -227,7 +221,7 @@ public class Scenario
 				
 				// get the new land-use...but remember that it needs to be in the format of a bit mask "position" that 
 				//	corresponds to the index vs. the index value itself.
-				JsonNode transformConfig = transformElement.get("config");
+				JsonNode transformConfig = transformElement.get("transform");
 				if (transformConfig == null || !transformConfig.isObject()) {
 					Logger.warn("Boooo....transform config does not exist or is not an object");
 					continue; // TODO: signal back to client that an error happened vs. just doing nothing
@@ -235,18 +229,18 @@ public class Scenario
 				
 				ObjectNode transformConfigObj = (ObjectNode)transformConfig;
 				
-				int newLandUse = transformConfigObj.get("LandUse").intValue();
+				int newLandUse = transformConfigObj.get("land_use").intValue();
 				detailedLog("  + New land use code: " + Integer.toString(newLandUse));
 				newLandUse = Layer_Integer.indexToMask(newLandUse);
 				
-				JsonNode managementOptions = transformConfigObj.get("Options");
+				JsonNode managementOptions = transformConfigObj.get("options");
 				if (managementOptions != null && managementOptions.isObject()) {
 					detailedLog("  +-- Management Options from Client: " + managementOptions.toString());
 					try {
-						JsonNode fertNode = managementOptions.get("Fertilizer");
+						JsonNode fertNode = managementOptions.get("type");
 						if (fertNode != null && fertNode.isObject()) { 
 							ObjectNode fertilizerOptions = (ObjectNode)fertNode;
-							if (fertilizerOptions.get("Fertilizer").booleanValue()) {
+							if (fertilizerOptions.get("fertilizer").booleanValue()) {
 								detailedLog("  +--- Applying Fertilizer");
 								newLandUse = ManagementOptions.E_Fertilizer.setOn(newLandUse); // else no fertilizer
 								if (fertilizerOptions.get("FertilizerManure").booleanValue()) {

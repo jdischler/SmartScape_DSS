@@ -2,6 +2,8 @@ package utils;
 
 import play.*;
 
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 //import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +29,9 @@ public class Json
 	public static JsonNode pack(Object ... arguments) throws RuntimeException {
 		
 		ObjectNode data = JsonNodeFactory.instance.objectNode();
-		if (!(arguments.length % 2 == 0)){
+		addToPack(data, arguments);
+		return data;
+/*		if (!(arguments.length % 2 == 0)){
 			throw new RuntimeException("Json: packageData: bad argument list; not an even number");
 		}
 		else {
@@ -35,9 +39,24 @@ public class Json
 				putKeyValue(data, arguments[i].toString(), arguments[i+1]);
 			}
 		}
-		return data;
+		return data;*/
 	}
 
+	// Allows extended an already packed objectNode though no sanity checking is provided for collisions or other badness
+	//--------------------------------------------------------------------------	
+	public static JsonNode addToPack(ObjectNode pack, Object ... arguments) throws RuntimeException {
+		
+		if (!(arguments.length % 2 == 0)){
+			throw new RuntimeException("Json: packageData: bad argument list; not an even number");
+		}
+		else {
+			for (int i = 0; i < arguments.length; i += 2) {
+				putKeyValue(pack, arguments[i].toString(), arguments[i+1]);
+			}
+		}
+		return pack;
+	}
+	
 	// Handle casting values to the correct type for placement on the carrier object node
 	//--------------------------------------------------------------------------	
 	public static final void putKeyValue(ObjectNode carrierNode, String key, Object value) {
@@ -63,6 +82,18 @@ public class Json
 		} else if (value instanceof String) {
 			carrierNode.put(key, value.toString());
 			
+		} else if (value instanceof String[]) {
+			ArrayNode ar = JsonNodeFactory.instance.arrayNode();
+			for (String v: (String[])value) {
+				ar.add(v);
+			}
+			carrierNode.set(key, ar);
+		} else if (value instanceof Integer[]) {
+			ArrayNode ar = JsonNodeFactory.instance.arrayNode();
+			for (Integer v: (Integer[])value) {
+				ar.add(v);
+			}
+			carrierNode.set(key, ar);
 /*		} else if (value instanceof Rectangle) {
 			Rectangle r = (Rectangle)value;
 			carrierNode.set(key, packageData("x",r.x, "y",r.y, "w",r.width, "h", r.height));
@@ -95,7 +126,12 @@ public class Json
 			} else if (o instanceof Integer) {
 				data.add((Integer)o);
 				
-			} else {// if (o instanceof String) {
+			} else  if (o instanceof String) {
+				data.add(o.toString());
+				
+			} else {
+				Logger.error(" Json.array doesn't have a handler for storing whatever datatype value is. Trying as string");
+				Logger.error("   Class for the value object is: " + data.getClass());
 				data.add(o.toString());
 			}
 		}
@@ -312,21 +348,42 @@ public class Json
 		}
 	}
 
-/*	//--------------------------------------------------------------------------
-	public static final Rectangle safeGetRectangle(JsonNode objectNode, String key) throws RuntimeException {
-		JsonNode d = objectNode.get(key);
-		if (!d.isObject()) {
-			throw new RuntimeException("Json.safeGetRectangle: node wasn't an object");
+	//--------------------------------------------------------------------------
+	public static final Rectangle2D.Double getRectangleDouble(JsonNode node, String key) throws RuntimeException {
+		
+		ArrayNode ar = Json.getArray(node, "coordinates");
+		
+		if (ar.size() != 4) {
+			throw new RuntimeException("Json: getRectangleDouble: expected 4 elements");			
 		}
 		
-		return new Rectangle(
-			Json.safeGetInteger(d, "x"),
-			Json.safeGetInteger(d, "y"),
-			Json.safeGetInteger(d, "w"),
-			Json.safeGetInteger(d, "h")
-			);
+		// TODO: add more validation if needed
+		return new Rectangle2D.Double(
+			ar.get(0).asDouble(),
+			ar.get(1).asDouble(),
+			ar.get(2).asDouble(),
+			ar.get(3).asDouble()
+		);
 	}
-*/	
+
+	//--------------------------------------------------------------------------
+	public static final Rectangle getRectangleInteger(JsonNode node, String key) throws RuntimeException {
+		
+		ArrayNode ar = Json.getArray(node, "coordinates");
+		
+		if (ar.size() != 4) {
+			throw new RuntimeException("Json: getRectangleInteger: expected 4 elements");			
+		}
+		
+		// TODO: add more validation if needed
+		return new Rectangle(
+			ar.get(0).asInt(),
+			ar.get(1).asInt(),
+			ar.get(2).asInt(),
+			ar.get(3).asInt()
+		);
+	}
+	
 	//--------------------------------------------------------------------------
 	public static final void toDisk(JsonNode root, String path) throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
@@ -343,5 +400,22 @@ public class Json
 		return reader.readTree(content);
 	}
 	
+	//--------------------------------------------------------------------------
+	public static final ArrayNode getArray(JsonNode node, String key) throws RuntimeException {
+
+		if (node == null) {
+			throw new RuntimeException("Json: toArray: no object node to check");
+		}
+		else {
+			JsonNode valNode = node.get(key);
+			if (valNode == null || valNode.isNull()) {
+				throw new RuntimeException("Json: toArray: no value at key <" + key + ">");
+			}
+			else if (!valNode.isArray()) {
+				throw new RuntimeException("Json: toArray: key <" + key + "> is not an array");
+			}
+			return (ArrayNode)valNode;
+		}
+	}
 }
 	

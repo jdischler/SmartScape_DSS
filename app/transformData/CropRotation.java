@@ -9,10 +9,11 @@ import java.io.*;
 //------------------------------------------------------------------------------
 // Crop Rotation
 //
-// This class calculates a new crop rotation layer based on data imported from 3 
-//	adjacent CDL years and using some (fairly) messy logic to sort things out...
+// This class calculates (creates) a new crop rotation layer based on data imported from 3 
+//	adjacent CDL years. WiscLand 2.0 is currently used instead so this is legacy
 //
 //------------------------------------------------------------------------------
+@Deprecated
 public class CropRotation
 {
 	//--------------------------------------------------------------------------

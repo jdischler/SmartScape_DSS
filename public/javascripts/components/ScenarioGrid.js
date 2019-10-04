@@ -12,7 +12,8 @@ var DSS_DefaultScenarioSetup = {
 	}]
 };
 
-var occlusionExample = [{
+// TODO: update to use the Landcover Filter layer vs. always using the wisc_land 2.0 filter widget
+var baseExample = [{
 	selection_name: 'Row crops near open water', transform_text: 'Mixed Grass (C3 / C4)',
 	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
 	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
@@ -31,70 +32,9 @@ var occlusionExample = [{
 		"name":"lcc","type":"indexed","matchValues":[5,6,7,8]
 	}]
 },{
-	selection_name: 'Row crops near public lands', transform_text: 'Mixed Grass (C3 / C4)',
-	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	},{
-		"name":"public_land","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":1000
-	}]
-},{
-	selection_name: 'Row crops on low slopes', transform_text: 'Keep (increase nutrient spreading)',
-	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	transform: { land_use: 7, options: [{type: 'fertilizer',value: 2 }] },
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	},{
-		"name":"slope","type":"continuous","lessThanTest":"<","greaterThanTest":">=","lessThanValue":4
-	}]
-},{
-	selection_name: 'Row crops on steeper slopes', transform_text: 'C3 Grass',
-	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	},{
-		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","greaterThanValue":5
-	}]
-},{
-	selection_name: 'All remaining row crops', transform_text: 'Alfalfa',
-	transform: { land_use: 5, options: [{type: 'fertilizer',value: 2 }] },
-	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	}]
-},{
-	selection_name: 'C4 Grasses', transform_text: 'Dairy Rotation',
-	transform: { land_use: 3, options: [{type: 'fertilizer',value: 2 }] },
-	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[5]
-	}]
-}];
-
-var baseExample = [{
-	selection_name: 'Row crops near open water',// transform_text: 'Mixed Grass (C3 / C4)',
-//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-	//transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	},{
-		"name":"dist_to_water","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":160
-	}]
-},{
-	selection_name: 'Row crops on marginal soils', //transform_text: 'Mixed Grass (C3 / C4)',
-//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-//	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
-	query: [{
-		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
-	},{
-		"name":"lcc","type":"indexed","matchValues":[5,6,7,8]
-	}]
-},{
-	selection_name: 'Grasses on prime soils', //transform_text: 'Cash Grain (50% corn, 50% soy)',
-//	management_text: '<ul><li>Fertilizer: Manure (not winter)</li><li>Tillage: no-till</li><li>Cover crop: small grain</li><li>Contouring: none</li></ul>',
-//	transform: { land_use: 2, options: [{type: 'fertilizer',value: 2 }] },
+	selection_name: 'Grasses on prime soils', transform_text: 'Cash Grain (50% corn, 50% soy)',
+	management_text: '<ul><li>Fertilizer: Manure (not winter)</li><li>Tillage: no-till</li><li>Cover crop: small grain</li><li>Contouring: none</li></ul>',
+	transform: { land_use: 2, options: [{type: 'fertilizer',value: 2 }] },
 	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[2,3,4,5]
 	},{
@@ -105,9 +45,9 @@ var baseExample = [{
 		"name":"slope","type":"continuous","lessThanTest":"<=","greaterThanTest":">=","lessThanValue":5
 	}]
 },{
-	selection_name: 'Row crops on steeper slopes',// transform_text: 'C3 Grass',
-//	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
-//	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
+	selection_name: 'Row crops on steeper slopes', transform_text: 'C3 Grass',
+	management_text: '<ul><li>Fertilizer: manure (from grazing)</li></ul>',
+	transform: { land_use: 6, options: [{type: 'fertilizer',value: 2 }] },
 	query: [{
 		"name":"wisc_land","type":"indexed","matchValues":[1,14,15,16]
 	},{
@@ -147,13 +87,14 @@ Ext.create('Ext.data.Store', {
 // Scenario Summary....
 //------------------------------------------------------------------------------
 Ext.define('DSS.components.ScenarioGrid', {
-    extend: 'Ext.grid.Panel',
-    alias: 'widget.scenario_grid',
-
-    requires: [
-    	'DSS.components.TransformPopup',
-    ],
-  
+	extend: 'Ext.grid.Panel',
+	alias: 'widget.scenario_grid',
+	
+	requires: [
+		'DSS.components.TransformPopup',
+	],
+    
+	id: 'dss-scenario-grid',
 	autoScroll: true,
     header: false,
 	dockedItems: [{
@@ -205,6 +146,7 @@ Ext.define('DSS.components.ScenarioGrid', {
 			width: 28, height: 28,
 			tooltip: 'Calculate the outcomes for my landscape transformations',
 			callback: function(toolOwner, tool) {
+				Ext.getCmp('dss-scenario-grid').runJob();
 				// TODO: actually run the simulation
 				DSS_viewport.enableNavBar();
 				Ext.defer(function() {
@@ -657,6 +599,101 @@ Ext.define('DSS.components.ScenarioGrid', {
 			})
 		}
     },
-		
+
+    //----------------------------------------------------------------------------------
+    runJob: function() {
+    	
+    	var me = this;
+    	Ext.Ajax.request({
+			url: location.href + '/requestModelRun',
+			jsonData: {
+				"transforms": baseExample
+			},
+			timeout: 10 * 60 * 1000, // minutes * seconds * (i.e. converted to) milliseconds
+			
+			success: function(response, opts) {
+				try {
+					var obj= JSON.parse(response.responseText);
+					console.log(obj);
+					me['dss-job-timer'] = Ext.TaskManager.start({
+						run: me.checkDone,
+						scope: me,
+						interval: 1000
+					});
+					me['dss-job-parms'] = obj;
+				}
+				catch(err) {
+					console.log(err);
+				}
+			},
+			
+			failure: function(respose, opts) {
+				alert("Model run failed");
+			}
+		})
+    },
+    
+    //----------------------------------------------------------------------------------
+    checkDone: function() {
+    	var me = this;
+    	var jobKey = me['dss-job-parms'].jobKey;
+    	
+    	console.log("checking done-ness for key: " + jobKey);
+    	Ext.Ajax.request({
+			url: location.href + '/getModelRunProgress',
+			jsonData: {
+				"jobKey": jobKey,
+			},
+			timeout: 10 * 60 * 1000, // minutes * seconds * (i.e. converted to) milliseconds
+			
+			success: function(response, opts) {
+				try {
+					var obj= JSON.parse(response.responseText);
+					if (obj && obj.done) {
+						console.log(me['dss-job-timer']);
+						Ext.TaskManager.stop(me['dss-job-timer']);
+//						clearInterval(me['dss-job-timer']);
+						me.getResults();
+					}
+				}
+				catch(err) {
+					console.log(err);
+				}
+			},
+			
+			failure: function(respose, opts) {
+				alert("Model progress failed");
+			}
+		})
+    },
+    
+    //----------------------------------------------------------------------------------
+    getResults: function() {
+    	var me = this;
+    	var parms = me['dss-job-parms'];
+    	
+    	console.log("getting results: " + parms.jobKey);
+    	Ext.Ajax.request({
+			url: location.href + '/getModelRunResults',
+			jsonData: parms,
+			timeout: 10 * 60 * 1000, // minutes * seconds * (i.e. converted to) milliseconds
+			
+			success: function(response, opts) {
+				try {
+					var obj= JSON.parse(response.responseText);
+					console.log(obj);
+				}
+				catch(err) {
+					console.log(err);
+				}
+			},
+			
+			failure: function(respose, opts) {
+				alert("Model results failed");
+			}
+		})
+    }
+    
+    
 });
 

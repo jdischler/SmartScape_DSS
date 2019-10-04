@@ -9,8 +9,6 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 
-import play.Logger;
-
 //------------------------------------------------------------------------------
 public class Analyzer_LandcoverProportions
 {
@@ -20,38 +18,38 @@ public class Analyzer_LandcoverProportions
 		JsonNode counties = types.get("counties"),
 			watersheds = types.get("watersheds");
 		
-		Layer_Integer wl = (Layer_Integer)Layer_Base.getLayer("wisc_land"); 
+		Layer_Integer cdl = Layer_CDL.get(); 
 		Layer_Integer county = (Layer_Integer)Layer_Base.getLayer("counties");
 		Layer_Integer huc = (Layer_Integer)Layer_Base.getLayer("huc-10");
 		
-		int width = wl.getWidth(), height = wl.getHeight();
-		int data[][] = wl.getIntData();
+		int width = cdl.getWidth(), height = cdl.getHeight();
+		int data[][] = cdl.getIntData();
 		int countyData[][] = county.getIntData();
 		int watershedData[][] = huc.getIntData();
 		
 		int hayCt = 0, pastureCt = 0, coolCt = 0, warmCt = 0;
-		int hayMask = wl.stringToMask("hay");
-		int pastureMask = wl.stringToMask("pasture");
-		int coolGrassMask = wl.stringToMask("cool-season grass");
-		int warmGrassMask = wl.stringToMask("warm-season grass");
+		int hayMask = cdl.stringToMask("hay");
+		int pastureMask = cdl.stringToMask("pasture");
+		int coolGrassMask = cdl.stringToMask("cool-season grass");
+		int warmGrassMask = cdl.stringToMask("warm-season grass");
 		
 		int contCornCt = 0, dairyCt = 0, cashGrainCt = 0;
-		int contCornMask = wl.stringToMask("continuous corn");
-		int dairyMask = wl.stringToMask("dairy rotation");
-		int cashGrainMask = wl.stringToMask("cash grain");
+		int contCornMask = cdl.stringToMask("continuous corn");
+		int dairyMask = cdl.stringToMask("dairy rotation");
+		int cashGrainMask = cdl.stringToMask("cash grain");
 		
 		int urbanCt = 0, suburbanCt = 0;
-		int urbanMask = wl.stringToMask("urban");
-		int suburbanMask = wl.stringToMask("suburban");
+		int urbanMask = cdl.stringToMask("urban");
+		int suburbanMask = cdl.stringToMask("suburban");
 		
 		int wetlandCt = 0, waterCt = 0;
-		int wetlandsMask = wl.stringToMask("wetland");
-		int waterMask = wl.stringToMask("open water");
+		int wetlandsMask = cdl.stringToMask("wetland");
+		int waterMask = cdl.stringToMask("open water");
 		
 		int coniferCt = 0, deciduousCt = 0, mixedCount = 0;
-		int coniferMask = wl.stringToMask("coniferous");
-		int deciduousMask = wl.stringToMask("deciduous");
-		int mixedWoolandMask = wl.stringToMask("mixed woodland");
+		int coniferMask = cdl.stringToMask("coniferous");
+		int deciduousMask = cdl.stringToMask("deciduous");
+		int mixedWoolandMask = cdl.stringToMask("mixed woodland");
 
 		int totalCt = 0;
 		int totalMask = hayMask | pastureMask | coolGrassMask | warmGrassMask |

@@ -2,6 +2,7 @@ package models;
 
 import play.*;
 import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.ManagementOptions;
@@ -40,7 +41,8 @@ public class Model_NitrousOxideEmissions extends Model_Base
 		debugLog("  > Allocated memory for N2O");
 		
 		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
+		Layer_Integer cdl = Layer_CDL.get(); 
+		// TODO: FIXME: update masks to WiscLand 2.0 values
 		int Grass_Mask = cdl.stringToMask("grass");
 		int Corn_Mask = cdl.stringToMask("corn");
 		int Soy_Mask = cdl.stringToMask("soy");

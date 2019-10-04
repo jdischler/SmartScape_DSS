@@ -2,14 +2,20 @@
 # ~~~~
 
 GET     /                        	controllers.HomeController.landing
-GET     /app                        controllers.HomeController.app
+GET     /app                        controllers.HomeController.app()
 GET     /main                       controllers.HomeController.main
+
 POST	/app/createSelection		controllers.HomeController.createSelection()
 POST	/app/showOcclusion			controllers.HomeController.showOcclusion()
 POST	/app/layerParmRequest		controllers.HomeController.layerParmRequest()
 POST	/app/getLandcoverProportions controllers.HomeController.getLandcoverProportions()
 POST	/app/getRadarData 			controllers.HomeController.getRadarData()
-GET	/app/getFarmPoints 			controllers.HomeController.getFarmGeoJson()
+GET		/app/getFarmPoints 			controllers.HomeController.getFarmGeoJson()
+POST	/app/getMask				controllers.HomeController.getMapMask()
+
+POST	/app/requestModelRun		controllers.HomeController.requestModelRun()
+POST	/app/getModelRunProgress	controllers.HomeController.getModelRunProgress()
+POST	/app/getModelRunResults		controllers.HomeController.getModelRunResults()
 
 # Map static resources from the /public folder to the /assets URL path
 GET		/files/:file				controllers.FileService.getFile(file: String)

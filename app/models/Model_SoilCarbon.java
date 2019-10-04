@@ -2,11 +2,10 @@ package models;
 
 import play.*;
 import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Integer;
 import query.Scenario;
 import utils.ManagementOptions;
-import utils.PerformanceTimer;
-
 import java.util.*;
 
 import analysis.ModelResult;
@@ -43,12 +42,12 @@ public class Model_SoilCarbon extends Model_Base {
 		int width = scenario.getWidth(), height = scenario.getHeight();
 		
 		debugLog(">>> Computing Soil Carbon Index");
-		PerformanceTimer timer = new PerformanceTimer();
 		
 		float [][] soilCarbonData = new float[height][width];
 		debugLog("  > Allocated memory for SOC");
 
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
+		Layer_Integer cdl = Layer_CDL.get();
+		// TODO: FIXME: update masks to use WiscLand 2.0
 		int Grass_Mask = cdl.stringToMask("grass");
 		int Corn_Mask = cdl.stringToMask("corn");
 		int Soy_Mask = cdl.stringToMask("soy");
@@ -80,13 +79,6 @@ public class Model_SoilCarbon extends Model_Base {
 		catch (Exception e) {
 			Logger.warn(e.toString());
 		}
-		
-		debugLog(" Agricultural no till from client = " + Float.toString(annualNoTillageModifier) );
-		debugLog(" Agricultural cover crop from client = " + Float.toString(annualCoverCropModifier) );
-		debugLog(" Agricultural Fertilizer from client = " + Float.toString(annualFertilizerModifier) );
-		debugLog(" Perennial Fertilizer from client = " + Float.toString(perennialFertilizerModifier) );
-		debugLog(" Annual Fall Fertilizer from client = " + Float.toString(annualFallFertilizerModifier) );
-		debugLog(" Perennial Fall Fertilizer from client = " + Float.toString(perennialFallFertilizerModifier) );
 		
 		// No Till Multiplier
 		float NT_M = 1.0f;
@@ -278,8 +270,6 @@ public class Model_SoilCarbon extends Model_Base {
 		List<ModelResult> results = new ArrayList<ModelResult>();
 		
 		results.add(new ModelResult(mModelFile, scenario.mOutputDir, soilCarbonData, width, height));
-
-		debugLog(">>> Model Soil Carbon is finished - timing (ms): " + timer.stringMilliseconds(2));
 
 		return results;
 	}

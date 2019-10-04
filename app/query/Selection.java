@@ -12,6 +12,8 @@ public class Selection
 	// Set up to run the query...allocate memory...
 	public byte[][] mRasterData;
 	public int mHeight, mWidth;
+	
+	// FIXME: TODO: isValid generally seems useless?
 	public boolean isValid = false;
 	
 	// Constructor...
@@ -28,15 +30,20 @@ public class Selection
 		isValid = true;
 	}
 	
+	// Note that fillValue can be NULL to skip initialization. This isn't universally valid to do so use with care
+	//	example: running a moving window on another selection to assign a value for EVERY selection pixel would be a legal use
 	//--------------------------------------------------------------------------
-	public Selection(int width, int height, byte fillValue) {
+	public Selection(int width, int height, Byte fillValue) {
 		
 		mHeight = height;
 		mWidth = width;
 		mRasterData = new byte[mHeight][mWidth];
-		for (byte[] row: mRasterData) {
-			Arrays.fill(row, fillValue);
+		if (fillValue != null) {
+			for (byte[] row: mRasterData) {
+				Arrays.fill(row, fillValue);
+			}
 		}
+		// FIXME: odd that we could be called valid despite skipping the fill value step...
 		isValid = true;
 	}
 
@@ -208,6 +215,7 @@ public class Selection
 	}
 
 	// THIS is considering the top layer, UNDER is the selection underneath
+	//-------------------------------------------------------------------------
 	public int countOccludedPixels(Selection under) {
 		int x, y, count = 0;
 		

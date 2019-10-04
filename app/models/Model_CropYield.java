@@ -3,7 +3,7 @@ package models;
 import play.*;
 import query.Layer_Base;
 import query.Layer_Integer;
-import query.Layer_WiscLand;
+import query.Layer_CDL;
 import query.Scenario;
 import utils.ManagementOptions;
 
@@ -34,6 +34,7 @@ public class Model_CropYield extends Model_Base
 	// slot is 0-4, which corresponds to 5 - 12-bit chunks in a 64 bit long
 	// The combination of slots vs. bits per slot is somewhat arbitrary, but this gives us
 	// accuracy down to about 0.006... with 5 crops
+	//--------------------------------------------------------------------
 	private final long packYield(float fValue, long lValue, int slot) {
 		
 		long scaled = (long)Math.round(fValue * (4095.0f / 25.0f));
@@ -51,7 +52,7 @@ public class Model_CropYield extends Model_Base
 	// Check to see if the required data layers are available
 	//--------------------------------------------------------------------
 	public static Boolean available() {
-		return (Layer_WiscLand.get() != null) &
+		return (Layer_CDL.get() != null) &
 			(Layer_Base.getLayer("Slope") != null) &
 			(Layer_Base.getLayer("Silt") != null) &
 			(Layer_Base.getLayer("Depth") != null) &
@@ -83,7 +84,7 @@ public class Model_CropYield extends Model_Base
 		float CC_M = 1.0f;		
 		
 		// Mask
-		Layer_Integer wl = Layer_WiscLand.get(); 
+		Layer_Integer wl = Layer_CDL.get(); 
 		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
 		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
 		int Soy_Mask = wl.stringToMask("cash grain");

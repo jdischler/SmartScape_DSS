@@ -2,14 +2,13 @@ package models;
 
 import play.*;
 import query.Layer_Base;
+import query.Layer_CDL;
 import query.Layer_Float;
 import query.Layer_Integer;
 import query.Scenario;
 import java.util.*;
-import java.lang.Math.*;
-
 import analysis.ModelResult;
-import analysis.Moving_Z_Window;
+import analysis.window.Moving_CDL_Window_Z;
 
 //------------------------------------------------------------------------------
 public class Model_HerdSuitabilityIndex extends Model_Base
@@ -26,7 +25,8 @@ public class Model_HerdSuitabilityIndex extends Model_Base
 	public List<ModelResult> run(Scenario scenario) {
 
 		// Mask
-		Layer_Integer cdl = (Layer_Integer)Layer_Base.getLayer("cdl_2012"); 
+		Layer_Integer cdl = Layer_CDL.get();
+		// TODO: update masks to use WiscLand 2.0 
 		int skipMask = cdl.stringToMask("Wetland") | cdl.stringToMask("Water") 
 				| cdl.stringToMask("Suburban") | cdl.stringToMask("Urban");
 
@@ -44,13 +44,13 @@ public class Model_HerdSuitabilityIndex extends Model_Base
 		
 		int data[][] = cdl.getIntData();
 		// --- Model specific code starts here
-		Moving_Z_Window zWin = new Moving_Z_Window(mWindowSizeInCells, data, width, height);
+		Moving_CDL_Window_Z zWin = new Moving_CDL_Window_Z(mWindowSizeInCells, data, width, height);
 
 		float [][] indexData = new float[height][width];
 		
 		boolean moreCells = true;
 		while (moreCells) {
-			Moving_Z_Window.WindowPoint point = zWin.getPoint();
+			Moving_CDL_Window_Z.WindowPoint point = zWin.getPoint();
 			
 			// If proportions are zero, don't try to get them because we'd divide by zero in doing that.
 			if (zWin.canGetProportions()) {

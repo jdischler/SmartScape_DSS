@@ -1,70 +1,64 @@
 package utils;
 
 //import java.awt.Rectangle;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import play.Logger;
-import transformData.FilenameCleaner;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
-/**
- * Subsets are always rectangular in shape.
- */
+import play.Logger;
+
+// Subsets are always rectangular in shape.
+//
+//-----------------------------------------------------------
 public class Subset {
 	
-	private static String DIRECTORY_PATH = "./presets/";
-	private static String EXTENSION = ".txt";
-	
+	private static String PRESETS_PATH = "./layerData/subset_presets.json";
 	private static List<Subset> mAvailableSubsets = new ArrayList<Subset>();
 	
-	public String mSubsetName;
-	public String mSubsetDescription;
+	public String mName;
+	public String mDescription;
 	
-	// Coordinates used to overlay onto map
-	public Double mCornerCoordsX, mCornerCoordsY;
+	public String mAssetDirectory;
+	
+	// Coordinates used to overlay onto map or clip a hole in the map mask
+	public Rectangle2D.Double mCoordinates;
 	
 	// Coordinates used to index into and extract the relevant section of data in the larger set
-//	public Rectangle mSubsetArea;
+	public Rectangle mMapping;
 	
 	
-	// Data for automated cleanup of custom subsets
-	public Boolean mCustomSubset = false;
-	// Custom subsets exist for at least 24 hours. Any usage of that custom subset refreshes the countdown
-	public Integer mCustomSubsetHoursLeft = 25; 
+	//-------------------------------------------------------------------------
+	Subset(String name, String description, String assetDirectory) {
+		mName = name;
+		mDescription = description;
+		mAssetDirectory = assetDirectory;
+	}
 	
 	// Masking example for open layers 3
 	//https://jsfiddle.net/Lngp3kzb/1/
 	
+	// FIXME: TODO: y may not be entirely linear in 3857 projection?
 	//-------------------------------------------------------------------------
-	public static void defineSubset(Subset subset) {
-		
-		mAvailableSubsets.add(subset);
-		subset.write();
+	public Point indicesFor(Double x, Double y) {
+		int idx = (int)Math.round((mCoordinates.x - x) / -30.0);
+		int idy = (int)Math.round((mCoordinates.y - y) / 30.0);
+		return new Point(idx,idy);
+	}		
+	
+	//-----------------------------------------------------------------
+	public Point indicesFor(Point2D.Double point) {
+		return indicesFor(point.x, point.y);
 	}
 	
-	//-----------------------------------------------
-		// TODO: this probably belongs on an Area of Interest object... 
-		class Point {
-			public Double mX, mY;
-			Point(Double x, Double y) {
-				mX = x; mY = y;
-			}
-		};
-		
-		// get the raster lookup x,y index of the given point location
-		public Point indexOf(Point location) {
-	
-			Double x = (mCornerCoordsX - location.mX) / -30.0;
-			// VERIFY: the change in y across the raster space doesn't seem to be perfectly linear in proj 3857
-			Double y = (mCornerCoordsY - location.mY) / -30.0;  
-			return new Point(x,y);
-		}
-	//-----------------------------------------------
-	
+	// FIXME: TODO: have a way to get one by name or something else instead?
 	//-------------------------------------------------------------------------
 	public static Subset getSubset(Integer idx) {
 		
@@ -86,96 +80,44 @@ public class Subset {
 	}
 
 	//-------------------------------------------------------------------------
-	private void ensureFolder(String folder) throws Exception {
-		File writeFolder = new File(folder);
-		if (writeFolder.exists() == false) {
-			FileUtils.forceMkdir(writeFolder);
-			//writeFolder.mkdirs();
-			if (writeFolder.exists() == false) {
-				throw new RuntimeException(" Error - Writer queue directory creation failed!!");
-			}
-		}
+	public JsonNode getMapMask() {
+		
+		return Json.pack("x", mCoordinates.x,
+				"y", mCoordinates.y,
+				"w", mCoordinates.width,
+				"h", mCoordinates.height
+			);
 	}
 	
 	// TODO: consider whether using the Jackson ObjectMapper is a much better fit
-	//-------------------------------------------------------------------------
-	private void write() {
-		
-		JsonNode data = Json.pack("name", mSubsetName,
-					"description", mSubsetDescription,
-					"atX", mCornerCoordsX,
-					"atY", mCornerCoordsY,
-//					"area", mSubsetArea,
-					"isCustom", mCustomSubset,
-					"expiresHours", mCustomSubsetHoursLeft);
-		String path = DIRECTORY_PATH + FilenameCleaner.cleanFileName(mSubsetName) + EXTENSION;
-		
-		try {
-			ensureFolder(DIRECTORY_PATH);
-			Json.toDisk(data, path);
-		} catch (Exception e) {
-			Logger.error(e.toString());
-		}
-	}
-	
-	// TODO: consider whether using the Jackson ObjectMapper is a much better fit
-	//-------------------------------------------------------------------------
-	private static Subset read(String path) {
-		
-		String name, description;
-		Double atX, atY;
-//		Rectangle area;
-		Boolean isCustom;
-		Integer hoursLeft = 25; 
-		Subset subset = null;
-		
-		try {
-			JsonNode data = Json.fromDisk(path);
-			
-			name = Json.safeGetString(data, "name");
-			description = Json.safeGetOptionalString(data, "description", "");
-			atX = Json.safeGetDouble(data, "atX");
-			atY = Json.safeGetDouble(data, "atY");
-			isCustom = Json.safeGetOptionalBoolean(data, "isCustom", false);
-			hoursLeft = Json.safeGetOptionalInteger(data, "expiresHours", hoursLeft);
-//			area = Json.safeGetRectangle(data, "area");
-			
-			subset = new Subset();
-			subset.mSubsetName = name;
-			subset.mSubsetDescription = description;
-			subset.mCornerCoordsX = atX;
-			subset.mCornerCoordsY = atY;
-//			subset.mSubsetArea = area;
-			subset.mCustomSubset = isCustom;
-			subset.mCustomSubsetHoursLeft = hoursLeft;
-			
-		} catch (Exception e) {
-			Logger.error(e.toString());
-		}
-		
-		return subset;
-	}
-	
 	//-------------------------------------------------------------------------
 	public static void loadPresets() {
 		
-		File folder = new File(DIRECTORY_PATH);
-		File[] listOfFiles = folder.listFiles();
-		
-		for (int i = 0; i < listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile()) {
-				String toLoad = DIRECTORY_PATH + listOfFiles[i].getName();
-				Logger.info(" - Subset.loadPresets: loading <<" + toLoad + ">>");
-				Subset subset = read(toLoad);
-				if (subset != null) {
-					mAvailableSubsets.add(subset);
-				}
+		Logger.info("Looking for a subset presets file");
+		try {
+			JsonNode data = Json.fromDisk(PRESETS_PATH);
+			if (!data.isArray()) throw new Exception("Subset: loadPresets: expected a JSON array of presets");
+			
+			ArrayNode array = (ArrayNode)data;
+			for (int i = 0; i < array.size(); i++) {
+				String name, description, assets;
+				
+				JsonNode elem = array.get(i);
+				
+				name = Json.safeGetString(elem, "name");
+				description = Json.safeGetOptionalString(elem, "description", "");
+				assets = Json.safeGetString(elem, "assets");
+				
+				Subset subset = new Subset(name, description, assets);
+				subset.mCoordinates = Json.getRectangleDouble(elem, "coordinates");
+				subset.mMapping = Json.getRectangleInteger(elem, "mapping");
+				
+				mAvailableSubsets.add(subset);
 			}
-			else if (listOfFiles[i].isDirectory()) {
-				Logger.error("Subdirectories in Subset Presets is not supported at this time");
-			}
+			
+		} catch (Exception e) {
+			Logger.error(e.toString());
 		}
-		
 	}
 }
-	
+

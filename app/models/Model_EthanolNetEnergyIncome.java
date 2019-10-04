@@ -2,7 +2,7 @@ package models;
 
 import play.*;
 import query.Layer_Integer;
-import query.Layer_WiscLand;
+import query.Layer_CDL;
 import query.Scenario;
 import utils.PerformanceTimer;
 
@@ -55,7 +55,7 @@ public class Model_EthanolNetEnergyIncome extends Model_Base
 		float Net_Energy_C = 0;
 		float Net_Energy_S = 0;
 		// Mask
-		Layer_Integer wl = Layer_WiscLand.get(); 
+		Layer_Integer wl = Layer_CDL.get(); 
 		int Grass_Mask = wl.stringToMask("hay","pasture","cool-season grass","warm-season grass");
 		int Corn_Mask = wl.stringToMask("continuous corn","dairy rotation","cash grain");
 		int Soy_Mask = wl.stringToMask("cash grain");
